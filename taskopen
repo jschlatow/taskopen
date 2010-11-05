@@ -1,0 +1,84 @@
+#!/bin/bash
+
+###############################################################################
+# taskopen - file based notes with taskwarrior
+#
+# Copyright 2010, Johannes Schlatow.
+# All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, write to the
+#
+#     Free Software Foundation, Inc.,
+#     51 Franklin Street, Fifth Floor,
+#     Boston, MA
+#     02110-1301
+#     USA
+#
+###############################################################################
+
+BROWSER=firefox
+EDITOR=vim
+TASKBIN=task
+
+FILEREGEX="/^(\/|www|http|\.|~)/"
+
+if [ $# != 1 ]; then
+	echo "Usage: $0 <id>"
+	exit 1
+fi
+
+#read annotations from task info output
+annotations=`$TASKBIN $* | gawk '$1 ~ /^[[:digit:]]/ && $2 ~ '$FILEREGEX' {print $2}'`
+anncount=`$TASKBIN $* | gawk '$1 ~ /^[[:digit:]]/ && $2 ~ '$FILEREGEX' { n++ } END { print n }'`
+
+if [ -z "$anncount" ]; then
+	echo "No annotation found."
+	exit 1
+else
+	echo "$anncount annotation(s) found."
+fi
+
+#choose an annotiation/file to open
+if [ $anncount -gt 1 ]; then
+	echo
+	echo "Please select an annotation:"
+	i=0;
+	for ann in $annotations
+	do
+		i=$((i+1))
+		files[i]=$ann
+		echo "    $i) $ann"
+	done
+
+	#read digit from stdin
+	read -p "Type number: " choice
+
+	#check it
+	if [ $choice -le $i -a $choice -ge 1 ]; then
+		file=${files[$choice]}
+	else
+		echo "$choice is not a valid number"
+	fi
+else
+	file=$annotations
+fi
+
+#open $file with an appropriate program
+if [[ $file =~ ^http|www ]]; then
+	$BROWSER $file &
+else
+	$SHELL -c "$EDITOR $file"
+fi
+
+exit 0
