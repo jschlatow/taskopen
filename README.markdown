@@ -28,9 +28,9 @@ You can also add weblinks to a task and even mix all kinds of annotations:
 	2 annotation(s) found.
 
 	Please select an annotation:
-	    1) www.taskwarrior.org
+       1) www.taskwarrior.org
        2) ~/tasknotes/1.txt
-   Type number: 
+    Type number: 
 
 #Installation
 Just copy the script to /usr/bin or ~/bin.
