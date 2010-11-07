@@ -39,8 +39,8 @@ if [ $# != 1 ]; then
 fi
 
 #read annotations from task info output
-annotations=`$TASKBIN $* | gawk '$1 ~ /^[[:digit:]]/ && $2 ~ '$FILEREGEX' {print $2}'`
-anncount=`$TASKBIN $* | gawk '$1 ~ /^[[:digit:]]/ && $2 ~ '$FILEREGEX' { n++ } END { print n }'`
+annotations=`$TASKBIN $* | gawk '$1 ~ /^[[:digit:]]/ && $NF ~ '$FILEREGEX' {print $NF}'`
+anncount=`$TASKBIN $* | gawk '$1 ~ /^[[:digit:]]/ && $NF ~ '$FILEREGEX' { n++ } END { print n }'`
 
 if [ -z "$anncount" ]; then
 	echo "No annotation found."
