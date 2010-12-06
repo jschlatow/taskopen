@@ -30,8 +30,9 @@
 BROWSER=firefox
 EDITOR=vim
 TASKBIN=task
+XDG=xdg-open
 
-FILEREGEX="/^(\/|www|http|\.|~)/"
+FILEREGEX="/^(\/|www|http|\.|~|Message-ID:)/"
 
 if [ $# != 1 ]; then
 	echo "Usage: $0 <id>"
@@ -76,10 +77,14 @@ else
 fi
 
 #open $file with an appropriate program
-if [[ $file =~ ^http|www ]]; then
+if [[ $file =~ ^http|^www ]]; then
 	$BROWSER $file &
-else
+elif [[ $file =~ Message-ID ]]; then
+	echo $file | muttjump && clear
+elif [[ `file $file | awk '{print $NF}'` =~ text ]]; then
 	$SHELL -c "$EDITOR $file"
+else 
+	$XDG $file &
 fi
 
 exit 0

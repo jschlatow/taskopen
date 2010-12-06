@@ -32,8 +32,28 @@ You can also add weblinks to a task and even mix all kinds of annotations:
        2) ~/tasknotes/1.txt
     Type number: 
 
+##Link to emails with mutt
+Thanks to the contribution of Jostein Berntsen you can use taskopen with mutt. The message ID is used as an identifier for the mutt mail. Here is the basic workflow:
+
+1. Add an email to task with 'mutt2task'
+1. Use 'mess2task' to add the message ID from this mail to the recently added task.
+
+taskopen then uses muttjump to open the mutt mailboxes natively or in a screen window (very quick and effective). The muttjump script is made by 
+Johannes Weissl:
+
+https://github.com/weisslj/muttjump
+
+You can also use 'mess2task2' which copies the message ID to the clipboard, so that you can add the mail ID to any task manually.
+
+These macros should then be added to mutt:
+
+	macro index ,k "<pipe-message>mutt2task<enter>\  
+	<copy-message>+TODO<enter>"
+	macro index ,m "<pipe-message>mess2task<enter>"
+	macro index ,t "<pipe-message>mess2task2<enter>"
+
 #Installation
-Just copy the script to /usr/bin or ~/bin.
+Just copy the scripts to /usr/bin or ~/bin.
 
 #Contribution
 Feel free to contribute to this project.
