@@ -3,7 +3,7 @@
 ###############################################################################
 # taskopen - file based notes with taskwarrior
 #
-# Copyright 2010, Johannes Schlatow.
+# Copyright 2010-2011, Johannes Schlatow.
 # All rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify it under
@@ -35,13 +35,37 @@ XDG=xdg-open
 FILEREGEX="/^(\/|www|http|\.|~|Message-ID:)/"
 
 if [ $# != 1 ]; then
-	echo "Usage: $0 <id>"
+	echo "Usage: $0 <id|filter>"
 	exit 1
 fi
 
+isdigit ()
+{
+	[ $# -eq 1 ] || return 1
+
+	case $1 in
+		*[!0-9]*|"") return 1;;
+		*) return 0;;
+	esac
+}
+
+if ! isdigit "$1"; then
+	# argument is a filter
+	TASKCOUNT=`$TASKBIN count status.isnt:deleted status.isnt:completed $1`
+	if [ $TASKCOUNT -gt 1 ]; then
+		# print task list
+		$TASKBIN rc.verbose=off rc.report.list.annotations=none rc.report.list.filter="status.isnt:deleted status.isnt:completed" list $1
+	fi
+
+	# remark: 'ids' command needs taskwarrior 2.0 or above
+	ID=`$TASKBIN ids status.isnt:deleted status.isnt:completed $1`
+else
+	ID="$1"
+fi
+
 #read annotations from task info output
-annotations=`$TASKBIN rc._forcecolor=no rc.defaultwidth=0 $* | gawk '$1 ~ /^[[:digit:]]/ && $NF ~ '$FILEREGEX' {print $NF}'`
-anncount=`$TASKBIN rc._forcecolor=no rc.defaultwidth=0 $* | gawk '$1 ~ /^[[:digit:]]/ && $NF ~ '$FILEREGEX' { n++ } END { print n }'`
+annotations=`$TASKBIN rc._forcecolor=no rc.defaultwidth=0 $ID | gawk '$1 ~ /^[[:digit:]]/ && $NF ~ '$FILEREGEX' {print $NF}'`
+anncount=`$TASKBIN rc._forcecolor=no rc.defaultwidth=0 $ID | gawk '$1 ~ /^[[:digit:]]/ && $NF ~ '$FILEREGEX' { n++ } END { print n }'`
 
 if [ -z "$anncount" ]; then
 	echo "No annotation found."
