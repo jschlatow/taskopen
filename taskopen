@@ -30,9 +30,15 @@
 BROWSER=firefox
 EDITOR=vim
 TASKBIN=task
-XDG=xdg-open
 
-FILEREGEX="/^(\/|www|http|\.|~|Message-ID:)/"
+if [[ $OSTYPE =~ .*darwin.* ]] #OSX
+then
+   XDG=open
+else 
+   XDG=xdg-open
+fi
+
+FILEREGEX="/^(\/|www|http|\.|~|Message-ID:|message:)/"
 
 if [ $# != 1 ]; then
 	echo "Usage: $0 <id>"
