@@ -55,5 +55,11 @@ These macros should then be added to mutt:
 #Installation
 Just copy the scripts to /usr/bin or ~/bin.
 
-#Contribution
+#Contributions
+
+Thanks to the following:
+
+ * Jostein Bernsten (for adding mutt support)
+ * John Hammond (for OSX 10.5+ support)
+
 Feel free to contribute to this project.
