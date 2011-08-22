@@ -27,9 +27,17 @@
 #
 ###############################################################################
 
+# default configuration
 BROWSER=firefox
-EDITOR=vim
-TASKBIN=task
+EDITOR='vim'
+TASKBIN='/usr/bin/task'
+FOLDER="~/tasknotes/"
+EXT=".txt"
+NOTEMSG="Notes"
+NOTES_CMD="$EDITOR ${FOLDER}UUID$EXT"
+
+# include your configuration
+. ~/.taskopenrc
 
 if [[ $OSTYPE =~ .*darwin.* ]] #OSX
 then
@@ -38,7 +46,7 @@ else
    XDG=xdg-open
 fi
 
-FILEREGEX="/^(\/|www|http|\.|~|Message-ID:|message:)/"
+FILEREGEX="/^(\/|www|http|\.|~|Message-ID:|message:|$NOTEMSG)/"
 
 if [ $# != 1 ]; then
 	echo "Usage: $0 <id|filter>"
@@ -72,6 +80,7 @@ fi
 #read annotations from task info output
 annotations=`$TASKBIN rc._forcecolor=no rc.defaultwidth=0 $ID | gawk '$1 ~ /^[[:digit:]]/ && $NF ~ '$FILEREGEX' {print $NF}'`
 anncount=`$TASKBIN rc._forcecolor=no rc.defaultwidth=0 $ID | gawk '$1 ~ /^[[:digit:]]/ && $NF ~ '$FILEREGEX' { n++ } END { print n }'`
+uuid=`$TASKBIN rc._forcecolor=no rc.defaultwidth=0 $ID | grep UUID | grep -o "[-a-f0-9]*\$"`
 
 if [ -z "$anncount" ]; then
 	echo "No annotation found."
@@ -107,7 +116,10 @@ else
 fi
 
 #open $file with an appropriate program
-if [[ $file =~ ^http|^www ]]; then
+if [ "$file" == $NOTEMSG ]; then
+	NOTES_CMD=${NOTES_CMD/UUID/$uuid}
+	$SHELL -c "$NOTES_CMD"
+elif [[ $file =~ ^http|^www ]]; then
 	$BROWSER $file &
 elif [[ $file =~ Message-ID ]]; then
 	echo $file | muttjump && clear

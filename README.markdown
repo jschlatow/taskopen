@@ -18,6 +18,19 @@ Open the linked file:
 
 	$ taskopen 1
 
+## Add default notes
+
+Inspired by Alan Bowens 'tasknote' you can add a default notes file to a task. The folder in which these files will be stored
+can be configured in ~/.taskopenrc.
+
+As soon as you annotate a task with 'Notes':
+
+	$ task 1 annotate Notes
+
+...you can edit this file:
+
+	$ taskopen 1
+
 ##More complex example
 You can also add weblinks to a task and even mix all kinds of annotations:
 	
@@ -53,7 +66,13 @@ These macros should then be added to mutt:
 	macro index ,t "<pipe-message>mess2task2<enter>"
 
 #Installation
-Just copy the scripts to /usr/bin or ~/bin.
+Just copy the scripts to /usr/bin or ~/bin. You should also copy one of the
+taskopenrc files to ~/.taskopenrc and modify it to your needs.
+
+Currently there are two different taskopenrc files delivered with taskopen:
+
+1. taskopenrc: default configuration example
+1. taskopenrc_vimnotes: configuration to use taskopen with [notes.vim](http://peterodding.com/code/vim/notes/) plugin
 
 #Contributions
 
@@ -61,5 +80,6 @@ Thanks to the following:
 
  * Jostein Bernsten (for adding mutt support)
  * John Hammond (for OSX 10.5+ support)
+ * Alan Bowen (for writing tasknote)
 
 Feel free to contribute to this project.

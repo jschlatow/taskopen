@@ -1,0 +1,21 @@
+#!/bin/bash
+
+BROWSER='firefox'
+EDITOR='vim'
+TASKBIN='/usr/bin/task'
+
+# If you sync tasks FOLDER should be a location that syncs and is available to
+# other computers, i.e. /users/dropbox/tasknotes
+# FOLDER to store notes in, must already exist!
+FOLDER="~/tasknotes/"
+
+# Preferred extension for tasknotes
+EXT=".txt"
+
+# Message that gets annotated to the task to indicate that notes exist
+NOTEMSG="Notes"
+
+# Command that opens notes. UUID will be replaced with the actual uuid of 
+# the task.
+# Default is: $EDITOR ${FOLDER}UUID$EXT
+NOTES_CMD="$EDITOR ${FOLEDER}UUID$EXT"
