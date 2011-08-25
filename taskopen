@@ -27,6 +27,8 @@
 #
 ###############################################################################
 
+# TODO parse 'task _query' output, use perl instead of bash
+
 # default configuration
 BROWSER=firefox
 EDITOR='vim'
@@ -58,7 +60,24 @@ ID=$*
 #read annotations from task info output
 annotations=`$TASKBIN rc._forcecolor=no rc.defaultwidth=0 $ID | gawk '$1 ~ /^[[:digit:]]/ && $NF ~ '$FILEREGEX' {print $NF}'`
 anncount=`$TASKBIN rc._forcecolor=no rc.defaultwidth=0 $ID | gawk '$1 ~ /^[[:digit:]]/ && $NF ~ '$FILEREGEX' { n++ } END { print n }'`
-uuid=`$TASKBIN rc._forcecolor=no rc.defaultwidth=0 $ID | grep UUID | grep -o "[-a-f0-9]*\$"`
+
+# save field seperator before modification
+OIFS=$IFS
+IFS="
+"
+
+# read UUIDs that are annotated with $NOTEMSG
+# remark: gawk sets a state (MATCH=1) if annotation with $NOTEMSG has been found;
+#         if a line matches UUID and MATCH was set, it will print the last field (UUID) 
+#         and resets MATCH to 0.
+UUIDs=(`$TASKBIN rc._forcecolor=no rc.defaultwidth=0 $ID | gawk '$1 ~ /^[[:digit:]]/ && $NF ~ /^'$NOTEMSG'/ {MATCH=1}; /^UUID/ {if (MATCH==1) {print $NF;MATCH=0}}'`)
+
+# get descriptions of the previously extracted UUIDs (TODO query taskwarrior directly when UUID addressing is available)
+# remark: gawk stores each description in the DESC; if a annotation with $NOTEMSG has been found, DESC will be printed
+descriptions=(`$TASKBIN rc._forcecolor=no rc.defaultwidth=0 $ID | gawk '/^Description/ {DESC=""; for(i=2;i<=NF;i++) DESC=(DESC $i " ")}; $1 ~ /^[[:digit:]]/ && $NF ~ /^'$NOTEMSG'/ {print DESC}'`)
+
+# restore field seperator
+IFS=$OIFS
 
 if [ -z "$anncount" ]; then
 	echo "No annotation found."
@@ -72,10 +91,16 @@ if [ $anncount -gt 1 ]; then
 	echo
 	echo "Please select an annotation:"
 	i=0;
+	j=0
 	for ann in $annotations
 	do
 		i=$((i+1))
 		files[i]=$ann
+		if [ "$ann" == $NOTEMSG ]; then
+			ann="$ann: ${descriptions[j]}"
+			files[i]=${UUIDs[j]}
+			((j++))
+		fi
 		echo "    $i) $ann"
 	done
 
@@ -91,19 +116,30 @@ if [ $anncount -gt 1 ]; then
 	fi
 else
 	file=$annotations
+	if [ "$annotations" == $NOTEMSG ]; then
+		file=${UUIDs[0]}
+	fi
 fi
 
+##############################################
 #open $file with an appropriate program
-if [ "$file" == $NOTEMSG ]; then
-	NOTES_CMD=${NOTES_CMD/UUID/$uuid}
+
+# UUID example: 89e7830c-75ce-5ead-99e8-038ab9e3257a
+# matching the first two segments should be appropriate, e.g. 89e7830c-75ce-
+if [[ $file =~ ^[0-9a-z]{8}-[0-9a-z]{4}- ]]; then
+	# $file is UUID, i.e. we have to open the note file for this UUID
+	NOTES_CMD=${NOTES_CMD/UUID/$file}
 	$SHELL -c "$NOTES_CMD"
 elif [[ $file =~ ^http|^www ]]; then
+	# $file is a url
 	$BROWSER $file &
 elif [[ $file =~ Message-ID ]]; then
 	echo $file | muttjump && clear
 elif [[ `file $file | awk '{print $NF}'` =~ text ]]; then
+	# $file is a textfile
 	$SHELL -c "$EDITOR $file"
 else 
+	# use XDG for unknown file types
 	$XDG $file &
 fi
 
