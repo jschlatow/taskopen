@@ -14,9 +14,13 @@ Add an annotation which links to a file:
 
 	$ task 1 annotate ~/notes.txt
 
-Open the linked file:
+Open the linked file by ID:
 
 	$ taskopen 1
+
+Or by a filter expression (requires taskwarrior 2.0):
+
+	$ taskopen Example
 
 ## Add default notes
 
