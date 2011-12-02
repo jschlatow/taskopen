@@ -145,6 +145,8 @@ fi
 ##############################################
 #open $file with an appropriate program
 
+file=${file/#\~/$HOME}
+
 # UUID example: 89e7830c-75ce-5ead-99e8-038ab9e3257a
 # matching the first two segments should be appropriate, e.g. 89e7830c-75ce-
 if [[ $file =~ ^[0-9a-z]{8}-[0-9a-z]{4}- ]]; then
