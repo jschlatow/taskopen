@@ -3,7 +3,7 @@
 ###############################################################################
 # taskopen - file based notes with taskwarrior
 #
-# Copyright 2010-2011, Johannes Schlatow.
+# Copyright 2010-2012, Johannes Schlatow.
 # All rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify it under
@@ -48,7 +48,7 @@ else
    XDG=xdg-open
 fi
 
-FILEREGEX="/^(\/|www|http|\.|~|Message-ID:|message:|$NOTEMSG)/"
+FILEREGEX="/^(\/|www|http|\.|~|Message-[Ii][Dd]:|message:|$NOTEMSG)/"
 
 if [ $# != 1 ]; then
 	echo "Usage: $0 <id|filter>"
@@ -156,7 +156,7 @@ if [[ $file =~ ^[0-9a-z]{8}-[0-9a-z]{4}- ]]; then
 elif [[ $file =~ ^http|^www ]]; then
 	# $file is a url
 	$BROWSER "$file" &
-elif [[ $file =~ Message-ID ]]; then
+elif [[ $file =~ Message-[Ii][Dd] ]]; then
 	echo $file | muttjump && clear
 elif [[ `file "$file" | awk '{print $NF}'` =~ text ]]; then
 	# $file is a textfile
