@@ -18,4 +18,4 @@ NOTEMSG="Notes"
 # Command that opens notes. UUID will be replaced with the actual uuid of 
 # the task.
 # Default is: $EDITOR ${FOLDER}UUID$EXT
-NOTES_CMD="$EDITOR ${FOLEDER}UUID$EXT"
+NOTES_CMD="$EDITOR ${FOLDER}UUID$EXT"
