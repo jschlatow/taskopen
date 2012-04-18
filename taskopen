@@ -30,16 +30,17 @@
 # TODO parse 'task _query' output, use perl instead of bash
 
 # default configuration
-BROWSER=firefox
-EDITOR='vim'
 TASKBIN='/usr/bin/task'
 FOLDER="~/tasknotes/"
 EXT=".txt"
 NOTEMSG="Notes"
-NOTES_CMD="$EDITOR ${FOLDER}UUID$EXT"
 
 # include your configuration
 . ~/.taskopenrc
+
+BROWSER=${BROWSER:-xdg-open}
+EDITOR=${EDITOR:-vim}
+NOTES_CMD="$EDITOR ${FOLDER}UUID$EXT"
 
 if [[ $OSTYPE =~ .*darwin.* ]] #OSX
 then
@@ -153,7 +154,10 @@ if [[ $file =~ ^[0-9a-z]{8}-[0-9a-z]{4}- ]]; then
 	# $file is UUID, i.e. we have to open the note file for this UUID
 	NOTES_CMD=${NOTES_CMD/UUID/$file}
 	$SHELL -c "$NOTES_CMD"
-elif [[ $file =~ ^http|^www ]]; then
+elif [[ $file =~ ^www ]]; then
+	# prepend http://
+	$BROWSER "http://$file" &
+elif [[ $file =~ ^http ]]; then
 	# $file is a url
 	$BROWSER "$file" &
 elif [[ $file =~ Message-[Ii][Dd] ]]; then
