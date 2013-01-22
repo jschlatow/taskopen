@@ -127,8 +127,32 @@ else {
 
 my $FILEREGEX = qr{^(?:(\S*):\s)?((?:\/|www|http|\.|~|Message-[Ii][Dd]:|message:|$NOTEMSG).*)};
 
-if ($#ARGV < 0 || $ARGV[0] =~ m/\\+(.+)/) {
-	print "Usage: $0 <id|filter> [\\\\label]\n";
+# argument parsing
+my $FILTER = "";
+my $LABEL;
+my $HELP;
+my $LIST;
+foreach my $arg (@ARGV) {
+    if ($arg eq "-h") {
+        $HELP = 1;
+    }
+    elsif ($arg eq "-l") {
+        $LIST = 1;
+    }
+    elsif ($arg =~ m/\\+(.+)/) {
+        $LABEL = $1;
+    }
+    else {
+        $FILTER = "$FILTER $arg";
+    }
+}
+
+if ($HELP) {
+	print "Usage: $0 [-h] [-l] [id|filter1 filter2 ... filterN] [\\\\label]\n\n";
+
+    print "-h        Show this text\n";
+    print "-l        List-only mode, does not open any file\n";
+
     print "\nCurrent configuration:\n";
     print "BROWSER   = $BROWSER\n";
     print "TASKBIN   = $TASKBIN\n";
@@ -139,32 +163,16 @@ if ($#ARGV < 0 || $ARGV[0] =~ m/\\+(.+)/) {
     print "NOTES_CMD = $NOTES_CMD\n";
     print "EXCLUDE   = $EXCLUDE\n";
     print "DEBUG     = $DEBUG\n";
+
 	exit 1;
 }
 
-my $LABEL;
-if ($ARGV[$#ARGV] =~ m/\\+(.+)/) {
-    pop(@ARGV);
-    $LABEL = $1;
-}
 
-my $ID;
-my $TASKCOUNT = 1;
-if ($ARGV[0] =~ m/\d+/) {
-    $ID = $ARGV[0];
-    if ($#ARGV > 0) {
-        shift (@ARGV);
-        my $tmp = join(", ", @ARGV);
-        print "Too many arguments, ignoring: $tmp\n";
-    }
+if ($DEBUG > 0) {
+    printf("[DEBUG] Appying filter: $EXCLUDE$FILTER");
 }
-else {
-    my $FILTER = join(' ', @ARGV);
-    $TASKCOUNT = qx{$TASKBIN count $EXCLUDE $FILTER};
-    chop($TASKCOUNT);
-    $ID = qx{$TASKBIN ids $EXCLUDE $FILTER};
-    chop($ID);
-}
+my $ID = qx{$TASKBIN ids $EXCLUDE$FILTER};
+chop($ID);
 
 # query IDs and parse json
 my $json = qx{$TASKBIN $ID _query};
@@ -211,7 +219,7 @@ else {
 
 # choose an annotation/file to open
 my $choice = 0;
-if ($#annotations > 0) {
+if ($#annotations > 0 || $LIST) {
     print "\n";
     print "Please select an annotation:\n";
 
@@ -219,7 +227,14 @@ if ($#annotations > 0) {
     foreach my $ann (@annotations) {
         my $text = qq{$ann->{'ann'} ("$ann->{'description'}")};
         print "    $i) $text\n";
+        if ($LIST) {
+            print "       execute: (FIXME not implemented)\n";
+        }
         $i++;
+    }
+
+    if ($LIST) {
+        exit 0;
     }
 
     # read input
