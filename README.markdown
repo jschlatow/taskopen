@@ -2,6 +2,12 @@
 
 This script is an enhancement to taskwarrior, i.e. it depends on the task binary. See http://www.taskwarrior.org
 
+The perl version also depends on the JSON module, i.e.
+
+ * _libjson-perl_ on debian
+ * _perl-json_ on archlinux
+ * to be continued...
+
 #What does it do?
 It enables you to add file based notes to tasks.
 
@@ -70,8 +76,21 @@ These macros should then be added to mutt:
 	macro index ,t "<pipe-message>mess2task2<enter>"
 
 #Installation
-Just copy the scripts to /usr/bin or ~/bin. You should also copy one of the
-taskopenrc files to ~/.taskopenrc and modify it to your needs.
+Just copy the scripts to /usr/bin or ~/bin.
+
+#Perl version, migration guide
+Replace your taskopen binary in /usr/bin or ~/bin with 'taskopen.pl'. Be sure to install all
+dependencies.
+
+Currently, the perl version does not support an external 'taskopenrc' file. Therefore you need to
+modify the variables in the script directly.
+
+**Any advice about how to add 'taskopenrc' support to the perl version (with low overhead and
+minimum dependencies) would be much appreciated.**
+
+#Bash version (deprecated)
+
+You should also copy one of the taskopenrc files to ~/.taskopenrc and modify it to your needs.
 
 Currently there are two different taskopenrc files delivered with taskopen:
 
