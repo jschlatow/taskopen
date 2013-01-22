@@ -15,7 +15,12 @@ EXT=""
 # Message that gets annotated to the task to indicate that notes exist
 NOTEMSG="Notes"
 
+# Path to notes file. UUID will be replaced with the actual uuid of
+# the task. If NOTES_CMD 
+# Default is: ${FOLDER}UUID$EXT
+#NOTES_FILE="~/Notes/vimnotes/UUID"
+
 # Command that opens notes. UUID will be replaced with the actual uuid of 
 # the task.
-# Default is: $EDITOR ${FOLDER}UUID$EXT
+# Default is: $EDITOR $NOTES_FILE
 NOTES_CMD="vim -c \":Note UUID\""

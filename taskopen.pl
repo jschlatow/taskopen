@@ -101,12 +101,20 @@ else {
     $EDITOR = "vim";
 }
 
+my $NOTES_FILE;
+if (exists $config{"NOTES_FILE"}) {
+    $NOTES_FILE = $config{"NOTES_FILE"};
+}
+else {
+    $NOTES_FILE = "${FOLDER}UUID$EXT";
+}
+
 my $NOTES_CMD;
 if (exists $config{"NOTES_CMD"}) {
     $NOTES_CMD = $config{"NOTES_CMD"};
 }
 else {
-    $NOTES_CMD = "${FOLDER}UUID$EXT";
+    $NOTES_CMD = "$EDITOR $NOTES_FILE";
 }
 
 my $EXCLUDE;
@@ -129,7 +137,18 @@ my $FILEREGEX = qr{^(?:(\S*):\s)?((?:\/|www|http|\.|~|Message-[Ii][Dd]:|message:
 
 sub create_cmd {
     my $ann = $_[0];
+    my $FORCE = $_[1];
     my $file = $ann->{"file"};
+
+    if ($FORCE) {
+        if ($file eq $NOTEMSG) {
+            $file = $NOTES_FILE;
+            $file =~ s/UUID/$ann->{"uuid"}/g;
+        }
+
+        $file =~ s/^~/$HOME/;
+        return qq{$FORCE "$file"};
+    }
 
     my $cmd;
     if ($file eq $NOTEMSG) {
@@ -167,12 +186,28 @@ my $FILTER = "";
 my $LABEL;
 my $HELP;
 my $LIST;
-foreach my $arg (@ARGV) {
+my $FORCE;
+for (my $i = 0; $i <= $#ARGV; ++$i) {
+    my $arg = $ARGV[$i];
     if ($arg eq "-h") {
         $HELP = 1;
     }
     elsif ($arg eq "-l") {
         $LIST = 1;
+    }
+    elsif ($arg eq "-e") {
+        if ($FORCE) {
+            print "Cannot use -e in conjunction with -x";
+            exit 1;
+        }
+        $FORCE = $EDITOR;
+    }
+    elsif ($arg eq "-x") {
+        if ($FORCE) {
+            print "Cannot use -x in conjunction with -e";
+            exit 1;
+        }
+        $FORCE = $ARGV[++$i];
     }
     elsif ($arg =~ m/\\+(.+)/) {
         $LABEL = $1;
@@ -185,19 +220,22 @@ foreach my $arg (@ARGV) {
 if ($HELP) {
 	print "Usage: $0 [-h] [-l] [id|filter1 filter2 ... filterN] [\\\\label]\n\n";
 
-    print "-h        Show this text\n";
-    print "-l        List-only mode, does not open any file\n";
+    print "-h          Show this text\n";
+    print "-l          List-only mode, does not open any file\n";
+    print "-e          Force to open file with EDITOR\n";
+    print "-x ['cmd']  Execute file, optionally prepend cmd to the command line\n";
 
     print "\nCurrent configuration:\n";
-    print "BROWSER   = $BROWSER\n";
-    print "TASKBIN   = $TASKBIN\n";
-    print "FOLDER    = $FOLDER\n";
-    print "EXT       = $EXT\n";
-    print "EDITOR    = $EDITOR\n";
-    print "NOTEMSG   = $NOTEMSG\n";
-    print "NOTES_CMD = $NOTES_CMD\n";
-    print "EXCLUDE   = $EXCLUDE\n";
-    print "DEBUG     = $DEBUG\n";
+    print "BROWSER    = $BROWSER\n";
+    print "TASKBIN    = $TASKBIN\n";
+    print "FOLDER     = $FOLDER\n";
+    print "EXT        = $EXT\n";
+    print "EDITOR     = $EDITOR\n";
+    print "NOTEMSG    = $NOTEMSG\n";
+    print "NOTES_FILE = $NOTES_FILE\n";
+    print "NOTES_CMD  = $NOTES_CMD\n";
+    print "EXCLUDE    = $EXCLUDE\n";
+    print "DEBUG      = $DEBUG\n";
 
 	exit 1;
 }
@@ -263,7 +301,7 @@ if ($#annotations > 0 || $LIST) {
         my $text = qq/$ann->{'ann'} ("$ann->{'description'}")/;
         print "    $i) $text\n";
         if ($LIST) {
-            my $cmd = create_cmd($ann);
+            my $cmd = create_cmd($ann, $FORCE);
             print "       executes: $cmd\n";
         }
         $i++;
@@ -293,4 +331,4 @@ if ($#annotations > 0 || $LIST) {
 #open annotations[$choice] with an appropriate program
 
 my $ann  = $annotations[$choice-1];
-exec(create_cmd($ann));
+exec(create_cmd($ann, $FORCE));

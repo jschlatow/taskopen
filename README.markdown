@@ -122,6 +122,24 @@ or even
 
     $ taskopen pro:taskwarrior +bug \\notes
 
+##Options
+
+Only list the files and commands to be executed:
+
+    $ taskopen -l
+
+Open file with editor:
+
+    $ taskopen -e
+
+Execute file:
+
+    $ taskopen -x
+
+Open file with arbitrary command (e.g. count lines):
+
+    $ taskopen -x 'wc -l'
+
 #Contributions
 
 Thanks to the following:
