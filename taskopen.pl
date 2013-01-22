@@ -134,7 +134,7 @@ sub create_cmd {
     my $cmd;
     if ($file eq $NOTEMSG) {
         $NOTES_CMD =~ s/UUID/$ann->{"uuid"}/g;
-        $cmd = qq{$ENV{"SHELL"} -c "$NOTES_CMD"};
+        $cmd = qq/$ENV{"SHELL"} -c "$NOTES_CMD"/;
     }
     elsif ($file =~ m/^www.*/ ) {
         # prepend http://
@@ -148,8 +148,8 @@ sub create_cmd {
     }
     else {
         my $filetype = qx{file "$file"};
-        if ($filetype =~ m/text/) {
-            $cmd = qq{$ENV{'SHELL'} -c "$EDITOR '$file'"};
+        if ($filetype =~ m/text/ ) {
+            $cmd = qq/$ENV{'SHELL'} -c "$EDITOR '$file'"/;
         }
         else {
             # use XDG for unknown file types
@@ -228,15 +228,15 @@ foreach my $task (@decoded_json) {
                 }
                 elsif ($DEBUG > 0) {
                     if (!$1) {
-                        printf(qq{[DEBUG] Skipping unlabeled annotation "$ann->{"description"}"\n});
+                        printf(qq/[DEBUG] Skipping unlabeled annotation "$ann->{"description"}"\n/);
                     }
                     else {
-                        printf(qq{[DEBUG] Skipping label "$1"\n});
+                        printf(qq/[DEBUG] Skipping label "$1"\n/);
                     }
                 }
             }
             elsif ($DEBUG > 0) {
-                printf(qq{[DEBUG] Skipping annotation "$ann->{"description"}"\n});
+                printf(qq/[DEBUG] Skipping annotation "$ann->{"description"}"\n/);
             }
         }
     }
@@ -259,7 +259,7 @@ if ($#annotations > 0 || $LIST) {
 
     my $i = 1;
     foreach my $ann (@annotations) {
-        my $text = qq{$ann->{'ann'} ("$ann->{'description'}")};
+        my $text = qq/$ann->{'ann'} ("$ann->{'description'}")/;
         print "    $i) $text\n";
         if ($LIST) {
             my $cmd = create_cmd($ann);
