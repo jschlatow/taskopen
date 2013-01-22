@@ -127,6 +127,39 @@ else {
 
 my $FILEREGEX = qr{^(?:(\S*):\s)?((?:\/|www|http|\.|~|Message-[Ii][Dd]:|message:|$NOTEMSG).*)};
 
+sub create_cmd {
+    my $ann = $_[0];
+    my $file = $ann->{"file"};
+
+    my $cmd;
+    if ($file eq $NOTEMSG) {
+        $NOTES_CMD =~ s/UUID/$ann->{"uuid"}/g;
+        $cmd = qq{$ENV{"SHELL"} -c "$NOTES_CMD"};
+    }
+    elsif ($file =~ m/^www.*/ ) {
+        # prepend http://
+        $cmd = qq{$BROWSER "http://$file"};
+    }
+    elsif ($file =~ m/^http.*/ ) {
+        $cmd = qq{$BROWSER "$file"};
+    }
+    elsif ($file =~ m/Message-[Ii][Dd]/ ) {
+        $cmd = qq{echo "$file" | muttjump && clear};
+    }
+    else {
+        my $filetype = qx{file "$file"};
+        if ($filetype =~ m/text/) {
+            $cmd = qq{$ENV{'SHELL'} -c "$EDITOR '$file'"};
+        }
+        else {
+            # use XDG for unknown file types
+            $cmd = qq{$XDG "$file"};
+        }
+    }
+
+    return $cmd;
+}
+
 # argument parsing
 my $FILTER = "";
 my $LABEL;
@@ -190,6 +223,7 @@ foreach my $task (@decoded_json) {
                                   "file"        => $2,
                                   "label"       => $1,
                                   "description" => $task->{"description"});
+                    $entry{"file"} =~ s/^~/$HOME/;
                     push(@annotations, \%entry);
                 }
                 elsif ($DEBUG > 0) {
@@ -228,7 +262,8 @@ if ($#annotations > 0 || $LIST) {
         my $text = qq{$ann->{'ann'} ("$ann->{'description'}")};
         print "    $i) $text\n";
         if ($LIST) {
-            print "       execute: (FIXME not implemented)\n";
+            my $cmd = create_cmd($ann);
+            print "       executes: $cmd\n";
         }
         $i++;
     }
@@ -257,30 +292,4 @@ if ($#annotations > 0 || $LIST) {
 #open annotations[$choice] with an appropriate program
 
 my $ann  = $annotations[$choice-1];
-my $file = $ann->{"file"};
-$file =~ s/~/$HOME/g;
-
-if ($file eq $NOTEMSG) {
-    $NOTES_CMD =~ s/UUID/$ann->{"uuid"}/g;
-    exec(qq{$ENV{"SHELL"} -c "$NOTES_CMD"});
-}
-elsif ($file =~ m/^www.*/) {
-    # prepend http://
-    exec(qq{$BROWSER "http://$file"});
-}
-elsif ($file =~ m/^http.*/) {
-    exec(qq{$BROWSER "$file"});
-}
-elsif ($file =~ m/Message-[Ii][Dd]/) {
-	exec(qq{echo $file | muttjump && clear});
-}
-else {
-    my $filetype = qx{file "$file"};
-    if ($filetype =~ m/text/) {
-        exec(qq{$ENV{'SHELL'} -c "$EDITOR '$file'"});
-    }
-    else {
-        # use XDG for unknown file types
-        exec(qq{$XDG "$file"});
-    }
-}
+exec(create_cmd($ann));
