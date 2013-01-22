@@ -109,14 +109,17 @@ else {
     $NOTES_CMD = "${FOLDER}UUID$EXT";
 }
 
-my $EXCLUDE = $ENV{'EXCLUDE'};
-if (!$EXCLUDE) {
+my $EXCLUDE;
+if ($config{"EXCLUDE"}) {
+    $EXCLUDE = $config{"EXCLUDE"};
+}
+else {
     $EXCLUDE = "status.isnt:deleted status.isnt:completed";
 }
 
-my $FILEREGEX = qr{^(?:(\S*):)?\s*((?:\/|www|http|\.|~|Message-[Ii][Dd]:|message:|$NOTEMSG).*)};
+my $FILEREGEX = qr{^(?:(\S*):\s)?((?:\/|www|http|\.|~|Message-[Ii][Dd]:|message:|$NOTEMSG).*)};
 
-if ($#ARGV < 0) {
+if ($#ARGV < 0 || $ARGV[0] =~ m/\\+(.+)/) {
 	print "Usage: $0 <id|filter> [\\\\label]\n";
     print "\nCurrent configuration:\n";
     print "BROWSER   = $BROWSER\n";
@@ -126,6 +129,7 @@ if ($#ARGV < 0) {
     print "EDITOR    = $EDITOR\n";
     print "NOTEMSG   = $NOTEMSG\n";
     print "NOTES_CMD = $NOTES_CMD\n";
+    print "EXCLUDE   = $EXCLUDE\n";
 	exit 1;
 }
 
