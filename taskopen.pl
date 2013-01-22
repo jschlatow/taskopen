@@ -54,7 +54,7 @@ while (<CONFIG>) {
 }
 
 my $TASKBIN;
-if ($config{"TASKBIN"}) {
+if (exists $config{"TASKBIN"}) {
     $TASKBIN = $config{"TASKBIN"};
 }
 else {
@@ -62,7 +62,7 @@ else {
 }
 
 my $FOLDER;
-if ($config{"FOLDER"}) {
+if (exists $config{"FOLDER"}) {
     $FOLDER = $config{"FOLDER"};
 }
 else {
@@ -70,7 +70,7 @@ else {
 }
 
 my $EXT;
-if ($config{"EXT"}) {
+if (exists $config{"EXT"}) {
     $EXT = $config{"EXT"};
 }
 else {
@@ -78,7 +78,7 @@ else {
 }
 
 my $NOTEMSG;
-if ($config{"NOTEMSG"}) {
+if (exists $config{"NOTEMSG"}) {
     $NOTEMSG = $config{"NOTEMSG"};
 }
 else {
@@ -86,7 +86,7 @@ else {
 }
 
 my $BROWSER;
-if ($config{"BROWSER"}) {
+if (exists $config{"BROWSER"}) {
     $BROWSER = $config{"BROWSER"};
 }
 else {
@@ -94,7 +94,7 @@ else {
 }
 
 my $EDITOR;
-if ($config{"EDITOR"}) {
+if (exists $config{"EDITOR"}) {
     $EDITOR = $config{"EDITOR"};
 }
 else {
@@ -102,7 +102,7 @@ else {
 }
 
 my $NOTES_CMD;
-if ($config{"NOTES_CMD"}) {
+if (exists $config{"NOTES_CMD"}) {
     $NOTES_CMD = $config{"NOTES_CMD"};
 }
 else {
@@ -110,7 +110,7 @@ else {
 }
 
 my $EXCLUDE;
-if ($config{"EXCLUDE"}) {
+if (exists $config{"EXCLUDE"}) {
     $EXCLUDE = $config{"EXCLUDE"};
 }
 else {
@@ -118,7 +118,7 @@ else {
 }
 
 my $DEBUG;
-if ($config{"DEBUG"} && $config{"DEBUG"} =~ m/\d+/) {
+if (exists $config{"DEBUG"} && $config{"DEBUG"} =~ m/\d+/) {
     $DEBUG = $config{"DEBUG"};
 }
 else {
@@ -133,8 +133,9 @@ sub create_cmd {
 
     my $cmd;
     if ($file eq $NOTEMSG) {
-        $NOTES_CMD =~ s/UUID/$ann->{"uuid"}/g;
-        $cmd = qq/$ENV{"SHELL"} -c "$NOTES_CMD"/;
+        $cmd = $NOTES_CMD;
+        $cmd =~ s/UUID/$ann->{"uuid"}/g;
+        $cmd = qq/$ENV{"SHELL"} -c "$cmd"/;
     }
     elsif ($file =~ m/^www.*/ ) {
         # prepend http://
@@ -147,6 +148,7 @@ sub create_cmd {
         $cmd = qq{echo "$file" | muttjump && clear};
     }
     else {
+        $file =~ s/^~/$HOME/;
         my $filetype = qx{file "$file"};
         if ($filetype =~ m/text/ ) {
             $cmd = qq/$ENV{'SHELL'} -c "$EDITOR '$file'"/;
@@ -223,7 +225,6 @@ foreach my $task (@decoded_json) {
                                   "file"        => $2,
                                   "label"       => $1,
                                   "description" => $task->{"description"});
-                    $entry{"file"} =~ s/^~/$HOME/;
                     push(@annotations, \%entry);
                 }
                 elsif ($DEBUG > 0) {
