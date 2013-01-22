@@ -117,6 +117,14 @@ else {
     $EXCLUDE = "status.isnt:deleted status.isnt:completed";
 }
 
+my $DEBUG;
+if ($config{"DEBUG"} && $config{"DEBUG"} =~ m/\d+/) {
+    $DEBUG = $config{"DEBUG"};
+}
+else {
+    $DEBUG = 0;
+}
+
 my $FILEREGEX = qr{^(?:(\S*):\s)?((?:\/|www|http|\.|~|Message-[Ii][Dd]:|message:|$NOTEMSG).*)};
 
 if ($#ARGV < 0 || $ARGV[0] =~ m/\\+(.+)/) {
@@ -130,6 +138,7 @@ if ($#ARGV < 0 || $ARGV[0] =~ m/\\+(.+)/) {
     print "NOTEMSG   = $NOTEMSG\n";
     print "NOTES_CMD = $NOTES_CMD\n";
     print "EXCLUDE   = $EXCLUDE\n";
+    print "DEBUG     = $DEBUG\n";
 	exit 1;
 }
 
@@ -175,6 +184,17 @@ foreach my $task (@decoded_json) {
                                   "description" => $task->{"description"});
                     push(@annotations, \%entry);
                 }
+                elsif ($DEBUG > 0) {
+                    if (!$1) {
+                        printf(qq{[DEBUG] Skipping unlabeled annotation "$ann->{"description"}"\n});
+                    }
+                    else {
+                        printf(qq{[DEBUG] Skipping label "$1"\n});
+                    }
+                }
+            }
+            elsif ($DEBUG > 0) {
+                printf(qq{[DEBUG] Skipping annotation "$ann->{"description"}"\n});
             }
         }
     }
