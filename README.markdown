@@ -82,11 +82,9 @@ Just copy the scripts to /usr/bin or ~/bin.
 Replace your taskopen binary in /usr/bin or ~/bin with 'taskopen.pl'. Be sure to install all
 dependencies.
 
-Currently, the perl version does not support an external 'taskopenrc' file. Therefore you need to
-modify the variables in the script directly.
-
-**Any advice about how to add 'taskopenrc' support to the perl version (with low overhead and
-minimum dependencies) would be much appreciated.**
+The perl version is basically backwards compatible with the bash-style taskopenrc files. However,
+bash magic must not be used within those files, i.e. only simple 'NAME=VALUE' notations can be
+parsed.
 
 #Bash version (deprecated)
 

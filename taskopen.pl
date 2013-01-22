@@ -38,61 +38,74 @@ if ($^O =~ m/.*darwin.*/) { #OSX
    $XDG = "open";
 }
 
-# TODO load external config
+my $cfgfile = "$HOME/.taskopenrc";
+my %config;
+open(CONFIG, "$cfgfile") or die "can't open $cfgfile: $!";
+while (<CONFIG>) {
+    chomp;
+    s/#.*//; # Remove comments
+    s/^\s+//; # Remove opening whitespace
+    s/\s+$//;  # Remove closing whitespace
+    next unless length;
+    my ($key, $value) = split(/\s*=\s*/, $_, 2);
+    $value =~ s/"(.*)"/$1/;
+    $value =~ s/'(.*)'/$1/;
+    $config{$key} = $value;
+}
+
 my $TASKBIN;
-my $FOLDER;
-my $EXT;
-my $NOTEMSG;
-my $BROWSER;
-my $EDITOR;
-my $NOTES_CMD;
-
-# ADD USER CONFIG HERE
-$EDITOR="vim";
-
-# If you sync tasks FOLDER should be a location that syncs and is available to
-# other computers, i.e. /users/dropbox/tasknotes
-# FOLDER to store notes in, must already exist!
-$FOLDER="~/Notes/vimnotes/";
-
-# Preferred extension for tasknotes
-$EXT="";
-
-# Message that gets annotated to the task to indicate that notes exist
-$NOTEMSG="Notes";
-
-# Command that opens notes. UUID will be replaced with the actual uuid of 
-# the task.
-# Default is: $EDITOR ${FOLDER}UUID$EXT
-$NOTES_CMD="vim -c ':Note UUID'";
-
-# END USER CONFIG 
-
-if (!$TASKBIN) {
+if ($config{"TASKBIN"}) {
+    $TASKBIN = $config{"TASKBIN"};
+}
+else {
     $TASKBIN = '/usr/bin/task';
 }
 
-if (!$FOLDER) {
+my $FOLDER;
+if ($config{"FOLDER"}) {
+    $FOLDER = $config{"FOLDER"};
+}
+else {
     $FOLDER = "~/tasknotes/";
 }
 
-if (!$EXT) {
+my $EXT;
+if ($config{"EXT"}) {
+    $EXT = $config{"EXT"};
+}
+else {
     $EXT = ".txt";
 }
 
-if (!$NOTEMSG) {
+my $NOTEMSG;
+if ($config{"NOTEMSG"}) {
+    $NOTEMSG = $config{"NOTEMSG"};
+}
+else {
     $NOTEMSG = "Notes";
 }
 
-if (!$BROWSER) {
+my $BROWSER;
+if ($config{"BROWSER"}) {
+    $BROWSER = $config{"BROWSER"};
+}
+else {
     $BROWSER = $XDG;
 }
 
-if (!$EDITOR) {
+my $EDITOR;
+if ($config{"EDITOR"}) {
+    $EDITOR = $config{"EDITOR"};
+}
+else {
     $EDITOR = "vim";
 }
 
-if (!$NOTES_CMD) {
+my $NOTES_CMD;
+if ($config{"NOTES_CMD"}) {
+    $NOTES_CMD = $config{"NOTES_CMD"};
+}
+else {
     $NOTES_CMD = "${FOLDER}UUID$EXT";
 }
 
@@ -105,6 +118,14 @@ my $FILEREGEX = qr{^(?:(\S*):)?\s*((?:\/|www|http|\.|~|Message-[Ii][Dd]:|message
 
 if ($#ARGV < 0) {
 	print "Usage: $0 <id|filter> [\\\\label]\n";
+    print "\nCurrent configuration:\n";
+    print "BROWSER   = $BROWSER\n";
+    print "TASKBIN   = $TASKBIN\n";
+    print "FOLDER    = $FOLDER\n";
+    print "EXT       = $EXT\n";
+    print "EDITOR    = $EDITOR\n";
+    print "NOTEMSG   = $NOTEMSG\n";
+    print "NOTES_CMD = $NOTES_CMD\n";
 	exit 1;
 }
 
