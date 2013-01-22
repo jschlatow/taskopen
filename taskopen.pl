@@ -101,22 +101,34 @@ if (!$EXCLUDE) {
     $EXCLUDE = "status.isnt:deleted status.isnt:completed";
 }
 
-my $FILEREGEX = qr{^(\/|www|http|\.|~|Message-[Ii][Dd]:|message:|$NOTEMSG)};
+my $FILEREGEX = qr{^(?:(\S*):)?\s*((?:\/|www|http|\.|~|Message-[Ii][Dd]:|message:|$NOTEMSG)\S*)};
 
 if ($#ARGV < 0) {
-	print "Usage: $0 <id|filter>\n";
+	print "Usage: $0 <id|filter> [\\\\label]\n";
 	exit 1;
+}
+
+my $LABEL;
+if ($ARGV[$#ARGV] =~ m/\\+(.+)/) {
+    pop(@ARGV);
+    $LABEL = $1;
 }
 
 my $ID;
 my $TASKCOUNT = 1;
 if ($ARGV[0] =~ m/\d+/) {
     $ID = $ARGV[0];
+    if ($#ARGV > 0) {
+        shift (@ARGV);
+        my $tmp = join(", ", @ARGV);
+        print "Too many arguments, ignoring: $tmp\n";
+    }
 }
 else {
-    $TASKCOUNT = qx{$TASKBIN count $EXCLUDE $ARGV[0]};
+    my $FILTER = join(' ', @ARGV);
+    $TASKCOUNT = qx{$TASKBIN count $EXCLUDE $FILTER};
     chop($TASKCOUNT);
-    $ID = qx{$TASKBIN ids $EXCLUDE $ARGV[0]};
+    $ID = qx{$TASKBIN ids $EXCLUDE $FILTER};
     chop($ID);
 }
 
@@ -130,11 +142,14 @@ foreach my $task (@decoded_json) {
     if (exists $task->{"annotations"}) {
         foreach my $ann (@{$task->{"annotations"}}) {
             if ($ann->{"description"} =~ m/$FILEREGEX/) {
-                my %entry = ( "ann"         => $ann->{"description"},
-                              "uuid"        => $task->{"uuid"},
-                              "description" => $task->{"description"});
-                $entry{"file"} = $entry{"ann"};
-                push(@annotations, \%entry);
+                if (!$LABEL || ($1 && $LABEL eq $1) ) {
+                    my %entry = ( "ann"         => $ann->{"description"},
+                                  "uuid"        => $task->{"uuid"},
+                                  "file"        => $2,
+                                  "label"       => $1,
+                                  "description" => $task->{"description"});
+                    push(@annotations, \%entry);
+                }
             }
         }
     }

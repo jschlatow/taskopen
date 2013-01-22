@@ -97,6 +97,33 @@ Currently there are two different taskopenrc files delivered with taskopen:
 1. taskopenrc: default configuration example
 1. taskopenrc_vimnotes: configuration to use taskopen with [notes.vim](http://peterodding.com/code/vim/notes/) plugin
 
+#Features (perl version)
+
+##Arbitrary filters
+Instead of providing taskopen with an ID you can also pass arbitrary filters in taskwarrior
+notation, like:
+
+    $ taskopen +next
+
+or
+
+    $ taskopen +todo pro:taskwarrior
+
+##Labels
+You can label your annotations by using the following syntax:
+
+    $ task 1 annotate tw: www.taskwarrior.org
+    $ task 1 annotate notes: Notes
+
+In this way, the annotations will be accessible by providing the label name as the last argument,
+escaped with double backslashes:
+
+    $ taskopen 1 \\notes
+
+or even
+
+    $ taskopen pro:taskwarrior +bug \\notes
+
 #Contributions
 
 Thanks to the following:
@@ -104,5 +131,6 @@ Thanks to the following:
  * Jostein Bernsten (for adding mutt support)
  * John Hammond (for OSX 10.5+ support)
  * Alan Bowen (for writing tasknote)
+ * David J Patrick (for great ideas)
 
 Feel free to contribute to this project.
