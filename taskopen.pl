@@ -114,7 +114,7 @@ if (!$EXCLUDE) {
     $EXCLUDE = "status.isnt:deleted status.isnt:completed";
 }
 
-my $FILEREGEX = qr{^(?:(\S*):)?\s*((?:\/|www|http|\.|~|Message-[Ii][Dd]:|message:|$NOTEMSG)\S*)};
+my $FILEREGEX = qr{^(?:(\S*):)?\s*((?:\/|www|http|\.|~|Message-[Ii][Dd]:|message:|$NOTEMSG).*)};
 
 if ($#ARGV < 0) {
 	print "Usage: $0 <id|filter> [\\\\label]\n";
@@ -164,7 +164,7 @@ foreach my $task (@decoded_json) {
         foreach my $ann (@{$task->{"annotations"}}) {
             if ($ann->{"description"} =~ m/$FILEREGEX/) {
                 if (!$LABEL || ($1 && $LABEL eq $1) ) {
-                    my %entry = ( "ann"         => $ann->{"description"},
+                    my %entry = ( "ann"         => $2,
                                   "uuid"        => $task->{"uuid"},
                                   "file"        => $2,
                                   "label"       => $1,
@@ -236,9 +236,9 @@ elsif ($file =~ m/Message-[Ii][Dd]/) {
 	exec(qq{echo $file | muttjump && clear});
 }
 else {
-    my $filetype = qx{file $file};
+    my $filetype = qx{file "$file"};
     if ($filetype =~ m/text/) {
-        exec(qq{$ENV{'SHELL'} -c "$EDITOR $file"});
+        exec(qq{$ENV{'SHELL'} -c "$EDITOR '$file'"});
     }
     else {
         # use XDG for unknown file types
