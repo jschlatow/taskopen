@@ -219,23 +219,36 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     }
     elsif ($arg eq "-m") {
         $MATCH = $ARGV[++$i];
+        if (!$MATCH || $MATCH =~ m/^-/) {
+            printf "Missing expression after -m\n";
+            exit 1;
+        }
     }
     elsif ($arg eq "-t") {
         $TYPE = $ARGV[++$i];
+        if (!$TYPE || $TYPE =~ m/^-/) {
+            printf "Missing expression after -t\n";
+            exit 1;
+        }
     }
     elsif ($arg eq "-e") {
         if ($FORCE) {
-            print "Cannot use -e in conjunction with -x";
+            print "Cannot use -e in conjunction with -x\n";
             exit 1;
         }
         $FORCE = $EDITOR;
     }
     elsif ($arg eq "-x") {
         if ($FORCE) {
-            print "Cannot use -x in conjunction with -e";
+            print "Cannot use -x in conjunction with -e\n";
             exit 1;
         }
-        $FORCE = $ARGV[++$i];
+        if ($i >= $#ARGV || $ARGV[$i+1] =~ m/^-/) {
+            $FORCE = qq/$ENV{"SHELL"} -c/;
+        }
+        else {
+            $FORCE = $ARGV[++$i];
+        }
     }
     elsif ($arg =~ m/\\+(.+)/) {
         $LABEL = $1;
