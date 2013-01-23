@@ -188,6 +188,7 @@ my $LABEL;
 my $HELP;
 my $LIST;
 my $FORCE;
+my $MATCH;
 for (my $i = 0; $i <= $#ARGV; ++$i) {
     my $arg = $ARGV[$i];
     if ($arg eq "-h") {
@@ -205,6 +206,9 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     elsif ($arg eq "-aa") {
         $EXCLUDE = "";
         $ID_CMD  = "uuids";
+    }
+    elsif ($arg eq "-m") {
+        $MATCH = $ARGV[++$i];
     }
     elsif ($arg eq "-e") {
         if ($FORCE) {
@@ -236,6 +240,7 @@ if ($HELP) {
     print "-n          Only show/open notes file, i.e. annotations containing '$NOTEMSG'\n";
     print "-a          Query all active tasks; clears the EXCLUDE filter\n";
     print "-aa         Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
+    print "-m 'regex'  Only include annotations that match 'regex'\n";
     print "-e          Force to open file with EDITOR\n";
     print "-x ['cmd']  Execute file, optionally prepend cmd to the command line\n";
 
@@ -271,21 +276,28 @@ foreach my $task (@decoded_json) {
     if (exists $task->{"annotations"}) {
         foreach my $ann (@{$task->{"annotations"}}) {
             if ($ann->{"description"} =~ m/$FILEREGEX/) {
-                if (!$LABEL || ($1 && $LABEL eq $1) ) {
-                    my %entry = ( "ann"         => $2,
-                                  "uuid"        => $task->{"uuid"},
-                                  "file"        => $2,
-                                  "label"       => $1,
-                                  "description" => $task->{"description"});
-                    push(@annotations, \%entry);
+                my $file = $2;
+                my $label = $1;
+                if (!$MATCH || ($file =~ m/$MATCH/)) {
+                    if (!$LABEL || ($label && $LABEL eq $label) ) {
+                        my %entry = ( "ann"         => $file,
+                                      "uuid"        => $task->{"uuid"},
+                                      "file"        => $file,
+                                      "label"       => $label,
+                                      "description" => $task->{"description"});
+                        push(@annotations, \%entry);
+                    }
+                    elsif ($DEBUG > 0) {
+                        if (!$label) {
+                            printf(qq/[DEBUG] Skipping unlabeled annotation "$ann->{"description"}"\n/);
+                        }
+                        else {
+                            printf(qq/[DEBUG] Skipping label "$label"\n/);
+                        }
+                    }
                 }
-                elsif ($DEBUG > 0) {
-                    if (!$1) {
-                        printf(qq/[DEBUG] Skipping unlabeled annotation "$ann->{"description"}"\n/);
-                    }
-                    else {
-                        printf(qq/[DEBUG] Skipping label "$1"\n/);
-                    }
+                elsif ($MATCH && ($DEBUG > 0)) {
+                    printf(qq/[DEBUG] Skipping annotation which doesn't match '$MATCH': $ann->{"description"}\n/);
                 }
             }
             elsif ($DEBUG > 0) {
