@@ -222,6 +222,8 @@ my $ID_CMD = "ids";
 my $LABEL;
 my $HELP;
 my $LIST;
+my $LIST_ANN;
+my $LIST_EXEC;
 my $FORCE;
 my $MATCH;
 my $TYPE;
@@ -232,6 +234,11 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     }
     elsif ($arg eq "-l") {
         $LIST = 1;
+        $LIST_ANN = 1;
+    }
+    elsif ($arg eq "-L") {
+        $LIST = 1;
+        $LIST_EXEC = 1;
     }
     elsif ($arg eq "-n") {
         $FILEREGEX = qr{^(?:(\S*):\s)?((?:$NOTEMSG).*)};
@@ -298,7 +305,8 @@ if ($HELP) {
 
     print "Available options:\n";
     print "-h                Show this text\n";
-    print "-l                List-only mode, does not open any file\n";
+    print "-l                List-only mode, does not open any file; shows annotations\n";
+    print "-L                List-only mode, does not open any file; shows command line\n";
     print "-n                Only show/open notes file, i.e. annotations containing '$NOTEMSG'\n";
     print "-a                Query all active tasks; clears the EXCLUDE filter\n";
     print "-aa               Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
@@ -414,15 +422,22 @@ if ($#annotations > 0 || $LIST) {
 
     my $i = 1;
     foreach my $ann (@annotations) {
-        my $id = $ann->{'id'};
-        if ($id == 0) {
-            $id = $ann->{'uuid'};
+        print "    $i)";
+        if (!$LIST || $LIST_ANN) {
+            my $id = $ann->{'id'};
+            if ($id == 0) {
+                $id = $ann->{'uuid'};
+            }
+            my $text = qq/$ann->{'annot'} ("$ann->{'description'}") -- $id/;
+            print " $text\n";
         }
-        my $text = qq/$ann->{'annot'} ("$ann->{'description'}") -- $id/;
-        print "    $i) $text\n";
-        if ($LIST) {
+
+        if ($LIST_EXEC) {
+            if ($LIST_ANN) {
+                print "       executes:";
+            }
             my $cmd = create_cmd($ann, $FORCE);
-            print "       executes: $cmd\n";
+            print " $cmd\n";
         }
         $i++;
     }
