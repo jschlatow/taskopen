@@ -148,13 +148,21 @@ Query all active tasks (still excluding deleted and completed ones):
 
     $ taskopen -a
 
-Querl all tasks (including deleted and completed tasks):
+Query all tasks (including deleted and completed tasks):
 
     $ taskopen -aa
 
 Please consider that completed and deleted tasks does not have an ID anymore. However, those tasks
 are still accessible by their UUID. Using '-aa' might be VERY slow depending on the size of your
-databse.
+database.
+
+Only include files whose filetype (as returned by 'file') match a given regular expression:
+
+    $ taskopen -t 'regex'
+
+Only include annotations that match a given regular expression (excluding labels):
+
+    $ taskopen -m 'regex'
 
 ## Even more advanced taskopen fu (examples)
 
