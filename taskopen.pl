@@ -259,8 +259,9 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
 }
 
 if ($HELP) {
-	print "Usage: $0 [-h] [-l] [id|filter1 filter2 ... filterN] [\\\\label]\n\n";
+	print "Usage: $0 [options] [id|filter1 filter2 ... filterN] [\\\\label]\n\n";
 
+    print "Available options:\n";
     print "-h          Show this text\n";
     print "-l          List-only mode, does not open any file\n";
     print "-n          Only show/open notes file, i.e. annotations containing '$NOTEMSG'\n";
@@ -349,10 +350,6 @@ foreach my $task (@decoded_json) {
 if ($#annotations < 0) {
     print "No annotation found.\n";
     exit 1;
-}
-else {
-    my $num = $#annotations + 1;
-    print "$num annotation(s) found\n";
 }
 
 # choose an annotation/file to open
