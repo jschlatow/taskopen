@@ -137,6 +137,10 @@ Execute file:
     $ taskopen -x
 
 Open file with arbitrary command (e.g. count lines):
+Show/open only 'Notes':
+
+    $ taskopen -n
+
 
     $ taskopen -x 'wc -l'
 

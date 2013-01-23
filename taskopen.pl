@@ -195,6 +195,9 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     elsif ($arg eq "-l") {
         $LIST = 1;
     }
+    elsif ($arg eq "-n") {
+        $FILEREGEX = qr{^(?:(\S*):\s)?((?:$NOTEMSG).*)};
+    }
     elsif ($arg eq "-e") {
         if ($FORCE) {
             print "Cannot use -e in conjunction with -x";
@@ -222,6 +225,7 @@ if ($HELP) {
 
     print "-h          Show this text\n";
     print "-l          List-only mode, does not open any file\n";
+    print "-n          Only show/open notes file, i.e. annotations containing '$NOTEMSG'\n";
     print "-e          Force to open file with EDITOR\n";
     print "-x ['cmd']  Execute file, optionally prepend cmd to the command line\n";
 
