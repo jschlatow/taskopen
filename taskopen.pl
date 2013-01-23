@@ -190,7 +190,33 @@ sub create_cmd {
     return $cmd;
 }
 
+sub sort_hasharr
+{
+    my $arr      = $_[0];
+    my $sortkeys = $_[1];
+
+    return sort {
+        foreach my $sortkey (@{$sortkeys}) {
+            $sortkey =~ m/(.*?)(\+|-)?$/;
+            if (!exists $a->{$1} || !exists $b->{$1}) {
+                next;
+            }
+            if ($a->{$1} eq $b->{$1}) {
+                next;
+            }
+            elsif ($2 && $2 eq "-") {
+                return $b->{$1} cmp $a->{$1};
+            }
+            else {
+                return $a->{$1} cmp $b->{$1};
+            }
+        }
+        return 0;
+    } @{$arr};
+}
+
 # argument parsing
+my @SORT_KEYS;
 my $FILTER = "";
 my $ID_CMD = "ids";
 my $LABEL;
@@ -216,6 +242,15 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     elsif ($arg eq "-aa") {
         $EXCLUDE = "";
         $ID_CMD  = "uuids";
+    }
+    elsif ($arg eq "-s") {
+        my $sort = $ARGV[++$i];
+        if (!$sort || $sort =~ m/^-/) {
+            printf "Missing argument after $arg\n";
+            exit 1;
+        }
+
+        @SORT_KEYS = split(',', $sort);
     }
     elsif ($arg eq "-m") {
         $MATCH = $ARGV[++$i];
@@ -262,15 +297,16 @@ if ($HELP) {
 	print "Usage: $0 [options] [id|filter1 filter2 ... filterN] [\\\\label]\n\n";
 
     print "Available options:\n";
-    print "-h          Show this text\n";
-    print "-l          List-only mode, does not open any file\n";
-    print "-n          Only show/open notes file, i.e. annotations containing '$NOTEMSG'\n";
-    print "-a          Query all active tasks; clears the EXCLUDE filter\n";
-    print "-aa         Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
-    print "-m 'regex'  Only include annotations that match 'regex'\n";
-    print "-t 'regex'  Only open files whose type (as returned by 'file') matches 'regex'\n";
-    print "-e          Force to open file with EDITOR\n";
-    print "-x ['cmd']  Execute file, optionally prepend cmd to the command line\n";
+    print "-h                Show this text\n";
+    print "-l                List-only mode, does not open any file\n";
+    print "-n                Only show/open notes file, i.e. annotations containing '$NOTEMSG'\n";
+    print "-a                Query all active tasks; clears the EXCLUDE filter\n";
+    print "-aa               Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
+    print "-m 'regex'        Only include annotations that match 'regex'\n";
+    print "-t 'regex'        Only open files whose type (as returned by 'file') matches 'regex'\n";
+    print "-s 'key1+,key2-'  Sort annotations by the given key which can be a taskwarrior field or 'annot' or 'label'\n";
+    print "-e                Force to open file with EDITOR\n";
+    print "-x ['cmd']        Execute file, optionally prepend cmd to the command line\n";
 
     print "\nCurrent configuration:\n";
     print "BROWSER    = $BROWSER\n";
@@ -308,11 +344,23 @@ foreach my $task (@decoded_json) {
                 my $label = $1;
                 if (!$MATCH || ($file =~ m/$MATCH/)) {
                     if (!$LABEL || ($label && $LABEL eq $label) ) {
-                        my %entry = ( "ann"         => $file,
+                        my %entry = ( "annot"       => $file,
                                       "uuid"        => $task->{"uuid"},
+                                      "id"          => $task->{"id"},
                                       "file"        => $file,
                                       "label"       => $label,
                                       "description" => $task->{"description"});
+
+                        # Copy sort keys
+                        foreach my $key (@SORT_KEYS) {
+                            $key =~ m/(.*?)(\+|-)?$/;
+                            if (!exists $entry{$1} &&
+                                 exists $task->{$1})
+                            {
+                                $entry{$1} = $task->{$1};
+                            }
+                        }
+                        
                         if ($TYPE) {
                             my $filepath = get_filepath(\%entry);
                             my $filetype = qx{file "$filepath"};
@@ -352,6 +400,10 @@ if ($#annotations < 0) {
     exit 1;
 }
 
+if ($#SORT_KEYS >= 0) {
+    @annotations = sort_hasharr(\@annotations, \@SORT_KEYS);
+}
+
 # choose an annotation/file to open
 my $choice = 0;
 if ($#annotations > 0 || $LIST) {
@@ -360,7 +412,11 @@ if ($#annotations > 0 || $LIST) {
 
     my $i = 1;
     foreach my $ann (@annotations) {
-        my $text = qq/$ann->{'ann'} ("$ann->{'description'}")/;
+        my $id = $ann->{'id'};
+        if ($id == 0) {
+            $id = $ann->{'uuid'};
+        }
+        my $text = qq/$ann->{'annot'} ("$ann->{'description'}") -- $id/;
         print "    $i) $text\n";
         if ($LIST) {
             my $cmd = create_cmd($ann, $FORCE);

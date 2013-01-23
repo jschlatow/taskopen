@@ -164,6 +164,10 @@ Only include annotations that match a given regular expression (excluding labels
 
     $ taskopen -m 'regex'
 
+Sorting by taskwarrior fields (as provided by 'task _query'), 'annot' or 'label':
+
+    $ taskopen -s 'label,project,urgency-'
+
 ## Even more advanced taskopen fu (examples)
 
 Count lines by executing 'wc -l':
