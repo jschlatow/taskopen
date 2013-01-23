@@ -408,7 +408,9 @@ if ($#SORT_KEYS >= 0) {
 my $choice = 0;
 if ($#annotations > 0 || $LIST) {
     print "\n";
-    print "Please select an annotation:\n";
+    if (!$LIST) {
+        print "Please select an annotation:\n";
+    }
 
     my $i = 1;
     foreach my $ann (@annotations) {
