@@ -135,18 +135,27 @@ else {
 
 my $FILEREGEX = qr{^(?:(\S*):\s)?((?:\/|www|http|\.|~|Message-[Ii][Dd]:|message:|$NOTEMSG).*)};
 
+sub get_filepath {
+    my $ann = $_[0];
+    my $file = $ann->{"file"};
+    
+    if ($file eq $NOTEMSG) {
+        $file = $NOTES_FILE;
+        $file =~ s/UUID/$ann->{"uuid"}/g;
+    }
+
+   $file =~ s/^~/$HOME/;
+
+   return $file;
+}
+
 sub create_cmd {
     my $ann = $_[0];
     my $FORCE = $_[1];
     my $file = $ann->{"file"};
 
     if ($FORCE) {
-        if ($file eq $NOTEMSG) {
-            $file = $NOTES_FILE;
-            $file =~ s/UUID/$ann->{"uuid"}/g;
-        }
-
-        $file =~ s/^~/$HOME/;
+        $file = get_filepath($ann);
         return qq{$FORCE "$file"};
     }
 
@@ -167,7 +176,7 @@ sub create_cmd {
         $cmd = qq{echo "$file" | muttjump && clear};
     }
     else {
-        $file =~ s/^~/$HOME/;
+        $file =~ get_filepath($ann);
         my $filetype = qx{file "$file"};
         if ($filetype =~ m/text/ ) {
             $cmd = qq/$ENV{'SHELL'} -c "$EDITOR '$file'"/;
@@ -189,6 +198,7 @@ my $HELP;
 my $LIST;
 my $FORCE;
 my $MATCH;
+my $TYPE;
 for (my $i = 0; $i <= $#ARGV; ++$i) {
     my $arg = $ARGV[$i];
     if ($arg eq "-h") {
@@ -209,6 +219,9 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     }
     elsif ($arg eq "-m") {
         $MATCH = $ARGV[++$i];
+    }
+    elsif ($arg eq "-t") {
+        $TYPE = $ARGV[++$i];
     }
     elsif ($arg eq "-e") {
         if ($FORCE) {
@@ -241,6 +254,7 @@ if ($HELP) {
     print "-a          Query all active tasks; clears the EXCLUDE filter\n";
     print "-aa         Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
     print "-m 'regex'  Only include annotations that match 'regex'\n";
+    print "-t 'regex'  Only open files whose type (as returned by 'file') matches 'regex'\n";
     print "-e          Force to open file with EDITOR\n";
     print "-x ['cmd']  Execute file, optionally prepend cmd to the command line\n";
 
@@ -285,7 +299,19 @@ foreach my $task (@decoded_json) {
                                       "file"        => $file,
                                       "label"       => $label,
                                       "description" => $task->{"description"});
-                        push(@annotations, \%entry);
+                        if ($TYPE) {
+                            my $filepath = get_filepath(\%entry);
+                            my $filetype = qx{file "$filepath"};
+                            if ($filetype =~ m/$TYPE/) {
+                                push(@annotations, \%entry);
+                            }
+                            elsif ($DEBUG > 0) {
+                                printf(qq/[DEBUG] Skipping file "$filepath" whose type doesn't match '$TYPE'\n/);
+                            }
+                        }
+                        else {
+                            push(@annotations, \%entry);
+                        }
                     }
                     elsif ($DEBUG > 0) {
                         if (!$label) {
