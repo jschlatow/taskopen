@@ -122,7 +122,7 @@ if (exists $config{"EXCLUDE"}) {
     $EXCLUDE = $config{"EXCLUDE"};
 }
 else {
-    $EXCLUDE = "status.isnt:deleted status.isnt:completed";
+    $EXCLUDE = "status.is:pending";
 }
 
 my $DEBUG;
@@ -183,6 +183,7 @@ sub create_cmd {
 
 # argument parsing
 my $FILTER = "";
+my $ID_CMD = "ids";
 my $LABEL;
 my $HELP;
 my $LIST;
@@ -197,6 +198,13 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     }
     elsif ($arg eq "-n") {
         $FILEREGEX = qr{^(?:(\S*):\s)?((?:$NOTEMSG).*)};
+    }
+    elsif ($arg eq "-a") {
+        $EXCLUDE = "";
+    }
+    elsif ($arg eq "-aa") {
+        $EXCLUDE = "";
+        $ID_CMD  = "uuids";
     }
     elsif ($arg eq "-e") {
         if ($FORCE) {
@@ -226,6 +234,8 @@ if ($HELP) {
     print "-h          Show this text\n";
     print "-l          List-only mode, does not open any file\n";
     print "-n          Only show/open notes file, i.e. annotations containing '$NOTEMSG'\n";
+    print "-a          Query all active tasks; clears the EXCLUDE filter\n";
+    print "-aa         Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
     print "-e          Force to open file with EDITOR\n";
     print "-x ['cmd']  Execute file, optionally prepend cmd to the command line\n";
 
@@ -246,9 +256,9 @@ if ($HELP) {
 
 
 if ($DEBUG > 0) {
-    printf("[DEBUG] Appying filter: $EXCLUDE$FILTER");
+    printf("[DEBUG] Applying filter: $EXCLUDE$FILTER\n");
 }
-my $ID = qx{$TASKBIN ids $EXCLUDE$FILTER};
+my $ID = qx{$TASKBIN $ID_CMD $EXCLUDE$FILTER};
 chop($ID);
 
 # query IDs and parse json

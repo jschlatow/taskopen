@@ -136,13 +136,43 @@ Execute file:
 
     $ taskopen -x
 
-Open file with arbitrary command (e.g. count lines):
+Open file with arbitrary command:
+
+    $ taskopen -x 'command arguments'
+
 Show/open only 'Notes':
 
     $ taskopen -n
 
+Query all active tasks (still excluding deleted and completed ones):
+
+    $ taskopen -a
+
+Querl all tasks (including deleted and completed tasks):
+
+    $ taskopen -aa
+
+Please consider that completed and deleted tasks does not have an ID anymore. However, those tasks
+are still accessible by their UUID. Using '-aa' might be VERY slow depending on the size of your
+databse.
+
+## Even more advanced taskopen fu (examples)
+
+Count lines by executing 'wc -l':
 
     $ taskopen -x 'wc -l'
+
+Delete orphaned 'Notes'-files, i.e. all files in FOLDER that correspond to deleted or completed
+tasks:
+
+    $ taskopen -n -aa -x rm status.is:deleted status.is:completed
+
+**This is a dangerous command which might go wrong if your taskopenrc is not carefully configured.
+Please consider adding '-l' to the command line in order to have a dry-run first.**
+
+Or only delete files if the corresponding task has been deleted (not completed):
+
+    $ taskopen -n -aa -x rm status.is:deleted
 
 #Contributions
 
