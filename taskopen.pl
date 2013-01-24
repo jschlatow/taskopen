@@ -547,4 +547,4 @@ if ($#annotations > 0 || $LIST) {
 #open annotations[$choice] with an appropriate program
 
 my $ann  = $annotations[$choice-1];
-exec(create_cmd($ann, %FORCE));
+exec(create_cmd($ann, \%FORCE));
