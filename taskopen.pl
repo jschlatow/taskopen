@@ -31,6 +31,12 @@ use JSON qw( decode_json );     # From CPAN
 use strict;
 use warnings;
 
+# DON'T TOUCH THE FOLLOWING LINES
+my $VERSION="";
+my $REVNUM="59";
+my $REVHASH="aa340e3";
+# END-DON'T-TOUCH
+
 my $HOME = $ENV{"HOME"};
 my $XDG = "xdg-open";
 

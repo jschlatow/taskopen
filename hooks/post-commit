@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+# An example hook script that is called after a successful
+# commit is made.
+#
+# To enable this hook, rename this file to "post-commit".
+
+REV=$(git rev-list master | wc -l)
+HASH=$(git log -1 --pretty=%h)
+VER=$(git describe --tags)
+
+sed "s/VERSION=.*;/VERSION=\"$VER\";/" -i taskopen.pl
+sed "s/REVNUM=.*;/REVNUM=\"$REV\";/" -i taskopen.pl
+sed "s/REVHASH=.*;/REVHASH=\"$HASH\";/" -i taskopen.pl
+
+git commit -m "Auto-commit (bumped revision)"
