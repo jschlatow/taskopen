@@ -10,7 +10,7 @@ HASH=$(git log -1 --pretty=%h)
 VER=$(git describe --tags)
 
 LAST_MSG=$(git log -1 --pretty=%s)
-if [ $LAST_MSG =~ /^Auto-commit/ ]; then
+if [[ $LAST_MSG =~ ^Auto-commit ]]; then
     exit;
 fi
 
