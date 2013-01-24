@@ -198,7 +198,7 @@ sub sort_hasharr
     return sort {
         foreach my $sortkey (@{$sortkeys}) {
             $sortkey =~ m/(.*?)(\+|-)?$/;
-            if (!exists $a->{$1} || !exists $b->{$1}) {
+            if (!$a->{$1} || !$b->{$1}) {
                 next;
             }
             if ($a->{$1} eq $b->{$1}) {
