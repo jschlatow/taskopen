@@ -33,9 +33,9 @@ use strict;
 use warnings;
 
 # DON'T TOUCH THE FOLLOWING LINES
-my $VERSION="v1.0-perl-release-7-g1c275e4";
-my $REVNUM="65";
-my $REVHASH="1c275e4";
+my $VERSION="v1.0-perl-release-9-gfa10870";
+my $REVNUM="67";
+my $REVHASH="fa10870";
 # END-DON'T-TOUCH
 
 my $HOME = $ENV{"HOME"};
