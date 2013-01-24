@@ -146,6 +146,13 @@ if (exists $config{"SORT"}) {
 
 my $FILEREGEX = qr{^(?:(\S*):\s)?((?:\/|www|http|\.|~|Message-[Ii][Dd]:|message:|$NOTEMSG).*)};
 
+sub print_version {
+    print "\n";
+    print "Taskopen, release $VERSION, revision $REVNUM ($REVHASH)\n";
+    print "Copyright 2010-2013, Johannes Schlatow.\n"
+    print "\n";
+}
+
 sub get_filepath {
     my $ann = $_[0];
     my $file = $ann->{"file"};
@@ -248,6 +255,10 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     if ($arg eq "-h") {
         $HELP = 1;
     }
+    elsif ($arg eq "-v") {
+        print_version;
+        exit 0;
+    }
     elsif ($arg eq "-l") {
         $LIST = 1;
         $LIST_ANN = 1;
@@ -322,6 +333,7 @@ if ($HELP) {
 
     print "Available options:\n";
     print "-h                Show this text\n";
+    print "-v                Print version information\n";
     print "-l                List-only mode, does not open any file; shows annotations\n";
     print "-L                List-only mode, does not open any file; shows command line\n";
     print "-n                Only show/open notes file, i.e. annotations containing '$NOTEMSG'\n";
