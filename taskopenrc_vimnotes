@@ -24,3 +24,11 @@ NOTEMSG="Notes"
 # the task.
 # Default is: $EDITOR $NOTES_FILE
 NOTES_CMD="vim -c \":Note UUID\""
+
+# Specify the default sorting.
+# Default is taskwarrior's default sorting
+#SORT="urgency-,label,annot"
+
+# Apply a default taskwarrior filter in order to exclude certain tasks.
+# Default is: status.is:pending
+#EXCLUDE=

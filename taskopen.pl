@@ -133,6 +133,11 @@ else {
     $DEBUG = 0;
 }
 
+my $SORT;
+if (exists $config{"SORT"}) {
+    $SORT = $config{"SORT"};
+}
+
 my $FILEREGEX = qr{^(?:(\S*):\s)?((?:\/|www|http|\.|~|Message-[Ii][Dd]:|message:|$NOTEMSG).*)};
 
 sub get_filepath {
@@ -221,7 +226,6 @@ sub sort_hasharr
 }
 
 # argument parsing
-my @SORT_KEYS;
 my $FILTER = "";
 my $ID_CMD = "ids";
 my $LABEL;
@@ -260,13 +264,11 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
         $DELETE = 1;
     }
     elsif ($arg eq "-s") {
-        my $sort = $ARGV[++$i];
-        if (!$sort || $sort =~ m/^-/) {
+        $SORT = $ARGV[++$i];
+        if (!$SORT || $SORT =~ m/^-/) {
             printf "Missing argument after $arg\n";
             exit 1;
         }
-
-        @SORT_KEYS = split(',', $sort);
     }
     elsif ($arg eq "-m") {
         $MATCH = $ARGV[++$i];
@@ -336,11 +338,16 @@ if ($HELP) {
     print "NOTES_FILE = $NOTES_FILE\n";
     print "NOTES_CMD  = $NOTES_CMD\n";
     print "EXCLUDE    = $EXCLUDE\n";
+    print "SORT       = $SORT\n";
     print "DEBUG      = $DEBUG\n";
 
 	exit 1;
 }
 
+my @SORT_KEYS;
+if ($SORT) {
+    @SORT_KEYS = split(',', $SORT);
+}
 
 if ($DEBUG > 0) {
     printf("[DEBUG] Applying filter: $EXCLUDE$FILTER\n");
