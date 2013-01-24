@@ -201,11 +201,21 @@ sub create_cmd {
 
     if ($FORCE->{"action"}) {
         if ($FORCE->{"action"} eq "\\del") {
-            return qq/$TASKBIN $ann->{'uuid'} denotate "$ann->{'annot'}"/;
+            # TODO remove as soon as tw bug #819 has been fixed
+            if ($ann->{'raw'} =~ m/(\/|\(|\))/) { # match all characters after which tw keeps adding spaces
+                return qq/echo "There is a bug in taskwarrior (#819) which prevents doing this."/
+            }
+            # END REMOVE
+            return qq/$TASKBIN $ann->{'uuid'} denotate "$ann->{'raw'}"/;
         }
         elsif ($FORCE->{"action"} eq "\\raw") {
             my $raw = raw_edit($ann->{"raw"});
             if ($raw ne $ann->{"raw"}) {
+                # TODO remove as soon as tw bug #1174 has been fixed
+                if ($ann->{'raw'} =~ m/\// || $raw =~ m/\//) {
+                    return qq{echo "Cannot replace annotations which contain '/'s (see #1174)."}
+                }
+                # END REMOVE
                 return qq%$TASKBIN $ann->{"uuid"} mod /$ann->{"raw"}/$raw/%;
             }
             else {
