@@ -28,6 +28,7 @@
 ###############################################################################
 
 use JSON qw( decode_json );     # From CPAN
+use POSIX;
 use strict;
 use warnings;
 
@@ -149,7 +150,7 @@ my $FILEREGEX = qr{^(?:(\S*):\s)?((?:\/|www|http|\.|~|Message-[Ii][Dd]:|message:
 sub print_version {
     print "\n";
     print "Taskopen, release $VERSION, revision $REVNUM ($REVHASH)\n";
-    print "Copyright 2010-2013, Johannes Schlatow.\n"
+    print "Copyright 2010-2013, Johannes Schlatow.\n";
     print "\n";
 }
 
@@ -167,19 +168,51 @@ sub get_filepath {
    return $file;
 }
 
+sub raw_edit {
+    my $old = $_[0];
+
+    my $filename = tmpnam();
+    open(FILE, ">$filename") or die "can't open $filename: $!";
+    print(FILE $old);
+    close(FILE); 
+
+    system(qq/$EDITOR "$filename"/);
+
+    open(FILE, "<$filename") or die "can't open $filename: $!'";
+    my @lines = <FILE>;
+    close(FILE);
+    unlink($filename);
+
+    # taskwarrior does not support multi-line annotations
+    # TODO fix if #1172 has been solved
+    
+    my $result = $lines[0];
+    chomp($result);
+    return $result;
+}
+
 sub create_cmd {
     my $ann = $_[0];
     my $FORCE = $_[1];
-    my $DELETE= $_[2];
-    my $file = $ann->{"file"};
+    my $file = $ann->{"annot"};
 
-    if ($DELETE) {
-        return qq/$TASKBIN $ann->{'uuid'} denotate "$ann->{'annot'}"/;
-    }
-
-    if ($FORCE) {
-        $file = get_filepath($ann);
-        return qq{$FORCE "$file"};
+    if ($FORCE->{"action"}) {
+        if ($FORCE->{"action"} eq "\\del") {
+            return qq/$TASKBIN $ann->{'uuid'} denotate "$ann->{'annot'}"/;
+        }
+        elsif ($FORCE->{"action"} eq "\\raw") {
+            my $raw = raw_edit($ann->{"raw"});
+            if ($raw ne $ann->{"raw"}) {
+                return qq%$TASKBIN $ann->{"uuid"} mod /$ann->{"raw"}/$raw/%;
+            }
+            else {
+                return qq/echo "No changes detected"/;
+            }
+        }
+        else {
+            $file = get_filepath($ann);
+            return qq/$FORCE->{"action"} "$file"/;
+        }
     }
 
     my $cmd;
@@ -238,6 +271,22 @@ sub sort_hasharr
     } @{$arr};
 }
 
+sub set_action
+{
+    my $force = $_[0];
+    my $arg   = $_[1];
+    my $action= $_[2];
+
+    if ($force->{"action"}) {
+        print qq/Cannot use $arg in conjunction with $force->{"arg"}\n/;
+        exit 1;
+    }
+    else {
+        $force->{"action"} = $action;
+        $force->{"arg"}    = $arg;
+    }
+}
+
 # argument parsing
 my $FILTER = "";
 my $ID_CMD = "ids";
@@ -246,8 +295,7 @@ my $HELP;
 my $LIST;
 my $LIST_ANN;
 my $LIST_EXEC;
-my $FORCE;
-my $DELETE;
+my %FORCE;
 my $MATCH;
 my $TYPE;
 for (my $i = 0; $i <= $#ARGV; ++$i) {
@@ -278,19 +326,22 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
         $ID_CMD  = "uuids";
     }
     elsif ($arg eq "-D") {
-        $DELETE = 1;
+        set_action(\%FORCE, "-D", "\\del");
+    }
+    elsif ($arg eq "-r") {
+        set_action(\%FORCE, "-r", "\\raw");
     }
     elsif ($arg eq "-s") {
         $SORT = $ARGV[++$i];
         if (!$SORT || $SORT =~ m/^-/) {
-            printf "Missing argument after $arg\n";
+            print "Missing argument after $arg\n";
             exit 1;
         }
     }
     elsif ($arg eq "-m") {
         $MATCH = $ARGV[++$i];
         if (!$MATCH || $MATCH =~ m/^-/) {
-            printf "Missing expression after -m\n";
+            print "Missing expression after -m\n";
             exit 1;
         }
     }
@@ -302,23 +353,17 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
         }
     }
     elsif ($arg eq "-e") {
-        if ($FORCE) {
-            print "Cannot use -e in conjunction with -x\n";
-            exit 1;
-        }
-        $FORCE = $EDITOR;
+        set_action(\%FORCE, "-e", $EDITOR);
     }
     elsif ($arg eq "-x") {
-        if ($FORCE) {
-            print "Cannot use -x in conjunction with -e\n";
-            exit 1;
-        }
+        my $action;
         if ($i >= $#ARGV || $ARGV[$i+1] =~ m/^-/) {
-            $FORCE = qq/$ENV{"SHELL"} -c/;
+            $action = qq/$ENV{"SHELL"} -c/;
         }
         else {
-            $FORCE = $ARGV[++$i];
+            $action = $ARGV[++$i];
         }
+        set_action(\%FORCE, "-x", $action);
     }
     elsif ($arg =~ m/\\+(.+)/) {
         $LABEL = $1;
@@ -340,6 +385,7 @@ if ($HELP) {
     print "-a                Query all active tasks; clears the EXCLUDE filter\n";
     print "-aa               Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
     print "-D                Delete the annotation rather than opening it\n";
+    print "-r                Raw mode, opens the annotation text with your EDITOR\n";
     print "-m 'regex'        Only include annotations that match 'regex'\n";
     print "-t 'regex'        Only open files whose type (as returned by 'file') matches 'regex'\n";
     print "-s 'key1+,key2-'  Sort annotations by the given key which can be a taskwarrior field or 'annot' or 'label'\n";
@@ -390,7 +436,7 @@ foreach my $task (@decoded_json) {
                         my %entry = ( "annot"       => $file,
                                       "uuid"        => $task->{"uuid"},
                                       "id"          => $task->{"id"},
-                                      "file"        => $file,
+                                      "raw"         => $ann->{"description"},
                                       "label"       => $label,
                                       "description" => $task->{"description"});
 
@@ -471,7 +517,7 @@ if ($#annotations > 0 || $LIST) {
             if ($LIST_ANN) {
                 print "       executes:";
             }
-            my $cmd = create_cmd($ann, $FORCE, $DELETE);
+            my $cmd = create_cmd($ann, \%FORCE);
             print " $cmd\n";
         }
         $i++;
@@ -501,4 +547,4 @@ if ($#annotations > 0 || $LIST) {
 #open annotations[$choice] with an appropriate program
 
 my $ann  = $annotations[$choice-1];
-exec(create_cmd($ann, $FORCE, $DELETE));
+exec(create_cmd($ann, %FORCE));
