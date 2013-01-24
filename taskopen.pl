@@ -144,6 +144,9 @@ my $SORT;
 if (exists $config{"SORT"}) {
     $SORT = $config{"SORT"};
 }
+else {
+    $SORT = "";
+}
 
 my $FILEREGEX = qr{^(?:(\S*):\s)?((?:\/|www|http|\.|~|Message-[Ii][Dd]:|message:|$NOTEMSG).*)};
 
