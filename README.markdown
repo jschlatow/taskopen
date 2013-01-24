@@ -168,6 +168,10 @@ Sorting by taskwarrior fields (as provided by 'task _query'), 'annot' or 'label'
 
     $ taskopen -s 'label,project,urgency-'
 
+Delete annotation with label 'notes' from task 1:
+
+    $ taskopen -D 1 \\notes
+
 ## Even more advanced taskopen fu (examples)
 
 Count lines by executing 'wc -l':

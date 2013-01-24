@@ -152,7 +152,12 @@ sub get_filepath {
 sub create_cmd {
     my $ann = $_[0];
     my $FORCE = $_[1];
+    my $DELETE= $_[2];
     my $file = $ann->{"file"};
+
+    if ($DELETE) {
+        return qq/$TASKBIN $ann->{'uuid'} denotate "$ann->{'annot'}"/;
+    }
 
     if ($FORCE) {
         $file = get_filepath($ann);
@@ -225,6 +230,7 @@ my $LIST;
 my $LIST_ANN;
 my $LIST_EXEC;
 my $FORCE;
+my $DELETE;
 my $MATCH;
 my $TYPE;
 for (my $i = 0; $i <= $#ARGV; ++$i) {
@@ -249,6 +255,9 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     elsif ($arg eq "-aa") {
         $EXCLUDE = "";
         $ID_CMD  = "uuids";
+    }
+    elsif ($arg eq "-D") {
+        $DELETE = 1;
     }
     elsif ($arg eq "-s") {
         my $sort = $ARGV[++$i];
@@ -310,6 +319,7 @@ if ($HELP) {
     print "-n                Only show/open notes file, i.e. annotations containing '$NOTEMSG'\n";
     print "-a                Query all active tasks; clears the EXCLUDE filter\n";
     print "-aa               Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
+    print "-D                Delete the annotation rather than opening it\n";
     print "-m 'regex'        Only include annotations that match 'regex'\n";
     print "-t 'regex'        Only open files whose type (as returned by 'file') matches 'regex'\n";
     print "-s 'key1+,key2-'  Sort annotations by the given key which can be a taskwarrior field or 'annot' or 'label'\n";
@@ -436,7 +446,7 @@ if ($#annotations > 0 || $LIST) {
             if ($LIST_ANN) {
                 print "       executes:";
             }
-            my $cmd = create_cmd($ann, $FORCE);
+            my $cmd = create_cmd($ann, $FORCE, $DELETE);
             print " $cmd\n";
         }
         $i++;
@@ -466,4 +476,4 @@ if ($#annotations > 0 || $LIST) {
 #open annotations[$choice] with an appropriate program
 
 my $ann  = $annotations[$choice-1];
-exec(create_cmd($ann, $FORCE));
+exec(create_cmd($ann, $FORCE, $DELETE));
