@@ -159,7 +159,7 @@ sub print_version {
 
 sub get_filepath {
     my $ann = $_[0];
-    my $file = $ann->{"file"};
+    my $file = $ann->{"annot"};
     
     if ($file eq $NOTEMSG) {
         $file = $NOTES_FILE;
