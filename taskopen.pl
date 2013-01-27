@@ -378,8 +378,14 @@ sub sort_hasharr
     return sort {
         foreach my $sortkey (@{$sortkeys}) {
             $sortkey =~ m/(.*?)(\+|-)?$/;
-            if (!$a->{$1} || !$b->{$1}) {
+            if (!$a->{$1} && !$b->{$1}) {
                 next;
+            }
+            elsif (!$a->{$1}) {
+                return 1;
+            }
+            elsif (!$b->{$1}) {
+                return -1;
             }
             if ($a->{$1} eq $b->{$1}) {
                 next;
@@ -643,7 +649,10 @@ foreach my $task (@decoded_json) {
                 my $file = $2;
                 my $label = $1;
                 if (!$MATCH || ($file =~ m/$MATCH/)) {
-                    if (!$LABEL || ($label && $LABEL eq $label) ) {
+                    if (!$label) {
+                        $label = "";
+                    }
+                    if (!$LABEL || ($LABEL eq $label) ) {
                         my %entry = ( "annot"       => $file,
                                       "uuid"        => $task->{"uuid"},
                                       "id"          => $task->{"id"},
@@ -755,7 +764,7 @@ if ($#annotations > 0 || ($MODE && $MODE eq "list")) {
             if ($id == 0) {
                 $id = $ann->{'uuid'};
             }
-            my $text = qq/$ann->{'annot'} ("$ann->{'description'}") -- $id/;
+            my $text = qq/$ann->{'raw'} ("$ann->{'description'}") -- $id/;
             print " $text\n";
         }
 
