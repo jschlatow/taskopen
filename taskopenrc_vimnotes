@@ -12,9 +12,6 @@ FOLDER="~/Notes/vimnotes/"
 # Preferred extension for tasknotes
 EXT=""
 
-# Message that gets annotated to the task to indicate that notes exist
-NOTEMSG="Notes"
-
 # Path to notes file. UUID will be replaced with the actual uuid of
 # the task. If NOTES_CMD 
 # Default is: ${FOLDER}UUID$EXT
@@ -32,3 +29,24 @@ NOTES_CMD="vim -c \":Note UUID\""
 # Apply a default taskwarrior filter in order to exclude certain tasks.
 # Default is: status.is:pending
 #EXCLUDE=
+
+# Regular expression that referes to the NOTES_FILE.
+# Default is: Notes
+#NOTES_REGEX="Notes" 
+
+# Regular expression that identifies annotations openable by BROWSER.
+# Default is: www|http
+#BROWSER_REGEX="www|http"
+
+# Regular expression that identifies file paths in annotations. Will be opened by EDITOR or
+# xdg-open.
+# Default is: \.|\/|~
+#FILE_REGEX="\.|\/|~"
+
+# Custom regular expression that specifies annotations passed to CUSTOM1_CMD, e.g:
+#CUSTOM1_REGEX="Message-[Ii][Dd]:|message:"
+#CUSTOM1_CMD="muttjumpwrapper"
+
+# Custom regular expression that specifies annotations passed to CUSTOM2_CMD.
+#CUSTOM2_REGEX=""
+#CUSTOM2_CMD=""

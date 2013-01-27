@@ -96,14 +96,6 @@ else {
     $EXT = ".txt";
 }
 
-my $NOTEMSG;
-if (exists $config{"NOTEMSG"}) {
-    $NOTEMSG = $config{"NOTEMSG"};
-}
-else {
-    $NOTEMSG = "Notes";
-}
-
 my $BROWSER;
 if (exists $config{"BROWSER"}) {
     $BROWSER = $config{"BROWSER"};
@@ -160,7 +152,70 @@ else {
     $SORT = "";
 }
 
-my $FILEREGEX = qr{^(?:(\S*):\s)?((?:\/|www|http|\.|~|Message-[Ii][Dd]:|message:|$NOTEMSG).*)};
+my $NOTES_REGEX;
+if (exists $config{"NOTES_REGEX"}) {
+    $NOTES_REGEX = $config{"NOTES_REGEX"};
+}
+else {
+    $NOTES_REGEX = "Notes";
+}
+
+my $BROWSER_REGEX;
+if (exists $config{"BROWSER_REGEX"}) {
+    $BROWSER_REGEX = $config{"BROWSER_REGEX"};
+}
+else {
+    $BROWSER_REGEX = "www|http";
+}
+
+my $FILE_REGEX;
+if (exists $config{"FILE_REGEX"}) {
+    $FILE_REGEX = $config{"FILE_REGEX"};
+}
+else {
+    $FILE_REGEX = "\\\.|\\\/|~";
+}
+
+my $CUSTOM1_REGEX;
+if (exists $config{"CUSTOM1_REGEX"}) {
+    $CUSTOM1_REGEX = $config{"CUSTOM1_REGEX"};
+}
+else {
+    $CUSTOM1_REGEX = "";
+}
+
+my $CUSTOM2_REGEX;
+if (exists $config{"CUSTOM2_REGEX"}) {
+    $CUSTOM2_REGEX = $config{"CUSTOM2_REGEX"};
+}
+else {
+    $CUSTOM2_REGEX = "";
+}
+
+my $CUSTOM1_CMD;
+if (exists $config{"CUSTOM1_CMD"}) {
+    $CUSTOM1_CMD = $config{"CUSTOM1_CMD"};
+}
+else {
+    $CUSTOM1_CMD = "";
+}
+
+my $CUSTOM2_CMD;
+if (exists $config{"CUSTOM2_CMD"}) {
+    $CUSTOM2_CMD = $config{"CUSTOM2_CMD"};
+}
+else {
+    $CUSTOM2_CMD = "";
+}
+
+my $TMPREGEX  = qr{$FILE_REGEX|$BROWSER_REGEX|$NOTES_REGEX};
+if ($CUSTOM1_REGEX) {
+    $TMPREGEX = qr{$TMPREGEX|$CUSTOM1_REGEX};
+}
+if ($CUSTOM2_REGEX) {
+    $TMPREGEX = qr{$TMPREGEX|$CUSTOM2_REGEX};
+}
+my $FILEREGEX = qr{^(?:(\S*):\s)?((?:$TMPREGEX).*)};
 
 sub print_version {
     print "\n";
@@ -213,7 +268,7 @@ sub get_filepath {
     my $ann = $_[0];
     my $file = $ann->{"annot"};
     
-    if ($file eq $NOTEMSG) {
+    if ($file =~ m/$NOTES_REGEX/) {
         $file = $NOTES_FILE;
         $file =~ s/UUID/$ann->{"uuid"}/g;
     }
@@ -281,20 +336,25 @@ sub create_cmd {
     }
 
     my $cmd;
-    if ($file eq $NOTEMSG) {
+    if ($file =~ m/$NOTES_REGEX/) {
         $cmd = $NOTES_CMD;
         $cmd =~ s/UUID/$ann->{"uuid"}/g;
         $cmd = qq/$ENV{"SHELL"} -c "$cmd"/;
     }
-    elsif ($file =~ m/^www.*/ ) {
-        # prepend http://
-        $cmd = qq{$BROWSER "http://$file"};
+    elsif ($file =~ m/$BROWSER_REGEX/ ) {
+        if ($file =~ m/^www/) {
+            # prepend http://
+            $cmd = qq{$BROWSER "http://$file"};
+        }
+        else {
+            $cmd = qq{$BROWSER "$file"};
+        }
     }
-    elsif ($file =~ m/^http.*/ ) {
-        $cmd = qq{$BROWSER "$file"};
+    elsif ($CUSTOM1_REGEX && $file =~ m/$CUSTOM1_REGEX/) {
+        $cmd = qq{$CUSTOM1_CMD "$file"};
     }
-    elsif ($file =~ m/Message-[Ii][Dd]/ ) {
-        $cmd = qq{echo "$file" | muttjump && clear};
+    elsif ($CUSTOM2_REGEX && $file =~ m/$CUSTOM2_REGEX/) {
+        $cmd = qq{$CUSTOM2_CMD "$file"};
     }
     else {
         $file = get_filepath($ann);
@@ -395,7 +455,7 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
         $LIST_EXEC = 1;
     }
     elsif ($arg eq "-n") {
-        $FILEREGEX = qr{^(?:(\S*):\s)?((?:$NOTEMSG).*)};
+        $FILEREGEX = qr{^(?:(\S*):\s)?((?:$NOTES_REGEX).*)};
     }
     elsif ($arg eq "-a") {
         $EXCLUDE = "";
@@ -468,7 +528,7 @@ if ($HELP) {
     print "-l                List-only mode, does not open any file; shows annotations\n";
     print "-L                List-only mode, does not open any file; shows command line\n";
     print "-b                Batch mode, processes every file in the list\n";
-    print "-n                Only show/open notes file, i.e. annotations containing '$NOTEMSG'\n";
+    print "-n                Only show/open notes file, i.e. annotations matching '$NOTES_REGEX'\n";
     print "-a                Query all active tasks; clears the EXCLUDE filter\n";
     print "-aa               Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
     print "-D                Delete the annotation rather than opening it\n";
@@ -482,17 +542,23 @@ if ($HELP) {
     print "-c filepath       Use alternate taskopenrc file as specified by 'filepath'\n";
 
     print "\nCurrent configuration:\n";
-    print "BROWSER    = $BROWSER\n";
-    print "TASKBIN    = $TASKBIN\n";
-    print "FOLDER     = $FOLDER\n";
-    print "EXT        = $EXT\n";
-    print "EDITOR     = $EDITOR\n";
-    print "NOTEMSG    = $NOTEMSG\n";
-    print "NOTES_FILE = $NOTES_FILE\n";
-    print "NOTES_CMD  = $NOTES_CMD\n";
-    print "EXCLUDE    = $EXCLUDE\n";
-    print "SORT       = $SORT\n";
-    print "DEBUG      = $DEBUG\n";
+    print "BROWSER       = $BROWSER\n";
+    print "TASKBIN       = $TASKBIN\n";
+    print "FOLDER        = $FOLDER\n";
+    print "EXT           = $EXT\n";
+    print "EDITOR        = $EDITOR\n";
+    print "NOTES_FILE    = $NOTES_FILE\n";
+    print "NOTES_CMD     = $NOTES_CMD\n";
+    print "EXCLUDE       = $EXCLUDE\n";
+    print "SORT          = $SORT\n";
+    print "DEBUG         = $DEBUG\n";
+    print "NOTES_REGEX   = $NOTES_REGEX\n";
+    print "BROWSER_REGEX = $BROWSER_REGEX\n";
+    print "FILE_REGEX    = $FILE_REGEX\n";
+    print "CUSTOM1_REGEX = $CUSTOM1_REGEX\n";
+    print "CUSTOM1_CMD   = $CUSTOM1_CMD\n";
+    print "CUSTOM2_REGEX = $CUSTOM2_REGEX\n";
+    print "CUSTOM2_CMD   = $CUSTOM2_CMD\n";
 
 	exit 1;
 }
@@ -619,7 +685,7 @@ if ($#SORT_KEYS >= 0) {
 
 # choose an annotation/file to open
 my @choices = (0);
-if ($#annotations > 0 || $MODE eq "list") {
+if ($#annotations > 0 || ($MODE && $MODE eq "list")) {
     print "\n";
     if (!$MODE) {
         print "Please select an annotation:\n";

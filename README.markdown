@@ -55,7 +55,9 @@ You can also add weblinks to a task and even mix all kinds of annotations:
        2) ~/tasknotes/1.txt
     Type number: 
 
-##Link to emails with mutt
+##Link to emails with mutt (deprecated)
+**Although this feature is not included anymore, it can still be achieved by using setting
+CUSTOM1_REGEX and CUSTOM1_CMD in the ~/.taskopenrc**
 Thanks to the contribution of Jostein Berntsen you can use taskopen with mutt. The message ID is used as an identifier for the mutt mail. Here is the basic workflow:
 
 1. Add an email to task with 'mutt2task'
