@@ -478,6 +478,7 @@ if ($HELP) {
     print "-s 'key1+,key2-'  Sort annotations by the given key which can be a taskwarrior field or 'annot' or 'label'\n";
     print "-e                Force to open file with EDITOR\n";
     print "-x ['cmd']        Execute file, optionally prepend cmd to the command line\n";
+    print "-c filepath       Use alternate taskopenrc file as specified by 'filepath'\n";
 
     print "\nCurrent configuration:\n";
     print "BROWSER    = $BROWSER\n";
