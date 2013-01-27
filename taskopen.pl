@@ -157,6 +157,46 @@ sub print_version {
     print "\n";
 }
 
+sub parse_number {
+    my $input = $_[0];
+    my $max   = $_[1];
+
+    my @items = split(m/[^\d\.-]+/, $input);
+    if ($#items >= 0) {
+        my @result;
+        foreach my $item (@items) {
+            if ($item =~ m/(\d+)(?:\.\.|-)(\d+)/) {
+                my $start = $1;
+                my $end   = $2;
+                if ($start < 1 || $end > $max) {
+                    print qq/"$item" is an invalid range\n/;
+                    exit 1;
+                }
+                while ($start <= $end) {
+                    push(@result, $start);
+                    $start++;
+                }
+            }
+            elsif ($item =~ m/\d+/) {
+                if ($item < 1 || $item > $max) {
+                    print qq/"$item" is an invalid number\n/;
+                    exit 1;
+                }
+                push(@result, $item);
+            }
+            else {
+                print qq/"$item" is not a number\n/;
+                exit 1;
+            }
+        }
+        return @result;
+    }
+    else {
+        print qq/Invalid input "$input"\n/;
+        exit 1;
+    }
+}
+
 sub get_filepath {
     my $ann = $_[0];
     my $file = $ann->{"annot"};
@@ -300,17 +340,31 @@ sub set_action
     }
 }
 
+sub set_mode
+{
+    my $mode = $_[0];
+    my $val  = $_[1];
+
+    if ($$mode && $$mode ne $val) {
+        print qq/Cannot use combine arguments -b with -l or -L\n/;
+        exit 1;
+    }
+    else {
+        $$mode = $val;
+    }
+}
+
 # argument parsing
 my $FILTER = "";
 my $ID_CMD = "ids";
 my $LABEL;
 my $HELP;
-my $LIST;
 my $LIST_ANN;
 my $LIST_EXEC;
 my %FORCE;
 my $MATCH;
 my $TYPE;
+my $MODE;
 for (my $i = 0; $i <= $#ARGV; ++$i) {
     my $arg = $ARGV[$i];
     if ($arg eq "-h") {
@@ -321,11 +375,11 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
         exit 0;
     }
     elsif ($arg eq "-l") {
-        $LIST = 1;
+        set_mode(\$MODE, "list");
         $LIST_ANN = 1;
     }
     elsif ($arg eq "-L") {
-        $LIST = 1;
+        set_mode(\$MODE, "list");
         $LIST_EXEC = 1;
     }
     elsif ($arg eq "-n") {
@@ -337,6 +391,9 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     elsif ($arg eq "-aa") {
         $EXCLUDE = "";
         $ID_CMD  = "uuids";
+    }
+    elsif ($arg eq "-b") {
+        set_mode(\$MODE, "batch");
     }
     elsif ($arg eq "-D") {
         set_action(\%FORCE, "-D", "\\del");
@@ -394,6 +451,7 @@ if ($HELP) {
     print "-v                Print version information\n";
     print "-l                List-only mode, does not open any file; shows annotations\n";
     print "-L                List-only mode, does not open any file; shows command line\n";
+    print "-b                Batch mode, processes every file in the list\n";
     print "-n                Only show/open notes file, i.e. annotations containing '$NOTEMSG'\n";
     print "-a                Query all active tasks; clears the EXCLUDE filter\n";
     print "-aa               Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
@@ -507,17 +565,17 @@ if ($#SORT_KEYS >= 0) {
 }
 
 # choose an annotation/file to open
-my $choice = 0;
-if ($#annotations > 0 || $LIST) {
+my @choices = (0);
+if ($#annotations > 0 || $MODE eq "list") {
     print "\n";
-    if (!$LIST) {
+    if (!$MODE) {
         print "Please select an annotation:\n";
     }
 
     my $i = 1;
     foreach my $ann (@annotations) {
         print "    $i)";
-        if (!$LIST || $LIST_ANN) {
+        if (!$MODE || $MODE ne "list" || $LIST_ANN) {
             my $id = $ann->{'id'};
             if ($id == 0) {
                 $id = $ann->{'uuid'};
@@ -536,28 +594,42 @@ if ($#annotations > 0 || $LIST) {
         $i++;
     }
 
-    if ($LIST) {
+    if ($MODE && $MODE eq "list") {
         exit 0;
     }
-
-    # read input
-    print "Type number: ";
-    $choice = <STDIN>;
-    chomp ($choice);
-
-    # check input
-    if ($choice !~ m/\d+/) {
-        print "$choice is not a number\n";
-        exit 1;
+    elsif ($MODE && $MODE eq "batch") {
+        @choices = (1..$#annotations+1);
     }
-    elsif ($choice < 1 || $choice >= $i) {
-        print "$choice is not a valid number\n";
-        exit 1;
+    else {
+        # read input
+        print "Type number(s): ";
+        my $choice = <STDIN>;
+        chomp ($choice);
+
+        @choices = parse_number($choice, $#annotations+1);
     }
 }
 
 ##############################################
 #open annotations[$choice] with an appropriate program
 
-my $ann  = $annotations[$choice-1];
-exec(create_cmd($ann, \%FORCE));
+if ($#choices > 0) {
+    my $tmp = join(",", @choices);
+    print "\n";
+    print qq/Do you really want to process files $tmp? (y\/N)\n/;
+    my $choice = <STDIN>;
+    chomp ($choice);
+    if ($choice !~ m/^y/i) {
+        exit 0;
+    }
+
+    foreach my $choice (@choices) {
+        my $ann = $annotations[$choice-1];
+        system(create_cmd($ann, \%FORCE));
+    }
+}
+else {
+    my $ann = $annotations[$choices[0]-1];
+    exec(create_cmd($ann, \%FORCE));
+}
+
