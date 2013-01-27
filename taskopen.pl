@@ -475,7 +475,8 @@ if ($HELP) {
     print "-r                Raw mode, opens the annotation text with your EDITOR\n";
     print "-m 'regex'        Only include annotations that match 'regex'\n";
     print "-t 'regex'        Only open files whose type (as returned by 'file') matches 'regex'\n";
-    print "-s 'key1+,key2-'  Sort annotations by the given key which can be a taskwarrior field or 'annot' or 'label'\n";
+    print "-s 'key1+,key2-'  Sort annotations by the given key which can be a taskwarrior field or\n";
+    print "                  'annot', 'label', 'entry', 'size', 'type', 'time', 'mtime' or 'atime'\n";
     print "-e                Force to open file with EDITOR\n";
     print "-x ['cmd']        Execute file, optionally prepend cmd to the command line\n";
     print "-c filepath       Use alternate taskopenrc file as specified by 'filepath'\n";
@@ -531,21 +532,56 @@ foreach my $task (@decoded_json) {
                         # Copy sort keys
                         foreach my $key (@SORT_KEYS) {
                             $key =~ m/(.*?)(\+|-)?$/;
-                            if (!exists $entry{$1} &&
-                                 exists $task->{$1})
-                            {
-                                $entry{$1} = $task->{$1};
+                            if (!exists $entry{$1}) {
+                                if (exists $ann->{$1})
+                                {
+                                    $entry{$1} = $ann->{$1};
+                                }
+                                elsif (exists $task->{$1})
+                                {
+                                    $entry{$1} = $task->{$1};
+                                }
+                                elsif ($1 eq "size") {
+                                    my $filepath = get_filepath(\%entry);
+                                    $entry{$1} = qx{stat -c "%s" "$filepath"};
+                                }
+                                elsif ($1 eq "mtime") {
+                                    my $filepath = get_filepath(\%entry);
+                                    $entry{$1} = qx{stat -c "%Y" "$filepath"};
+                                }
+                                elsif ($1 eq "time") {
+                                    my $filepath = get_filepath(\%entry);
+                                    $entry{$1} = qx{stat -c "%W" "$filepath"};
+                                }
+                                elsif ($1 eq "atime") {
+                                    my $filepath = get_filepath(\%entry);
+                                    $entry{$1} = qx{stat -c "%X" "$filepath"};
+                                }
+                                elsif ($1 eq "type") {
+                                    my $filepath = get_filepath(\%entry);
+                                    $entry{$1} = qx{file "$filepath"};
+                                }
+                                else {
+                                    print qq/Unknown sort key "$1"\n/;
+                                    exit 1;
+                                }
                             }
                         }
                         
                         if ($TYPE) {
-                            my $filepath = get_filepath(\%entry);
-                            my $filetype = qx{file "$filepath"};
+                            my $filetype;
+                            if (!$entry{"type"}) {
+                                my $filepath = get_filepath(\%entry);
+                                $filetype = qx{file "$filepath"};
+                            }
+                            else {
+                                $filetype = $entry{"type"};
+                            }
                             if ($filetype =~ m/$TYPE/) {
                                 push(@annotations, \%entry);
                             }
                             elsif ($DEBUG > 0) {
-                                printf(qq/[DEBUG] Skipping file "$filepath" whose type doesn't match '$TYPE'\n/);
+                                printf(qq/[DEBUG] Skipping file "$entry{'file'}" whose type doesn't match '$TYPE'\n/);
                             }
                         }
                         else {
