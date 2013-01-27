@@ -208,14 +208,13 @@ else {
     $CUSTOM2_CMD = "";
 }
 
-my $TMPREGEX  = qr{$FILE_REGEX|$BROWSER_REGEX|$NOTES_REGEX};
+my $REGEX_CODE = "fbn";
 if ($CUSTOM1_REGEX) {
-    $TMPREGEX = qr{$TMPREGEX|$CUSTOM1_REGEX};
+    $REGEX_CODE = "${REGEX_CODE}1";
 }
 if ($CUSTOM2_REGEX) {
-    $TMPREGEX = qr{$TMPREGEX|$CUSTOM2_REGEX};
+    $REGEX_CODE = "${REGEX_CODE}2";
 }
-my $FILEREGEX = qr{^(?:(\S*):\s)?((?:$TMPREGEX).*)};
 
 sub print_version {
     print "\n";
@@ -455,7 +454,40 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
         $LIST_EXEC = 1;
     }
     elsif ($arg eq "-n") {
-        $FILEREGEX = qr{^(?:(\S*):\s)?((?:$NOTES_REGEX).*)};
+        if ($REGEX_CODE =~ m/N/) {
+            print "Cannot combine argument -n with -N\n";
+            exit 1;
+        }
+        if (length($REGEX_CODE) == 1) {
+            print "Cannot combine argument -n with -f\n";
+            exit 1;
+        }
+        $REGEX_CODE = "n";
+    }
+    elsif ($arg eq "-N") {
+        if ($REGEX_CODE eq "n") {
+            print "Cannot combine argument -N with -n\n";
+            exit 1;
+        }
+        $REGEX_CODE =~ s/n/N/;
+    }
+    elsif ($arg eq "-f") {
+        if ($REGEX_CODE =~ m/F/) {
+            print "Cannot combine argument -f with -F\n";
+            exit 1;
+        }
+        if (length($REGEX_CODE) == 1) {
+            print "Cannot combine argument -f with -n\n";
+            exit 1;
+        }
+        $REGEX_CODE = "f";
+    }
+    elsif ($arg eq "-F") {
+        if ($REGEX_CODE eq "f") {
+            print "Cannot combine argument -F with -f\n";
+            exit 1;
+        }
+        $REGEX_CODE =~ s/f/F/;
     }
     elsif ($arg eq "-a") {
         $EXCLUDE = "";
@@ -519,6 +551,27 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     }
 }
 
+my $tmpregex="";
+foreach my $code (split("", $REGEX_CODE)) {
+    if ($code eq "n") {
+        $tmpregex = "${tmpregex}${NOTES_REGEX}|";
+    }
+    elsif ($code eq "f") {
+        $tmpregex = "${tmpregex}${FILE_REGEX}|";
+    }
+    elsif ($code eq "b") {
+        $tmpregex = "${tmpregex}${BROWSER_REGEX}|";
+    }
+    elsif ($code eq "1") {
+        $tmpregex = "${tmpregex}${CUSTOM1_REGEX}|";
+    }
+    elsif ($code eq "2") {
+        $tmpregex = "${tmpregex}${CUSTOM2_REGEX}|";
+    }
+}
+chop($tmpregex);
+my $FILEREGEX = qr{^(?:(\S*):\s)?((?:$tmpregex).*)};
+
 if ($HELP) {
 	print "Usage: $0 [options] [id|filter1 filter2 ... filterN] [\\\\label]\n\n";
 
@@ -529,6 +582,9 @@ if ($HELP) {
     print "-L                List-only mode, does not open any file; shows command line\n";
     print "-b                Batch mode, processes every file in the list\n";
     print "-n                Only show/open notes file, i.e. annotations matching '$NOTES_REGEX'\n";
+    print "-N                Show all but notes files; inverse of -n\n";
+    print "-f                Only show/open real files, i.e. annotations matching '$FILE_REGEX'\n";
+    print "-F                Show all but real files; inverse of -f\n";
     print "-a                Query all active tasks; clears the EXCLUDE filter\n";
     print "-aa               Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
     print "-D                Delete the annotation rather than opening it\n";
