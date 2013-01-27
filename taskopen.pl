@@ -245,7 +245,7 @@ sub create_cmd {
         $cmd = qq{echo "$file" | muttjump && clear};
     }
     else {
-        $file =~ get_filepath($ann);
+        $file = get_filepath($ann);
         my $filetype = qx{file "$file"};
         if ($filetype =~ m/text/ ) {
             $cmd = qq/$ENV{'SHELL'} -c "$EDITOR '$file'"/;
