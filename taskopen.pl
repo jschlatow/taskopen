@@ -46,6 +46,18 @@ if ($^O =~ m/.*darwin.*/) { #OSX
 }
 
 my $cfgfile = "$HOME/.taskopenrc";
+
+# find alternative config file specification in argument list
+for (my $i = 0; $i <= $#ARGV; ++$i) {
+    my $arg = $ARGV[$i];
+    if ($arg eq "-c") {
+        $cfgfile = $ARGV[++$i];
+        $cfgfile =~ s/^~/$HOME/;
+        print "Using alternate config file $cfgfile\n";
+        last;
+    }
+}
+
 my %config;
 open(CONFIG, "$cfgfile") or die "can't open $cfgfile: $!";
 while (<CONFIG>) {
@@ -437,6 +449,10 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     }
     elsif ($arg =~ m/\\+(.+)/) {
         $LABEL = $1;
+    }
+    elsif ($arg eq "-c") {
+        # just skip (handled above)
+        $i++;
     }
     else {
         $FILTER = "$FILTER $arg";
