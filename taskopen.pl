@@ -152,12 +152,20 @@ else {
     $SORT = "";
 }
 
+my $SHOW_CMD;
+if (exists $config{"SHOW_CMD"}) {
+    $SHOW_CMD = $config{"SHOW_CMD"};
+}
+else {
+    $SHOW_CMD = "ls -la";
+}
+
 my $NOTES_REGEX;
 if (exists $config{"NOTES_REGEX"}) {
     $NOTES_REGEX = $config{"NOTES_REGEX"};
 }
 else {
-    $NOTES_REGEX = "Notes";
+    $NOTES_REGEX = "^Notes";
 }
 
 my $BROWSER_REGEX;
@@ -453,6 +461,7 @@ my %FORCE;
 my $MATCH;
 my $TYPE;
 my $MODE;
+my $SHOW;
 for (my $i = 0; $i <= $#ARGV; ++$i) {
     my $arg = $ARGV[$i];
     if ($arg eq "-h") {
@@ -556,6 +565,12 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
         }
         set_action(\%FORCE, "-x", $action);
     }
+    elsif ($arg eq "-S") {
+        if ($i < $#ARGV && $ARGV[$i+1] !~ m/^-/) {
+            $SHOW_CMD = $ARGV[++$i];
+        }
+        $SHOW = 1;
+    }
     elsif ($arg =~ m/\\+(.+)/) {
         $LABEL = $1;
     }
@@ -612,6 +627,7 @@ if ($HELP) {
     print "                  'annot', 'label', 'entry', 'size', 'type', 'time', 'mtime' or 'atime'\n";
     print "-e                Force to open file with EDITOR\n";
     print "-x ['cmd']        Execute file, optionally prepend cmd to the command line\n";
+    print "-S ['cmd']        Execute 'cmd <filename>' for each file and shows its output interleaved with the other output.\n";
     print "-c filepath       Use alternate taskopenrc file as specified by 'filepath'\n";
 
     print "\nCurrent configuration:\n";
@@ -785,6 +801,13 @@ if ($#annotations > 0 || ($MODE && $MODE eq "list")) {
             }
             my $cmd = create_cmd($ann, \%FORCE);
             print " $cmd\n";
+        }
+
+        if ($SHOW) {
+            my $filepath = get_filepath($ann);
+            my $output = qx/$SHOW_CMD "$filepath"/;
+            chomp($output);
+            print "       $output\n";
         }
         $i++;
     }

@@ -30,9 +30,13 @@ EXT=".txt"
 # Default is: status.is:pending
 #EXCLUDE=
 
+# Default command for '-S'
+# Default is: ls -la
+#SHOW_CMD="ls -la"
+
 # Regular expression that referes to the NOTES_FILE.
-# Default is: Notes
-#NOTES_REGEX="Notes" 
+# Default is: ^Notes
+#NOTES_REGEX="^Notes" 
 
 # Regular expression that identifies annotations openable by BROWSER.
 # Default is: www|http
