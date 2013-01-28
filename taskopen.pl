@@ -309,7 +309,18 @@ sub create_cmd {
         if ($FORCE->{"action"} eq "\\del") {
             # TODO remove as soon as tw bug #819 has been fixed
             if ($ann->{'raw'} =~ m/(\/|\(|\))/) { # match all characters after which tw keeps adding spaces
-                return qq/echo "There is a bug in taskwarrior (#819) which prevents doing this."/
+                my $raw = $ann->{'raw'};
+                # remove any leading or trailing special character
+                $raw =~ s/^(\/|\(|\))//g;
+                $raw =~ m/^.*(\/|\(|\))(.*)/;
+                while ($raw =~ m/^.*(\/|\(|\))(.*)/) {
+                    if ($2) {
+                        $raw = $2;
+                        last;
+                    }
+                    chop($raw);
+                }
+                return qq/$TASKBIN $ann->{"uuid"} denotate "$raw"/;
             }
             # END REMOVE
             return qq/$TASKBIN $ann->{'uuid'} denotate "$ann->{'raw'}"/;
