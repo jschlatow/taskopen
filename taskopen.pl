@@ -77,7 +77,7 @@ if (exists $config{"TASKBIN"}) {
     $TASKBIN = qq/$config{"TASKBIN"} rc.verbose=off rc.json.array=on/;
 }
 else {
-    $TASKBIN = '/usr/bin/task rc.verbose=off rc.json.array=on';
+    $TASKBIN = 'task rc.verbose=off rc.json.array=on';
 }
 
 my $FOLDER;
@@ -165,7 +165,7 @@ if (exists $config{"NOTES_REGEX"}) {
     $NOTES_REGEX = $config{"NOTES_REGEX"};
 }
 else {
-    $NOTES_REGEX = "^Notes";
+    $NOTES_REGEX = "Notes";
 }
 
 my $BROWSER_REGEX;
@@ -275,7 +275,7 @@ sub get_filepath {
     my $ann = $_[0];
     my $file = $ann->{"annot"};
     
-    if ($file =~ m/$NOTES_REGEX/) {
+    if ($file =~ m/^$NOTES_REGEX/) {
         $file = $NOTES_FILE;
         $file =~ s/UUID/$ann->{"uuid"}/g;
     }
@@ -354,12 +354,12 @@ sub create_cmd {
     }
 
     my $cmd;
-    if ($file =~ m/$NOTES_REGEX/) {
+    if ($file =~ m/^$NOTES_REGEX/) {
         $cmd = $NOTES_CMD;
         $cmd =~ s/UUID/$ann->{"uuid"}/g;
         $cmd = qq/$ENV{"SHELL"} -c "$cmd"/;
     }
-    elsif ($file =~ m/$BROWSER_REGEX/ ) {
+    elsif ($file =~ m/^$BROWSER_REGEX/ ) {
         if ($file =~ m/^www/) {
             # prepend http://
             $cmd = qq{$BROWSER "http://$file"};
@@ -368,10 +368,10 @@ sub create_cmd {
             $cmd = qq{$BROWSER "$file"};
         }
     }
-    elsif ($CUSTOM1_REGEX && $file =~ m/$CUSTOM1_REGEX/) {
+    elsif ($CUSTOM1_REGEX && $file =~ m/^$CUSTOM1_REGEX/) {
         $cmd = qq{$CUSTOM1_CMD "$file"};
     }
-    elsif ($CUSTOM2_REGEX && $file =~ m/$CUSTOM2_REGEX/) {
+    elsif ($CUSTOM2_REGEX && $file =~ m/^$CUSTOM2_REGEX/) {
         $cmd = qq{$CUSTOM2_CMD "$file"};
     }
     else {
@@ -661,7 +661,7 @@ if ($DEBUG > 0) {
     printf("[DEBUG] Applying filter: $EXCLUDE$FILTER\n");
 }
 my $ID = qx{$TASKBIN $ID_CMD $EXCLUDE$FILTER};
-chop($ID);
+chomp($ID);
 
 # query IDs and parse json
 my $json = qx{$TASKBIN $ID _query};

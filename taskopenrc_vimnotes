@@ -2,7 +2,7 @@
 
 BROWSER='firefox'
 EDITOR='vim'
-TASKBIN='/usr/bin/task'
+TASKBIN='task'
 
 # If you sync tasks FOLDER should be a location that syncs and is available to
 # other computers, i.e. /users/dropbox/tasknotes
@@ -35,8 +35,8 @@ NOTES_CMD="vim -c \":Note UUID\""
 #SHOW_CMD="ls -la"
 
 # Regular expression that referes to the NOTES_FILE.
-# Default is: ^Notes
-#NOTES_REGEX="^Notes" 
+# Default is: Notes
+#NOTES_REGEX="Notes" 
 
 # Regular expression that identifies annotations openable by BROWSER.
 # Default is: www|http
