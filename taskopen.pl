@@ -74,10 +74,10 @@ while (<CONFIG>) {
 
 my $TASKBIN;
 if (exists $config{"TASKBIN"}) {
-    $TASKBIN = $config{"TASKBIN"};
+    $TASKBIN = qq/$config{"TASKBIN"} rc.verbose=off rc.json.array=on/;
 }
 else {
-    $TASKBIN = '/usr/bin/task';
+    $TASKBIN = '/usr/bin/task rc.verbose=off rc.json.array=on';
 }
 
 my $FOLDER;
@@ -665,7 +665,7 @@ chop($ID);
 
 # query IDs and parse json
 my $json = qx{$TASKBIN $ID _query};
-my @decoded_json = @{decode_json("[$json]")};
+my @decoded_json = @{decode_json("$json")};
 
 # Reorganize data
 my @annotations;
