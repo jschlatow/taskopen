@@ -72,6 +72,10 @@ while (<CONFIG>) {
     $config{$key} = $value;
 }
 
+if (exists $config{"PATH_EXT"}) {
+    $ENV{"PATH"} = qq/$config{"PATH_EXT"}:$ENV{"PATH"}/;
+}
+
 my $TASKBIN;
 if (exists $config{"TASKBIN"}) {
     $TASKBIN = qq/$config{"TASKBIN"} rc.verbose=off rc.json.array=on/;
@@ -648,6 +652,7 @@ if ($HELP) {
     print "CUSTOM1_CMD   = $CUSTOM1_CMD\n";
     print "CUSTOM2_REGEX = $CUSTOM2_REGEX\n";
     print "CUSTOM2_CMD   = $CUSTOM2_CMD\n";
+    print "PATH          = $ENV{'PATH'}\n";
 
 	exit 1;
 }

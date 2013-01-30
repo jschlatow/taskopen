@@ -34,6 +34,9 @@ EXT=".txt"
 # Default is: ls -la
 #SHOW_CMD="ls -la"
 
+# Add some paths to the taskopen's PATH variable
+#PATH_EXT=/path/to/taskopen/scripts
+
 # Regular expression that referes to the NOTES_FILE.
 # Default is: Notes
 #NOTES_REGEX="Notes" 
