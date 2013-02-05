@@ -15,15 +15,15 @@ if [[ $LAST_MSG =~ ^Auto-commit ]]; then
 fi
 
 # save changes
-git diff taskopen.pl > taskopen.pl.orig
-patch -p1 -R < taskopen.pl.orig
+git diff taskopen > taskopen.orig
+patch -p1 -R < taskopen.orig
 
-sed "s/VERSION=.*;/VERSION=\"$VER\";/" -i taskopen.pl
-sed "s/REVNUM=.*;/REVNUM=\"$REV\";/" -i taskopen.pl
-sed "s/REVHASH=.*;/REVHASH=\"$HASH\";/" -i taskopen.pl
+sed "s/VERSION=.*;/VERSION=\"$VER\";/" -i taskopen
+sed "s/REVNUM=.*;/REVNUM=\"$REV\";/" -i taskopen
+sed "s/REVHASH=.*;/REVHASH=\"$HASH\";/" -i taskopen
 
-git add taskopen.pl
+git add taskopen
 git commit -m "Auto-commit (bumped revision)"
 
-patch -p1 < taskopen.pl.orig
-rm taskopen.pl.orig
+patch -p1 < taskopen.orig
+rm taskopen.orig
