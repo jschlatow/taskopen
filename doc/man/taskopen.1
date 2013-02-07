@@ -1,0 +1,284 @@
+.TH taskopen 1 2013-02-05 "taskopen v1.0-perl-release" "User Manuals"
+
+.SH NAME
+taskopen \- A companion application for taskwarrior, that facilitates opening annotations.
+
+.SH SYNOPSIS
+.B taskopen [options] [filter1 filter2 filterN] [\\\\\\\\label]
+
+.SH DESCRIPTION
+Any task in taskwarrior can have zero-or-more annotations. Taskopen can filter and list these annotations, and can determine several things about them, based on clues found in the format. An annotation can be a line of text, it can be a link to a file, a link to a program, or a link to a website. If the annotation starts with [label: ]Notes, then taskopen will open (creating if necessary) a text note that is specific to the task, and is named UUID.txt (where UUID is replaced with the actual task uuid).  Taskopen can be custom-configured by editing the
+.I .taskopenrc
+file, see
+.BR taskopenrc (5).
+
+.SH OPTIONS
+
+.SS General options
+.TP
+.BR \-h
+Show a help text.
+.TP
+.BR \-v
+Print version information.
+.TP
+.BR \-V
+Print more verbose version and environment information.
+.TP
+.BR "\-c <filepath>"
+Use alternate taskopenrc file as specified by
+.I filepath.
+
+
+.SS Filter options
+.TP
+.BR \-a
+Query all active tasks; clears the EXCLUDE filter.
+.TP
+.BR \-A
+Query all tasks. This includes completed and deleted tasks as well. Depending on the size of your
+database this may be very slow.
+.TP
+.BR \-n
+Only show/open notes, i.e. annotations matching NOTES_REGEX.
+.TP
+.BR \-N
+Show all but notes;  inverse of -n.
+.TP \-f
+Only show/open real files, i.e. annotations matching FILE_REGEX.
+.TP
+.BR \-F
+Show all but real files; inverse of -f.
+.TP
+.BR "\-m 'regex'"
+Only include annotations that match
+.I regex.
+.TP
+.BR "\-t 'regex'"
+Only open files whose type (as returned by the
+.I file
+command) matches
+.I regex.
+
+
+.SS Execution options
+.TP
+.BR \-b
+Batch mode, processes every matching annotation.
+.TP
+.BR \-r
+Raw mode, opens the annotation text with your EDITOR.
+.TP
+.BR \-D
+Delete the annotation instead of opening it.
+.TP
+.BR \-e
+Force to open the file with EDITOR.
+.TP
+.BR "\-x [cmd]"
+Execute file, optionally prepend
+.I cmd
+to the command line.
+
+
+.SS Output options
+.TP
+.BR \-l
+List-only mode, does not open any file. Can be combined with -L.
+.TP
+.BR \-L
+List-only mode, does not open any file. Shows command line that would be executed. Can be combined
+with -l.
+.TP
+.BR "\s 'key1+,key2-'"
+Sort annotations by the given key which can be a taskwarrior field or 'annot', 'label', 'entry', 'size', 'type', 'time', 'mtime' or 'atime'. A '+' or '-' may be appended to the field indentifier in order to specify a sort order.
+.TP
+.BR "-i [cmd]"
+Execute
+.I cmd
+for each file and shows its output interleaved with the other output. A default can be set in the
+.I taskopenrc
+file.
+
+.SH FILTERS
+Any argument that is not considered as an option or label will be passed to taskwarrior as an
+additional filter, i.e. any combination of taskwarrior filters can be used with taskopen. The
+default filter can be specified in the
+.I taskopenrc
+file, see
+.BR taskopenrc (5).
+
+.SH LABELS
+Each annotation can have a "label", which is a leading word with a colon and a space
+
+.RS
+<label>: <annotation text>
+.RE
+
+The label can be used to filter and/or sort the listings, and (in a future version) it can be used as to specify how the annotation should be handled.
+
+.SH EXAMPLES
+
+.SS Basic usage
+
+Create a new taskwarrior task:
+.RS
+$ task add Example
+.RE
+
+Add an annotation which links to a file:
+.RS
+$ task 1 annotate ~/checklist.txt
+.RE
+
+Open the linked file by using the task's ID:
+.RS
+$ taskopen 1
+.RE
+
+or by a filter expression:
+.RS
+$ taskopen Example
+.RE
+
+.SS Default notes
+Inspired by Alan Bowens 'tasknote' you can add a default notes file to a task. These files will be
+automatically created by the task's UUID and don't require to annotate the task with a specific file
+path. The folder in which these files will be stored, the triggering text (default: "Notes") as well
+as the command to be executed can be customised by editing the
+.I taskopenrc
+file.
+
+As soon as you annotate a task with 'Notes':
+.RS
+$ task 1 annotate Notes
+.RE
+
+you can open and edit this file by:
+.RS
+$ taskopen 1
+.RE
+
+which, by default, opens a file like
+-I "~/tasknotes/5727f1c7-2efe-fb6b-2bac-6ce073ba95ee.txt" 
+with your favourite EDITOR.
+
+.SS Multiple annotations
+You can also add weblinks to a task and even mix all kinds of annotations:
+	
+.RS
+$ task 1 annotate web: www.taskwarrior.org
+$ task 1 annotate I want to consider this
+$ task 1 annotate man: ~/Documents/manual.pdf
+.RE
+
+There are various ways to open either the URI or the pdf file. If taskopen finds more than one
+suitable annotation, it will output a list and ask for user interaction:
+
+.RS
+$ taskopen 1
+
+Please select an annotation:
+   1) web: www.taskwarrior.org
+   2) man: ~/Documents/manual.pdf
+Type number(s): 
+.RE
+
+However, you can directly address the desired annotation...
+
+by providing taskopen with the corresponding label:
+
+.RS
+$ taskopen 1 \\\\web
+.RE
+
+by adding a regular expression:
+
+.RS
+$ taskopen 1 -m Documents
+.RE
+
+or by adding a file type:
+
+.RS
+$ taskopen 1 -t PDF
+.RE
+
+.SS Clean up annotations
+The -x option can be used to execute arbitrary commands. The decoded annotation, which will be a
+file path in most cases, will be passed as a command line argument. This enables the user to do
+fancy things like removing unused files from the filesystem:
+
+.RS
+$ taskopen -x 'rm' -A status.is:deleted
+.RE
+
+This command will show you a list of annotations of any deleted task. You can then select one or
+even multiple items of the list in order to remove the corresponding file from the filesystem.
+
+You may also decide to precheck the command that is going to be executed by taskopen by adding the
+-L argument.
+
+If you are sure that you want to execute the command on every file you may consider activating the
+batch mode by adding the -b option. Taskopen will then skip the user interaction and automatically select all
+entries from the list.
+
+.SS Output/interleave additional information
+Interleaving of arbitrary information can be achieved by using the
+.I "-i 'cmd'"
+argument. This is particularly useful when you are using rather general filters. The provided
+.I cmd
+will be executed for every annotation that is going to be listed and the output of this command will
+be interleaved with the list items. Taskopen comes with a number of helper scripts that may be
+useful for this, e.g. for peeking into all your Notes files:
+
+.RS
+$ taskopen -i 'headindent -n 5' -n
+.RE
+
+.SH FILES & FOLDERS
+
+.TP
+~/.taskopenrc
+User configuration file - see also
+.BR taskopenrc (5).
+This can be overriden by the -c argument.
+
+.TP
+~/.taskopen/scripts/
+User-specific extension scripts. Will be contained in taskopen's PATH variable by default.
+
+.SH HISTORY
+.TP
+.BR "2010 \- 2012"
+The first release of taskopen was a quite simple bash script.
+
+.TP
+.BR "early 2013"
+Re-implementation of taskopen in perl.
+
+.SH "CREDITS & COPYRIGHTS"
+Copyright (C) 2010 \- 2013, J. Schlatow
+
+Taskopen is distributed under the GNU General Public License. See
+.I http://www.opensource.org/licenses/gpl-2.0.php
+for more information.
+
+.SH SEE ALSO
+.BR taskopenrc (5)
+
+For more information regarding taskopen, see the following:
+
+The official site at
+.TP
+.I <https://github.com/ValiValpas/taskopen/>
+
+The official code repository at
+.TP
+.I <git://github.com/ValiValpas/taskopen.git>
+
+.SH REPORTING BUGS
+.TP
+Bugs in taskopen may be reported to the issue-tracker at
+.I <https://github.com/ValiValpas/taskopen/issues>
+

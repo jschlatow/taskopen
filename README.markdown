@@ -1,15 +1,16 @@
 #Dependencies
 
-This script is an enhancement to taskwarrior, i.e. it depends on the task binary. See http://www.taskwarrior.org
+This perl script is an enhancement to taskwarrior, i.e. it depends on the task binary. See http://www.taskwarrior.org
 
-The perl version also depends on the JSON module, i.e.
+It also depends on the JSON module, i.e.
 
  * _libjson-perl_ on debian
  * _perl-json_ on archlinux
  * to be continued...
 
 #What does it do?
-It enables you to add file based notes to tasks.
+It enables you to add file based notes to tasks. The following sections show some (very) basic usage
+examples. Please be referred to 'taskopen -h' or the manpage taskopen(1) for further details.
 
 ##Basic usage
 Add a task:
@@ -18,9 +19,9 @@ Add a task:
 
 Add an annotation which links to a file:
 
-	$ task 1 annotate ~/notes.txt
+	$ task 1 annotate ~/checklist.txt
 
-Open the linked file by ID:
+Open the linked file by using the task's ID:
 
 	$ taskopen 1
 
@@ -30,55 +31,42 @@ Or by a filter expression (requires taskwarrior 2.0):
 
 ## Add default notes
 
-Inspired by Alan Bowens 'tasknote' you can add a default notes file to a task. The folder in which these files will be stored
-can be configured in ~/.taskopenrc.
+Inspired by Alan Bowens 'tasknote' you can add a default notes file to a task. These files will be
+automatically created by the task's UUID and don't require to annotate the task with a specific file
+path. The folder in which these files will be stored can be configured in ~/.taskopenrc.
 
 As soon as you annotate a task with 'Notes':
 
 	$ task 1 annotate Notes
 
-...you can edit this file:
+...you can open and edit this file by:
 
 	$ taskopen 1
+
+...which, by default, opens a file like "~/tasknotes/5727f1c7-2efe-fb6b-2bac-6ce073ba95ee.txt".
 
 ##More complex example
 You can also add weblinks to a task and even mix all kinds of annotations:
 	
 	$ task 1 annotate www.taskwarrior.org
 	$ task 1 annotate I want to consider this
-	$ task 1 annotate ~/tasknotes/1.txt
+	$ task 1 annotate ~/Documents/manual.pdf
 	$ taskopen 1
-	2 annotation(s) found.
 
 	Please select an annotation:
        1) www.taskwarrior.org
-       2) ~/tasknotes/1.txt
+       2) ~/Documents/manual.pdf
     Type number: 
 
-##Link to emails with mutt (deprecated)
-**Although this feature is not included anymore, it can still be achieved by using setting
-CUSTOM1_REGEX and CUSTOM1_CMD in the ~/.taskopenrc**
-Thanks to the contribution of Jostein Berntsen you can use taskopen with mutt. The message ID is used as an identifier for the mutt mail. Here is the basic workflow:
-
-1. Add an email to task with 'mutt2task'
-1. Use 'mess2task' to add the message ID from this mail to the recently added task.
-
-taskopen then uses muttjump to open the mutt mailboxes natively or in a screen window (very quick and effective). The muttjump script is made by 
-Johannes Weissl:
-
-https://github.com/weisslj/muttjump
-
-You can also use 'mess2task2' which copies the message ID to the clipboard, so that you can add the mail ID to any task manually.
-
-These macros should then be added to mutt:
-
-	macro index ,k "<pipe-message>mutt2task<enter>\  
-	<copy-message>+TODO<enter>"
-	macro index ,m "<pipe-message>mess2task<enter>"
-	macro index ,t "<pipe-message>mess2task2<enter>"
-
 #Installation
-Just copy the scripts to /usr/bin or ~/bin.
+Just copy taskopen.pl to /usr/bin or ~/bin. 
+
+You should also copy one of the taskopenrc files to ~/.taskopenrc and modify it to your needs.
+
+Currently there are two different taskopenrc files delivered with taskopen:
+
+1. taskopenrc: default configuration example
+1. taskopenrc_vimnotes: configuration to use taskopen with [notes.vim](http://peterodding.com/code/vim/notes/) plugin
 
 #Perl version, migration guide
 Replace your taskopen binary in /usr/bin or ~/bin with 'taskopen.pl'. Be sure to install all
@@ -88,16 +76,28 @@ The perl version is basically backwards compatible with the bash-style taskopenr
 bash magic must not be used within those files, i.e. only simple 'NAME=VALUE' notations can be
 parsed.
 
-#Bash version (deprecated)
+#Configuration
 
-You should also copy one of the taskopenrc files to ~/.taskopenrc and modify it to your needs.
+Taskopen can be customised by editing you ~/.taskopenrc file where you can set your favourite text editor
+and web browser for instance. Every file that is not considered a text file or URI is going to be opened with
+'xdg-open', which picks the corresponding application depending on the mime time (see 'xdg-mime').
 
-Currently there are two different taskopenrc files delivered with taskopen:
+Please take a look at the manpage taskopenrc(5) for further details.
 
-1. taskopenrc: default configuration example
-1. taskopenrc_vimnotes: configuration to use taskopen with [notes.vim](http://peterodding.com/code/vim/notes/) plugin
+#Packaging guidelines
 
-#Features (perl version)
+**TODO write packaging guidelines**
+
+#Features
+
+  * Arbitrary filters
+  * Optional labelling for easier access
+  * Execution of arbitrary commands (overriding the default command)
+  * Filtering by file type
+  * Batch processing and selecting multiple files from a list
+  * Deleting and editing of annotations
+  * Various customisation options (e.g. sorting)
+  * Extensibility
 
 ##Arbitrary filters
 Instead of providing taskopen with an ID you can also pass arbitrary filters in taskwarrior
@@ -107,7 +107,7 @@ notation, like:
 
 or
 
-    $ taskopen +todo pro:taskwarrior
+    $ taskopen +bug pro:taskwarrior
 
 ##Labels
 You can label your annotations by using the following syntax:
@@ -123,74 +123,6 @@ escaped with double backslashes:
 or even
 
     $ taskopen pro:taskwarrior +bug \\notes
-
-##Options
-
-Only list the files and commands to be executed:
-
-    $ taskopen -l
-
-Open file with editor:
-
-    $ taskopen -e
-
-Execute file:
-
-    $ taskopen -x
-
-Open file with arbitrary command:
-
-    $ taskopen -x 'command arguments'
-
-Show/open only 'Notes':
-
-    $ taskopen -n
-
-Query all active tasks (still excluding deleted and completed ones):
-
-    $ taskopen -a
-
-Query all tasks (including deleted and completed tasks):
-
-    $ taskopen -aa
-
-Please consider that completed and deleted tasks does not have an ID anymore. However, those tasks
-are still accessible by their UUID. Using '-aa' might be VERY slow depending on the size of your
-database.
-
-Only include files whose filetype (as returned by 'file') match a given regular expression:
-
-    $ taskopen -t 'regex'
-
-Only include annotations that match a given regular expression (excluding labels):
-
-    $ taskopen -m 'regex'
-
-Sorting by taskwarrior fields (as provided by 'task _query'), 'annot' or 'label':
-
-    $ taskopen -s 'label,project,urgency-'
-
-Delete annotation with label 'notes' from task 1:
-
-    $ taskopen -D 1 \\notes
-
-## Even more advanced taskopen fu (examples)
-
-Count lines by executing 'wc -l':
-
-    $ taskopen -x 'wc -l'
-
-Delete orphaned 'Notes'-files, i.e. all files in FOLDER that correspond to deleted or completed
-tasks:
-
-    $ taskopen -n -aa -x rm status.is:deleted status.is:completed
-
-**This is a dangerous command which might go wrong if your taskopenrc is not carefully configured.
-Please consider adding '-l' to the command line in order to have a dry-run first.**
-
-Or only delete files if the corresponding task has been deleted (not completed):
-
-    $ taskopen -n -aa -x rm status.is:deleted
 
 #Contributions
 
