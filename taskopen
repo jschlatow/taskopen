@@ -522,7 +522,7 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     elsif ($arg eq "-a") {
         $EXCLUDE = "";
     }
-    elsif ($arg eq "-aa") {
+    elsif ($arg eq "-A") {
         $EXCLUDE = "";
         $ID_CMD  = "uuids";
     }
@@ -569,7 +569,7 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
         }
         set_action(\%FORCE, "-x", $action);
     }
-    elsif ($arg eq "-S") {
+    elsif ($arg eq "-i") {
         if ($i < $#ARGV && $ARGV[$i+1] !~ m/^-/) {
             $SHOW_CMD = $ARGV[++$i];
         }
@@ -622,7 +622,7 @@ if ($HELP) {
     print "-f                Only show/open real files, i.e. annotations matching '$FILE_REGEX'\n";
     print "-F                Show all but real files; inverse of -f\n";
     print "-a                Query all active tasks; clears the EXCLUDE filter\n";
-    print "-aa               Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
+    print "-A                Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
     print "-D                Delete the annotation rather than opening it\n";
     print "-r                Raw mode, opens the annotation text with your EDITOR\n";
     print "-m 'regex'        Only include annotations that match 'regex'\n";
@@ -631,7 +631,7 @@ if ($HELP) {
     print "                  'annot', 'label', 'entry', 'size', 'type', 'time', 'mtime' or 'atime'\n";
     print "-e                Force to open file with EDITOR\n";
     print "-x ['cmd']        Execute file, optionally prepend cmd to the command line\n";
-    print "-S ['cmd']        Execute 'cmd <filename>' for each file and shows its output interleaved with the other output.\n";
+    print "-i ['cmd']        Execute 'cmd <filename>' for each file and shows its output interleaved with the other output.\n";
     print "-c filepath       Use alternate taskopenrc file as specified by 'filepath'\n";
 
     print "\nCurrent configuration:\n";
