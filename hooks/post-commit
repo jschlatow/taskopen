@@ -5,7 +5,16 @@
 #
 # To enable this hook, rename this file to "post-commit".
 
-REV=$(git rev-list master | wc -l)
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ "$BRANCH" == "master" ]; then
+    # don't bump version on master branch (will be done manually)
+    exit;
+fi
+
+# only bump version if taskopen script has been modified
+git show --pretty="format:" --name-only | grep ^taskopen$ || exit
+
+REV=$(git rev-list HEAD | wc -l)
 HASH=$(git log -1 --pretty=%h)
 VER=$(git describe --tags)
 
