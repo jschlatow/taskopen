@@ -1,0 +1,145 @@
+.TH taskopenrc 5 2013-02-07 "taskopen v1.0-devel" "User Manuals"
+
+.SH NAME
+taskopenrc \- Configuration file for the
+.BR taskopen (1)
+command
+
+.SH SYNOPSIS
+.B ~/.taskopenrc
+.br
+.B taskopen -c /path/to/taskopenrc
+
+.SH DESCRIPTION
+.B taskopen
+obtains its configuration data from a file called
+.I ~/.taskopenrc
+in the user's home directory.
+
+Each line in the taskopenrc file is either an assignment, a comment or empty.
+
+An assignment consists of a variable name and a value separated by the equal sign ("="):
+
+.RS
+<variable name>=<value>
+.RE
+
+where the variable name is one of the names below.
+
+A has mark ("#") can be used to mark the beginning of a comment line.
+
+.SH CONFIGURATION VARIABLES
+Valid variable names and their default values are:
+
+.SS General configuration
+.TP
+.BR BROWSER
+TODO
+
+.TP
+.BR EDITOR
+TODO
+
+.TP
+.BR TASKBIN
+TODO
+
+.TP
+.BR PATH_EXT
+TODO
+
+.TP
+.BR DEBUG
+TODO
+
+.SS "Notes" files
+
+.TP
+.BR NOTES_FOLDER
+TODO
+
+.TP
+.BR NOTES_EXT
+TODO
+
+.TP
+.BR NOTES_FILE
+TODO
+
+.TP
+.BR NOTES_CMD
+TODO
+
+.TP
+.BR NOTES_REGEX
+TODO
+
+.SS Default arguments
+
+.TP
+.BR DEFAULT_FILTER (EXCLUDE)
+TODO
+
+.TP
+.BR DEFAULT-s
+TODO
+
+.TP
+.BR DEFAULT-i
+TODO
+
+.TP
+.BR DEFAULT-x
+TODO
+
+.SS Classification
+
+.TP
+.BR NOTES_REGEX
+TODO
+
+.TP
+.BR BROWSER_REGEX
+TODO
+
+.TP
+.BR FILE_REGEX
+TODO
+
+.TP
+.BR CUSTOM1_REGEX
+TODO
+
+.TP
+.BR CUSTOM1_CMD
+TODO
+
+.SH EXAMPLES
+
+.SS Mutt
+TODO
+
+.SH "CREDITS & COPYRIGHTS"
+Copyright (C) 2010 \- 2013, J. Schlatow
+
+Taskopen is distributed under the GNU General Public License. See
+.I http://www.opensource.org/licenses/gpl-2.0.php
+for more information.
+
+.SH SEE ALSO
+.BR taskopen (1)
+
+For more information regarding taskopen, see the following:
+
+The official site at
+.TP
+.I <https://github.com/ValiValpas/taskopen/>
+
+The official code repository at
+.TP
+.I <git://github.com/ValiValpas/taskopen.git>
+
+.SH REPORTING BUGS
+.TP
+Bugs in taskopen may be reported to the issue-tracker at
+.I <https://github.com/ValiValpas/taskopen/issues>
