@@ -133,8 +133,8 @@ else {
 }
 
 my $EXCLUDE;
-if (exists $config{"EXCLUDE"}) {
-    $EXCLUDE = $config{"EXCLUDE"};
+if (exists $config{"DEFAULT_FILTER"}) {
+    $EXCLUDE = $config{"DEFAULT_FILTER"};
 }
 else {
     $EXCLUDE = "status.is:pending";
@@ -157,11 +157,19 @@ else {
 }
 
 my $SHOW_CMD;
-if (exists $config{"SHOW_CMD"}) {
-    $SHOW_CMD = $config{"SHOW_CMD"};
+if (exists $config{"DEFAULT-i"}) {
+    $SHOW_CMD = $config{"DEFAULT-i"};
 }
 else {
     $SHOW_CMD = "ls -la";
+}
+
+my $DEFAULT_x;
+if (exists $config{"DEFAULT-x"}) {
+    $DEFAULT_x = $config{"DEFAULT-x"};
+}
+else {
+    $DEFAULT_x = qq/$ENV{"SHELL"} -c/;
 }
 
 my $NOTES_REGEX;
@@ -562,7 +570,7 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     elsif ($arg eq "-x") {
         my $action;
         if ($i >= $#ARGV || $ARGV[$i+1] =~ m/^-/) {
-            $action = qq/$ENV{"SHELL"} -c/;
+            $action = $DEFAULT_x;
         }
         else {
             $action = $ARGV[++$i];
@@ -621,7 +629,7 @@ if ($HELP) {
     print "-N                Show all but notes files; inverse of -n\n";
     print "-f                Only show/open real files, i.e. annotations matching '$FILE_REGEX'\n";
     print "-F                Show all but real files; inverse of -f\n";
-    print "-a                Query all active tasks; clears the EXCLUDE filter\n";
+    print "-a                Query all active tasks; clears the DEFAULT_FILTER\n";
     print "-A                Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
     print "-D                Delete the annotation rather than opening it\n";
     print "-r                Raw mode, opens the annotation text with your EDITOR\n";
@@ -642,7 +650,7 @@ if ($HELP) {
     print "EDITOR        = $EDITOR\n";
     print "NOTES_FILE    = $NOTES_FILE\n";
     print "NOTES_CMD     = $NOTES_CMD\n";
-    print "EXCLUDE       = $EXCLUDE\n";
+    print "DEFAULT_FILTER= $DEFAULT_FILTER\n";
     print "SORT          = $SORT\n";
     print "DEBUG         = $DEBUG\n";
     print "NOTES_REGEX   = $NOTES_REGEX\n";

@@ -28,7 +28,7 @@ NOTES_EXT=".txt"
 
 # Apply a default taskwarrior filter in order to exclude certain tasks.
 # Default is: status.is:pending
-#EXCLUDE=
+#DEFAULT_FILTER=
 
 # Default command for '-S'
 # Default is: ls -la
