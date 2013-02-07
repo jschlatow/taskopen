@@ -33,9 +33,9 @@ use strict;
 use warnings;
 
 # DON'T TOUCH THE FOLLOWING LINES
-my $VERSION="v1.0-perl-release-49-gd35fc60";
-my $REVNUM="107";
-my $REVHASH="d35fc60";
+my $VERSION="v1.0-devel-4-g181659a";
+my $REVNUM="112";
+my $REVHASH="181659a";
 # END-DON'T-TOUCH
 
 my $HOME = $ENV{"HOME"};
@@ -85,16 +85,16 @@ else {
 }
 
 my $FOLDER;
-if (exists $config{"FOLDER"}) {
-    $FOLDER = $config{"FOLDER"};
+if (exists $config{"NOTES_FOLDER"}) {
+    $FOLDER = $config{"NOTES_FOLDER"};
 }
 else {
     $FOLDER = "~/tasknotes/";
 }
 
 my $EXT;
-if (exists $config{"EXT"}) {
-    $EXT = $config{"EXT"};
+if (exists $config{"NOTES_EXT"}) {
+    $EXT = $config{"NOTES_EXT"};
 }
 else {
     $EXT = ".txt";
@@ -637,8 +637,8 @@ if ($HELP) {
     print "\nCurrent configuration:\n";
     print "BROWSER       = $BROWSER\n";
     print "TASKBIN       = $TASKBIN\n";
-    print "FOLDER        = $FOLDER\n";
-    print "EXT           = $EXT\n";
+    print "NOTES_FOLDER  = $FOLDER\n";
+    print "NOTES_EXT     = $EXT\n";
     print "EDITOR        = $EDITOR\n";
     print "NOTES_FILE    = $NOTES_FILE\n";
     print "NOTES_CMD     = $NOTES_CMD\n";

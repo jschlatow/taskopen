@@ -4,17 +4,17 @@
 #EDITOR='vim'
 TASKBIN='task'
 
-# If you sync tasks FOLDER should be a location that syncs and is available to
+# If you sync tasks NOTES_FOLDER should be a location that syncs and is available to
 # other computers, i.e. /users/dropbox/tasknotes
-# FOLDER to store notes in, must already exist!
-FOLDER="~/tasknotes/"
+# NOTES_FOLDER to store notes in, must already exist!
+NOTES_FOLDER="~/tasknotes/"
 
 # Preferred extension for tasknotes
-EXT=".txt"
+NOTES_EXT=".txt"
 
 # Path to notes file. UUID will be replaced with the actual uuid of
 # the task. If NOTES_CMD 
-# Default is: ${FOLDER}UUID$EXT
+# Default is: ${NOTES_FOLDER}UUID${NOTES_EXT}
 #NOTES_FILE="~/tasknotes/UUID.txt"
 
 # Command that opens notes. UUID will be replaced with the actual uuid of 
