@@ -7,7 +7,7 @@ taskopen \- A companion application for taskwarrior, that facilitates opening an
 .B taskopen [options] [filter1 filter2 filterN] [\\\\\\\\label]
 
 .SH DESCRIPTION
-Any task in taskwarrior can have zero-or-more annotations. Taskopen can filter and list these annotations, and can determine several things about them, based on clues found in the format. An annotation can be a line of text, it can be a link to a file, a link to a program, or a link to a website. If the annotation starts with [label: ]Notes, then taskopen will open (creating if necessary) a text note that is specific to the task, and is named UUID.txt (where UUID is replaced with the actual task uuid).  Taskopen can be custom-configured by editing the
+Any task in taskwarrior can have zero-or-more annotations. Taskopen can filter, list and open these annotations, and can determine several things about them, based on clues found in the format. An annotation can be a line of text, it can be a link to a file, a link to a program, or a link to a website. If the annotation starts with [label: ]Notes, then taskopen will open (creating if necessary) a text note that is specific to the task, and is named UUID.txt (where UUID is replaced with the actual task uuid).  Taskopen can be custom-configured by editing the
 .I .taskopenrc
 file, see
 .BR taskopenrc (5).
