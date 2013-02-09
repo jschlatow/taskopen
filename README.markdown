@@ -9,8 +9,10 @@ It also depends on the JSON module, i.e.
  * to be continued...
 
 #What does it do?
-It enables you to add file based notes to tasks. The following sections show some (very) basic usage
-examples. Please be referred to 'taskopen -h' or the manpage taskopen(1) for further details.
+It enables you to add almost any sort of link to a taskwarrior task, simply by adding a uri(link) as an annotation. Text notes, email messages, PDF files, web addresses and many other sorts of links can then be filtered, listed and opened by using taskopen. 
+Arbitrary commands can be used as well, acting on the link targets, enhancing listings and even executing annotations as commands.
+Run 'taskopen -h' or 'man taskopen' for further details.
+The following sections show some (very) basic usage examples. 
 
 ##Basic usage
 Add a task:
