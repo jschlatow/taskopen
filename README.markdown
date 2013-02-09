@@ -9,8 +9,10 @@ It also depends on the JSON module, i.e.
  * to be continued...
 
 #What does it do?
-It enables you to add almost any sort of link to a taskwarrior task, simply by adding a uri(link) as an annotation. Text notes, email messages, PDF files, web addresses and many other sorts of links can then be filtered, listed and opened by using taskopen. 
-Arbitrary commands can be used as well, acting on the link targets, enhancing listings and even executing annotations as commands.
+It allows you to link almost any file, webpage or command to a taskwarrior task, simply by adding a filepath, web-link or uri as an annotation. Text notes, images, PDF files, web addresses, spreadsheets and many other sorts of links can then be filtered, listed and opened by using taskopen. Some actions are sane defaults, others can be configured, and everything alse will use your systems mime-types to open the link. 
+
+Arbitrary commands can be used with taskopen at the CLI, acting on the link targets, enhancing listings and even executing annotations as commands.
+
 Run 'taskopen -h' or 'man taskopen' for further details.
 The following sections show some (very) basic usage examples. 
 
