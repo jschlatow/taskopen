@@ -9,7 +9,7 @@ It also depends on the JSON module, i.e.
  * to be continued...
 
 #What does it do?
-It allows you to link almost any file, webpage or command to a taskwarrior task, simply by adding a filepath, web-link or uri as an annotation. Text notes, images, PDF files, web addresses, spreadsheets and many other sorts of links can then be filtered, listed and opened by using taskopen. Some actions are sane defaults, others can be custom-configured, and everything else will use your systems mime-types to open the link. 
+It allows you to link almost any file, webpage or command to a taskwarrior task by adding a filepath, web-link or uri as an annotation. Text notes, images, PDF files, web addresses, spreadsheets and many other types of links can then be filtered, listed and opened by using taskopen. Some actions are sane defaults, others can be custom-configured, and everything else will use your systems mime-types to open the link. 
 
 Arbitrary commands can be used with taskopen at the CLI, acting on the link targets, enhancing listings and even executing annotations as commands.
 
