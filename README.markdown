@@ -67,7 +67,7 @@ You can also add weblinks to a task and even mix all kinds of annotations:
 Installation is as easy as:
 
     $ make PREFIX=/usr
-    $ make install
+    $ make PREFIX=/usr install
 
 Taskopen also creates a configuration file at '~/.taskopenrc' if it does not already exist.
 
