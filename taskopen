@@ -58,6 +58,89 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     }
 }
 
+# create cfgfile if it doesn't exist (ask first)
+unless (-e $cfgfile) {
+    my $choice = "inval";
+    while ($choice ne "y" &&
+           $choice ne "Y" &&
+           $choice ne "n" && 
+           $choice ne "N" && 
+           $choice ne "")
+    {
+        print qq{Config file "$cfgfile" does not exist. Do you want to create it? (Y/n) };
+        $choice = <STDIN>;
+        chomp($choice);
+    }
+
+    if ($choice eq "n" || $choice eq "N") {
+        print qq/Can not continue without a config file.\n/;
+        exit 0;
+    }
+    else {
+        open(CONFIG, ">$cfgfile") or die "can't open $cfgfile: $!";
+        # write default config
+        print CONFIG q<
+#BROWSER='xdg-open'
+#EDITOR='vim'
+TASKBIN='task'
+
+# If you sync tasks NOTES_FOLDER should be a location that syncs and is available to
+# other computers, i.e. /users/dropbox/tasknotes
+# NOTES_FOLDER to store notes in, must already exist!
+NOTES_FOLDER="~/tasknotes/"
+
+# Preferred extension for tasknotes
+NOTES_EXT=".txt"
+
+# Path to notes file. UUID will be replaced with the actual uuid of
+# the task. If NOTES_CMD 
+# Default is: ${NOTES_FOLDER}UUID${NOTES_EXT}
+#NOTES_FILE="~/tasknotes/UUID.txt"
+
+# Command that opens notes. UUID will be replaced with the actual uuid of 
+# the task.
+# Default is: $EDITOR $NOTES_FILE
+#NOTES_CMD="vim ~/tasknotes/UUID.txt"
+
+# Specify the default sorting.
+# Default is taskwarrior's default sorting
+#SORT="urgency-,label,annot"
+
+# Apply a default taskwarrior filter in order to exclude certain tasks.
+# Default is: status.is:pending
+#DEFAULT_FILTER=
+
+# Default command for '-S'
+# Default is: ls -la
+#SHOW_CMD="ls -la"
+
+# Add some paths to the taskopen's PATH variable
+#PATH_EXT=/path/to/taskopen/scripts
+
+# Regular expression that referes to the NOTES_FILE.
+# Default is: Notes
+#NOTES_REGEX="Notes" 
+
+# Regular expression that identifies annotations openable by BROWSER.
+# Default is: www|http
+#BROWSER_REGEX="www|http"
+
+# Regular expression that identifies file paths in annotations. Will be opened by EDITOR or
+# xdg-open.
+# Default is: \.|\/|~
+#FILE_REGEX="\.|\/|~"
+
+# Custom regular expression that specifies annotations passed to CUSTOM1_CMD, e.g:
+#CUSTOM1_REGEX="Message-[Ii][Dd]:|message:"
+#CUSTOM1_CMD="muttjumpwrapper"
+
+# Custom regular expression that specifies annotations passed to CUSTOM2_CMD.
+#CUSTOM2_REGEX=""
+#CUSTOM2_CMD=""
+>;
+    }
+}
+
 my %config;
 open(CONFIG, "$cfgfile") or die "can't open $cfgfile: $!";
 while (<CONFIG>) {
@@ -650,7 +733,7 @@ if ($HELP) {
     print "EDITOR        = $EDITOR\n";
     print "NOTES_FILE    = $NOTES_FILE\n";
     print "NOTES_CMD     = $NOTES_CMD\n";
-    print "DEFAULT_FILTER= $DEFAULT_FILTER\n";
+    print "DEFAULT_FILTER= $EXCLUDE\n";
     print "SORT          = $SORT\n";
     print "DEBUG         = $DEBUG\n";
     print "NOTES_REGEX   = $NOTES_REGEX\n";
