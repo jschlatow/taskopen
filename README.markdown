@@ -9,8 +9,12 @@ It also depends on the JSON module, i.e.
  * to be continued...
 
 #What does it do?
-It enables you to add file based notes to tasks. The following sections show some (very) basic usage
-examples. Please be referred to 'taskopen -h' or the manpage taskopen(1) for further details.
+It allows you to link almost any file, webpage or command to a taskwarrior task, simply by adding a filepath, web-link or uri as an annotation. Text notes, images, PDF files, web addresses, spreadsheets and many other sorts of links can then be filtered, listed and opened by using taskopen. Some actions are sane defaults, others can be custom-configured, and everything else will use your systems mime-types to open the link. 
+
+Arbitrary commands can be used with taskopen at the CLI, acting on the link targets, enhancing listings and even executing annotations as commands.
+
+Run 'taskopen -h' or 'man taskopen' for further details.
+The following sections show some (very) basic usage examples. 
 
 ##Basic usage
 Add a task:
@@ -25,7 +29,7 @@ Open the linked file by using the task's ID:
 
 	$ taskopen 1
 
-Or by a filter expression (requires taskwarrior 2.0):
+Or by a filter expression (requires > taskwarrior 2.0):
 
 	$ taskopen Example
 
@@ -78,7 +82,7 @@ parsed.
 
 #Configuration
 
-Taskopen can be customised by editing you ~/.taskopenrc file where you can set your favourite text editor
+Taskopen can be customised by editing your ~/.taskopenrc file, where you can set your favourite text editor
 and web browser for instance. Every file that is not considered a text file or URI is going to be opened with
 'xdg-open', which picks the corresponding application depending on the mime time (see 'xdg-mime').
 
