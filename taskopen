@@ -370,7 +370,7 @@ sub get_filepath {
     my $ann = $_[0];
     my $file = $ann->{"annot"};
     
-    if ($file =~ m/^$NOTES_REGEX/) {
+    if ($file =~ m/^$NOTES_REGEX/ || $ann->{"raw"} =~ m/^$NOTES_REGEX/) {
         $file = $NOTES_FILE;
         $file =~ s/UUID/$ann->{"uuid"}/g;
     }
@@ -449,7 +449,7 @@ sub create_cmd {
     }
 
     my $cmd;
-    if ($file =~ m/^$NOTES_REGEX/) {
+    if ($file =~ m/^$NOTES_REGEX/ || $ann->{"raw"} =~ m/^$NOTES_REGEX/) {
         $cmd = $NOTES_CMD;
         $cmd =~ s/UUID/$ann->{"uuid"}/g;
         $cmd = qq/$ENV{"SHELL"} -c "$cmd"/;
@@ -679,9 +679,11 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
 }
 
 my $tmpregex="";
+my $tmplabelregex="";
 foreach my $code (split("", $REGEX_CODE)) {
     if ($code eq "n") {
         $tmpregex = "${tmpregex}${NOTES_REGEX}|";
+        $tmplabelregex = "${tmplabelregex}${NOTES_REGEX}|";
     }
     elsif ($code eq "f") {
         $tmpregex = "${tmpregex}${FILE_REGEX}|";
@@ -697,7 +699,8 @@ foreach my $code (split("", $REGEX_CODE)) {
     }
 }
 chop($tmpregex);
-my $FILEREGEX = qr{^(?:(\S*):\s)?((?:$tmpregex).*)};
+my $FILEREGEX = qr{^((?:$tmpregex).*)};
+my $LABELREGEX = qr{^($tmplabelregex)$};
 
 if ($HELP) {
 	print "Usage: $0 [options] [id|filter1 filter2 ... filterN] [\\\\label]\n\n";
@@ -768,9 +771,12 @@ my @annotations;
 foreach my $task (@decoded_json) {
     if (exists $task->{"annotations"}) {
         foreach my $ann (@{$task->{"annotations"}}) {
-            if ($ann->{"description"} =~ m/$FILEREGEX/) {
-                my $file = $2;
-                my $label = $1;
+            $ann->{"description"} =~ m/(?:(\S+):\s+)?(.*)/;
+            my $file = $2;
+            my $label = $1;
+            if ( ($file  && $file  =~ m/$FILEREGEX/ ) ||
+                 ($label && $label =~ m/$LABELREGEX/) )
+            {
                 if (!$MATCH || ($file =~ m/$MATCH/)) {
                     if (!$label) {
                         $label = "";
