@@ -6,6 +6,7 @@ taskopen.pl:
 	PATH_EXT=$(PREFIX)/share/taskopen/scripts' taskopen > taskopen.pl
 
 install: taskopen.pl
+	mkdir -p $(DESTDIR)/$(PREFIX)/bin
 	install -m 0755 taskopen.pl $(DESTDIR)/$(PREFIX)/bin/taskopen
 	mkdir -p $(DESTDIR)/$(PREFIX)/share/taskopen/doc/{man,html}
 	install -m 0644 doc/man/* $(DESTDIR)/$(PREFIX)/share/taskopen/doc/man
