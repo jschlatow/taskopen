@@ -63,14 +63,15 @@ You can also add weblinks to a task and even mix all kinds of annotations:
     Type number: 
 
 #Installation
-Just copy taskopen.pl to /usr/bin or ~/bin. 
 
-You should also copy one of the taskopenrc files to ~/.taskopenrc and modify it to your needs.
+Installation is as easy as:
 
-Currently there are two different taskopenrc files delivered with taskopen:
+    $ make PREFIX=/usr
+    $ make install
 
-1. taskopenrc: default configuration example
-1. taskopenrc_vimnotes: configuration to use taskopen with [notes.vim](http://peterodding.com/code/vim/notes/) plugin
+Taskopen also creates a configuration file at '~/.taskopenrc' if it does not already exist.
+
+You can also add 'DESTDIR=/path/to/dir/' to the install command.
 
 #Perl version, migration guide
 Replace your taskopen binary in /usr/bin or ~/bin with 'taskopen.pl'. Be sure to install all
@@ -87,10 +88,6 @@ and web browser for instance. Every file that is not considered a text file or U
 'xdg-open', which picks the corresponding application depending on the mime time (see 'xdg-mime').
 
 Please take a look at the manpage taskopenrc(5) for further details.
-
-#Packaging guidelines
-
-**TODO write packaging guidelines**
 
 #Features
 
