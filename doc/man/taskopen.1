@@ -90,7 +90,7 @@ List-only mode, does not open any file. Can be combined with -L.
 List-only mode, does not open any file. Shows command line that would be executed. Can be combined
 with -l.
 .TP
-.BR "\s 'key1+,key2-'"
+.BR "\-s 'key1+,key2-'"
 Sort annotations by the given key which can be a taskwarrior field or 'annot', 'label', 'entry', 'size', 'type', 'time', 'mtime' or 'atime'. A '+' or '-' may be appended to the field indentifier in order to specify a sort order.
 .TP
 .BR "-i [cmd]"
@@ -101,7 +101,7 @@ for each file and shows its output interleaved with the other output. A default 
 file.
 
 .SH FILTERS
-Any argument that is not considered as an option or label will be passed to taskwarrior as an
+Any argument that is not recognized as an option or label will be passed to taskwarrior as an
 additional filter, i.e. any combination of taskwarrior filters can be used with taskopen. The
 default filter can be specified in the
 .I taskopenrc
