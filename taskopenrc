@@ -24,15 +24,15 @@ NOTES_EXT=".txt"
 
 # Specify the default sorting.
 # Default is taskwarrior's default sorting
-#SORT="urgency-,label,annot"
+#DEFAULT_SORT="urgency-,label,annot"
 
 # Apply a default taskwarrior filter in order to exclude certain tasks.
 # Default is: status.is:pending
 #DEFAULT_FILTER=
 
-# Default command for '-S'
+# Default command for '-i'
 # Default is: ls -la
-#SHOW_CMD="ls -la"
+#DEFAULT-i="ls -la"
 
 # Add some paths to the taskopen's PATH variable
 #PATH_EXT=/path/to/taskopen/scripts

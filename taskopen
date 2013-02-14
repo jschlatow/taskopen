@@ -104,7 +104,7 @@ NOTES_EXT=".txt"
 
 # Specify the default sorting.
 # Default is taskwarrior's default sorting
-#SORT="urgency-,label,annot"
+#DEFAULT_SORT="urgency-,label,annot"
 
 # Apply a default taskwarrior filter in order to exclude certain tasks.
 # Default is: status.is:pending
@@ -112,7 +112,7 @@ NOTES_EXT=".txt"
 
 # Default command for '-S'
 # Default is: ls -la
-#SHOW_CMD="ls -la"
+#DEFAULT-i="ls -la"
 
 # Add some paths to the taskopen's PATH variable
 #PATH_EXT=/path/to/taskopen/scripts
@@ -232,12 +232,13 @@ else {
 }
 
 my $SORT;
-if (exists $config{"SORT"}) {
-    $SORT = $config{"SORT"};
+if (exists $config{"DEFAULT_SORT"}) {
+    $SORT = $config{"DEFAULT_SORT"};
 }
 else {
     $SORT = "";
 }
+my $DEFAULT_SORT = $SORT;
 
 my $SHOW_CMD;
 if (exists $config{"DEFAULT-i"}) {
@@ -246,6 +247,7 @@ if (exists $config{"DEFAULT-i"}) {
 else {
     $SHOW_CMD = "ls -la";
 }
+my $DEFAULT_i = $SHOW_CMD;
 
 my $DEFAULT_x;
 if (exists $config{"DEFAULT-x"}) {
@@ -320,9 +322,61 @@ if ($CUSTOM2_REGEX) {
 }
 
 sub print_version {
+    print "$VERSION $REVNUM $REVHASH\n";
+}
+
+sub print_version_long {
     print "\n";
     print "Taskopen, release $VERSION, revision $REVNUM ($REVHASH)\n";
     print "Copyright 2010-2013, Johannes Schlatow.\n";
+    print "\n";
+}
+
+sub diag {
+    print_version_long;
+
+    my $task_version = qx{$TASKBIN _version};
+    chomp($task_version);
+
+    my $xdg_version  = qx{$XDG --version};
+    chomp($xdg_version);
+
+    print "Environment\n";
+    print "    Platform:      $^O\n";
+    print "    Perl:          $^V\n";
+    print "    Taskwarrior:   $task_version\n";
+    print "    xdg-open:      $xdg_version\n";
+    print "    Configuration: $cfgfile\n";
+    print "\n";
+
+    print "Current configuration\n";
+    print "  Binaries and paths:\n";
+    print "    BROWSER       = $BROWSER\n";
+    print "    TASKBIN       = $TASKBIN\n";
+    print "    EDITOR        = $EDITOR\n";
+    print "    XDG           = $XDG\n";
+    print "    PATH          = $ENV{'PATH'}\n";
+    print "\n";
+    print "  Others:\n";
+    print "    NOTES_FOLDER  = $FOLDER\n";
+    print "    NOTES_EXT     = $EXT\n";
+    print "    NOTES_FILE    = $NOTES_FILE\n";
+    print "    NOTES_CMD     = $NOTES_CMD\n";
+    print "    DEFAULT_FILTER= $EXCLUDE\n";
+    print "    DEFAULT_SORT  = $DEFAULT_SORT\n";
+    print "           current: $SORT\n";
+    print "    DEFAULT-i     = $DEFAULT_i\n";
+    print "           current: $SHOW_CMD\n";
+    print "    DEFAULT-x     = $DEFAULT_x\n";
+    print "    DEBUG         = $DEBUG\n";
+    print "    NOTES_REGEX   = $NOTES_REGEX\n";
+    print "    BROWSER_REGEX = $BROWSER_REGEX\n";
+    print "    FILE_REGEX    = $FILE_REGEX\n";
+    print "    CUSTOM1_REGEX = $CUSTOM1_REGEX\n";
+    print "    CUSTOM1_CMD   = $CUSTOM1_CMD\n";
+    print "    CUSTOM2_REGEX = $CUSTOM2_REGEX\n";
+    print "    CUSTOM2_CMD   = $CUSTOM2_CMD\n";
+
     print "\n";
 }
 
@@ -550,6 +604,10 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
         print_version;
         exit 0;
     }
+    elsif ($arg eq "-V") {
+        diag;
+        exit 0;
+    }
     elsif ($arg eq "-l") {
         set_mode(\$MODE, "list");
         $LIST_ANN = 1;
@@ -690,47 +748,28 @@ if ($HELP) {
 	print "Usage: $0 [options] [id|filter1 filter2 ... filterN] [\\\\label]\n\n";
 
     print "Available options:\n";
-    print "-h                Show this text\n";
-    print "-v                Print version information\n";
-    print "-l                List-only mode, does not open any file; shows annotations\n";
-    print "-L                List-only mode, does not open any file; shows command line\n";
-    print "-b                Batch mode, processes every file in the list\n";
-    print "-n                Only show/open notes file, i.e. annotations matching '$NOTES_REGEX'\n";
-    print "-N                Show all but notes files; inverse of -n\n";
-    print "-f                Only show/open real files, i.e. annotations matching '$FILE_REGEX'\n";
-    print "-F                Show all but real files; inverse of -f\n";
-    print "-a                Query all active tasks; clears the DEFAULT_FILTER\n";
-    print "-A                Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
-    print "-D                Delete the annotation rather than opening it\n";
-    print "-r                Raw mode, opens the annotation text with your EDITOR\n";
-    print "-m 'regex'        Only include annotations that match 'regex'\n";
-    print "-t 'regex'        Only open files whose type (as returned by 'file') matches 'regex'\n";
-    print "-s 'key1+,key2-'  Sort annotations by the given key which can be a taskwarrior field or\n";
-    print "                  'annot', 'label', 'entry', 'size', 'type', 'time', 'mtime' or 'atime'\n";
-    print "-e                Force to open file with EDITOR\n";
-    print "-x ['cmd']        Execute file, optionally prepend cmd to the command line\n";
-    print "-i ['cmd']        Execute 'cmd <filename>' for each file and shows its output interleaved with the other output.\n";
-    print "-c filepath       Use alternate taskopenrc file as specified by 'filepath'\n";
-
-    print "\nCurrent configuration:\n";
-    print "BROWSER       = $BROWSER\n";
-    print "TASKBIN       = $TASKBIN\n";
-    print "NOTES_FOLDER  = $FOLDER\n";
-    print "NOTES_EXT     = $EXT\n";
-    print "EDITOR        = $EDITOR\n";
-    print "NOTES_FILE    = $NOTES_FILE\n";
-    print "NOTES_CMD     = $NOTES_CMD\n";
-    print "DEFAULT_FILTER= $EXCLUDE\n";
-    print "SORT          = $SORT\n";
-    print "DEBUG         = $DEBUG\n";
-    print "NOTES_REGEX   = $NOTES_REGEX\n";
-    print "BROWSER_REGEX = $BROWSER_REGEX\n";
-    print "FILE_REGEX    = $FILE_REGEX\n";
-    print "CUSTOM1_REGEX = $CUSTOM1_REGEX\n";
-    print "CUSTOM1_CMD   = $CUSTOM1_CMD\n";
-    print "CUSTOM2_REGEX = $CUSTOM2_REGEX\n";
-    print "CUSTOM2_CMD   = $CUSTOM2_CMD\n";
-    print "PATH          = $ENV{'PATH'}\n";
+    print "  -h                Show this text\n";
+    print "  -v                Print version information\n";
+    print "  -l                List-only mode, does not open any file; shows annotations\n";
+    print "  -L                List-only mode, does not open any file; shows command line\n";
+    print "  -b                Batch mode, processes every file in the list\n";
+    print "  -n                Only show/open notes file, i.e. annotations matching '$NOTES_REGEX'\n";
+    print "  -N                Show all but notes files; inverse of -n\n";
+    print "  -f                Only show/open real files, i.e. annotations matching '$FILE_REGEX'\n";
+    print "  -F                Show all but real files; inverse of -f\n";
+    print "  -a                Query all active tasks; clears the DEFAULT_FILTER\n";
+    print "  -A                Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
+    print "  -D                Delete the annotation rather than opening it\n";
+    print "  -r                Raw mode, opens the annotation text with your EDITOR\n";
+    print "  -m 'regex'        Only include annotations that match 'regex'\n";
+    print "  -t 'regex'        Only open files whose type (as returned by 'file') matches 'regex'\n";
+    print "  -s 'key1+,key2-'  Sort annotations by the given key which can be a taskwarrior field or\n";
+    print "                    'annot', 'label', 'entry', 'size', 'type', 'time', 'mtime' or 'atime'\n";
+    print "  -e                Force to open file with EDITOR\n";
+    print "  -x ['cmd']        Execute file, optionally prepend cmd to the command line\n";
+    print "  -i ['cmd']        Execute 'cmd <filename>' for each file and shows its output interleaved with the other output.\n";
+    print "  -c filepath       Use alternate taskopenrc file as specified by 'filepath'\n";
+    print "\n";
 
 	exit 1;
 }
