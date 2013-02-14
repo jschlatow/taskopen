@@ -131,8 +131,11 @@ $ task add Example
 
 Add an annotation which links to a file:
 .RS
-$ task 1 annotate ~/checklist.txt
+$ task 1 annotate -- ~/checklist.txt
 .RE
+
+(Note that the "--" instructs taskwarrior to take the following arguments as the description part
+without doing any parser magic. This is particularly useful to circumvent bug #819.)
 
 Open the linked file by using the task's ID:
 .RS
@@ -172,7 +175,7 @@ You can also add weblinks to a task and even mix all kinds of annotations:
 .RS
 $ task 1 annotate web: www.taskwarrior.org
 $ task 1 annotate I want to consider this
-$ task 1 annotate man: ~/Documents/manual.pdf
+$ task 1 annotate -- man: ~/Documents/manual.pdf
 .RE
 
 There are various ways to open either the URI or the pdf file. If taskopen finds more than one

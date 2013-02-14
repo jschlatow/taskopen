@@ -23,7 +23,10 @@ Add a task:
 
 Add an annotation which links to a file:
 
-	$ task 1 annotate ~/checklist.txt
+	$ task 1 annotate -- ~/checklist.txt
+
+(Note that the "--" instructs taskwarrior to take the following arguments as the description part
+without doing any parser magic. This is particularly useful to circumvent bug #819.)
 
 Open the linked file by using the task's ID:
 
@@ -54,7 +57,7 @@ You can also add weblinks to a task and even mix all kinds of annotations:
 	
 	$ task 1 annotate www.taskwarrior.org
 	$ task 1 annotate I want to consider this
-	$ task 1 annotate ~/Documents/manual.pdf
+	$ task 1 annotate -- ~/Documents/manual.pdf
 	$ taskopen 1
 
 	Please select an annotation:

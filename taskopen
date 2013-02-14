@@ -410,23 +410,7 @@ sub create_cmd {
 
     if ($FORCE->{"action"}) {
         if ($FORCE->{"action"} eq "\\del") {
-            # TODO remove as soon as tw bug #819 has been fixed
-            if ($ann->{'raw'} =~ m/(\/|\(|\))/) { # match all characters after which tw keeps adding spaces
-                my $raw = $ann->{'raw'};
-                # remove any leading or trailing special character
-                $raw =~ s/^(\/|\(|\))//g;
-                $raw =~ m/^.*(\/|\(|\))(.*)/;
-                while ($raw =~ m/^.*(\/|\(|\))(.*)/) {
-                    if ($2) {
-                        $raw = $2;
-                        last;
-                    }
-                    chop($raw);
-                }
-                return qq/$TASKBIN $ann->{"uuid"} denotate "$raw"/;
-            }
-            # END REMOVE
-            return qq/$TASKBIN $ann->{'uuid'} denotate "$ann->{'raw'}"/;
+            return qq/$TASKBIN $ann->{'uuid'} denotate -- "$ann->{'raw'}"/;
         }
         elsif ($FORCE->{"action"} eq "\\raw") {
             my $raw = raw_edit($ann->{"raw"});

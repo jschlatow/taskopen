@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.21 -->
-<!-- CreationDate: Sun Feb 10 06:55:01 2013 -->
+<!-- CreationDate: Thu Feb 14 01:13:23 2013 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -94,7 +94,12 @@ Notes file.</p>
 task add Example</p>
 
 <p style="margin-top: 1em">Add an annotation which links to
-a file: $ task 1 annotate ~/checklist.txt</p>
+a file: $ task 1 annotate -- ~/checklist.txt</p>
+
+<p style="margin-top: 1em">(Note that the &quot;--&quot;
+instructs taskwarrior to take the following arguments as the
+description part without doing any parser magic. This is
+particularly useful to circumvent bug #819.)</p>
 
 <p style="margin-top: 1em">Open the linked file by using
 the task&rsquo;s ID: $ taskopen 1</p>
@@ -134,7 +139,7 @@ kinds of annotations:</p></td>
 
 
 <p>$ task 1 annotate web: www.taskwarrior.org $ task 1
-annotate I want to consider this $ task 1 annotate man:
+annotate I want to consider this $ task 1 annotate -- man:
 ~/Documents/manual.pdf</p> </td>
 <td width="85%">
 </td></tr>
