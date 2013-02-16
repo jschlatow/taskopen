@@ -157,19 +157,21 @@ $ task 1 annotate Notes
 
 you can open and edit this file by:
 .RS
-$ taskopen 1
+$ taskopen 1 -n
 .RE
 
 which, by default, opens a file like
--I "~/tasknotes/5727f1c7-2efe-fb6b-2bac-6ce073ba95ee.txt" 
+.I "~/tasknotes/5727f1c7-2efe-fb6b-2bac-6ce073ba95ee.txt" 
 with your favourite EDITOR.
 
 .SS Multiple annotations
 You can also add weblinks to a task and even mix all kinds of annotations:
-
+.BR
 .RS
 $ task 1 annotate web: www.taskwarrior.org
+
 $ task 1 annotate I want to consider this
+
 $ task 1 annotate man: ~/Documents/manual.pdf
 .RE
 
@@ -182,6 +184,7 @@ $ taskopen 1
 Please select an annotation:
    1) web: www.taskwarrior.org
    2) man: ~/Documents/manual.pdf
+   3) Notes
 Type number(s): 
 .RE
 
