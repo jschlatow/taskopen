@@ -175,7 +175,7 @@ $ task 1 annotate man: ~/Documents/manual.pdf
 .RE
 
 There are various ways to open either the URI or the pdf file. If taskopen finds more than one
-suitable annotation, it will output a list and ask for user interaction:
+annotation matching the filter, it will output a list and ask for user interaction:
 
 .RS
 $ taskopen 1
@@ -183,12 +183,15 @@ $ taskopen 1
 Please select an annotation:
    1) web: www.taskwarrior.org
    2) man: ~/Documents/manual.pdf
-   3) Notes
+   3) ~/checklist.txt
+   4) Notes
 
 Type number(s):
 .RE
 
-However, you can directly address the desired annotation...
+Enter the number(s) of the annotation to open it, or any other character to abort. Mutliple selections can be opened in sequence, by entering a comma-separated list and/or range (as in 1,3,4 or 2-4)
+
+You can directly address the desired annotation...
 
 by providing taskopen with the corresponding label:
 
