@@ -173,6 +173,7 @@ $ task 1 annot I want to consider this
 $ task 1 ann man: ~/Documents/manual.pdf
 .RE
 
+(note: taskopen currently works only with "link-type" annotations, so the second annot above will not be listed)
 There are various ways to open either the URI or the pdf file. If taskopen finds more than one
 annotation matching the filter, it will output a list and ask for user interaction:
 
@@ -204,16 +205,10 @@ by regular expression:
 $ taskopen 1 -m Doc
 .RE
 
-by file type:
+or by file type:
 
 .RS
 $ taskopen 1 -t PDF
-.RE
-
-or by using additional taskwarrior filters:
-
-.RS
-$ taskopen 1 +bug
 .RE
 
 Filter options and taskwarrior attributes can be used in any combination.
