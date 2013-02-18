@@ -160,9 +160,8 @@ you can open and edit this file by:
 $ taskopen 1 -n
 .RE
 
-which, by default, opens a file like
+which will use your default EDITOR to open a file like
 .I "~/tasknotes/5727f1c7-2efe-fb6b-2bac-6ce073ba95ee.txt"
-with your favourite EDITOR.
 
 .SS Multiple annotations
 You can also add weblinks to a task and even mix all kinds of annotations:
@@ -191,25 +190,33 @@ Type number(s):
 
 Enter the number(s) of the annotation to open it, or any other character to abort. Mutliple selections can be opened in sequence, by entering a comma-separated list and/or range (as in 1,3,4 or 2-4)
 
-You can directly address the desired annotation...
+You can use filters to directly address the desired annotation(s)...
 
-by providing taskopen with the corresponding label:
+by label:
 
 .RS
 $ taskopen 1 \\\\web
 .RE
 
-by adding a regular expression:
+by regular expression:
 
 .RS
-$ taskopen 1 -m Documents
+$ taskopen 1 -m Doc
 .RE
 
-or by adding a file type:
+by file type:
 
 .RS
 $ taskopen 1 -t PDF
 .RE
+
+or by using additional taskwarrior filters:
+
+.RS
+$ taskopen 1 +bug
+.RE
+
+Filter options and taskwarrior attributes can be used in any combination.
 
 .SS Clean up annotations
 The -x option can be used to execute arbitrary commands. The decoded annotation, which will be a
