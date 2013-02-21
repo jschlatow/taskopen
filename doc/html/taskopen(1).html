@@ -1,5 +1,5 @@
-<!-- Creator     : groff version 1.21 -->
-<!-- CreationDate: Thu Feb 14 01:13:23 2013 -->
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 21 07:52:51 2013 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -71,7 +71,7 @@ for each file and shows its output interleaved with the
 other output. A default can be set in the file.</p>
 
 <p style="margin-top: 1em">Any argument that is not
-considered as an option or label will be passed to
+recognized as an option or label will be passed to
 taskwarrior as an additional filter, i.e. any combination of
 taskwarrior filters can be used with taskopen. The default
 filter can be specified in the file, see</p>
@@ -120,59 +120,65 @@ be customised by editing the file.</p>
 with &rsquo;Notes&rsquo;: $ task 1 annotate Notes</p>
 
 <p style="margin-top: 1em">you can open and edit this file
-by: $ taskopen 1</p>
+by: $ taskopen 1 -n</p>
 
-<p style="margin-top: 1em">which, by default, opens a file
-like -I
-&quot;~/tasknotes/5727f1c7-2efe-fb6b-2bac-6ce073ba95ee.txt&quot;
-with your favourite EDITOR.</p>
+<p style="margin-top: 1em">which will use your default
+EDITOR to open a file like</p>
 
-<table width="100%" border="0" rules="none" frame="void"
-       cellspacing="0" cellpadding="0">
-<tr valign="top" align="left">
-<td width="8%">
+<p style="margin-top: 1em">You can also add weblinks to a
+task and even mix all kinds of annotations: $ task 1
+annotate web: www.taskwarrior.org
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD $ task 1 annotate I want
+to consider this $ task 1 annotate -- man:
+~/Documents/manual.pdf =======</p>
 
+<p style="margin-top: 1em">$ task 1 annot I want to
+consider this</p>
 
-<p>You can also add weblinks to a task and even mix all
-kinds of annotations:</p></td>
-<td width="7%">
+<p style="margin-top: 1em">$ task 1 ann man:
+~/Documents/manual.pdf &gt;&gt;&gt;&gt;&gt;&gt;&gt;
+origin/master</p>
 
-
-<p>$ task 1 annotate web: www.taskwarrior.org $ task 1
-annotate I want to consider this $ task 1 annotate -- man:
-~/Documents/manual.pdf</p> </td>
-<td width="85%">
-</td></tr>
-</table>
-
-<p style="margin-top: 1em">There are various ways to open
-either the URI or the pdf file. If taskopen finds more than
-one suitable annotation, it will output a list and ask for
-user interaction:</p>
+<p style="margin-top: 1em">(note: taskopen currently works
+only with &quot;link-type&quot; annotations, so the second
+annot above will not be listed) There are various ways to
+open either the URI or the pdf file. If taskopen finds more
+than one annotation matching the filter, it will output a
+list and ask for user interaction:</p>
 
 <p style="margin-top: 1em">$ taskopen 1</p>
 
 <p style="margin-top: 1em">Please select an annotation:
 <br>
-1) web: www.taskwarrior.org <br>
-2) man: ~/Documents/manual.pdf Type number(s):</p>
+1) man: ~/Documents/manual.pdf <br>
+2) web: www.taskwarrior.org <br>
+3) ~/checklist.txt <br>
+4) Notes</p>
 
-<p style="margin-top: 1em">However, you can directly
-address the desired annotation...</p>
+<p style="margin-top: 1em">Type number(s):</p>
 
-<p style="margin-top: 1em">by providing taskopen with the
-corresponding label:</p>
+<p style="margin-top: 1em">Enter the number(s) of the
+annotation to open it, or any other character to abort.
+Multiple selections can be opened in sequence, by entering a
+comma-separated list and/or range (as in 1,3,4 or 2-4)</p>
+
+<p style="margin-top: 1em">You can use filters to directly
+address the desired annotation(s)...</p>
+
+<p style="margin-top: 1em">by label:</p>
 
 <p style="margin-top: 1em">$ taskopen 1 \\web</p>
 
-<p style="margin-top: 1em">by adding a regular
-expression:</p>
+<p style="margin-top: 1em">by regular expression:</p>
 
-<p style="margin-top: 1em">$ taskopen 1 -m Documents</p>
+<p style="margin-top: 1em">$ taskopen 1 -m Doc</p>
 
-<p style="margin-top: 1em">or by adding a file type:</p>
+<p style="margin-top: 1em">or by file type:</p>
 
 <p style="margin-top: 1em">$ taskopen 1 -t PDF</p>
+
+<p style="margin-top: 1em">Filter options and taskwarrior
+attributes can be used in any combination.</p>
 
 <p style="margin-top: 1em">The -x option can be used to
 execute arbitrary commands. The decoded annotation, which

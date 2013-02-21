@@ -102,7 +102,7 @@ for each file and shows its output interleaved with the other output. A default 
 file.
 
 .SH FILTERS
-Any argument that is not considered as an option or label will be passed to taskwarrior as an
+Any argument that is not recognized as an option or label will be passed to taskwarrior as an
 additional filter, i.e. any combination of taskwarrior filters can be used with taskopen. The
 default filter can be specified in the
 .I taskopenrc
@@ -162,53 +162,66 @@ $ task 1 annotate Notes
 
 you can open and edit this file by:
 .RS
-$ taskopen 1
+$ taskopen 1 -n
 .RE
 
-which, by default, opens a file like
--I "~/tasknotes/5727f1c7-2efe-fb6b-2bac-6ce073ba95ee.txt" 
-with your favourite EDITOR.
+which will use your default EDITOR to open a file like
+.I "~/tasknotes/5727f1c7-2efe-fb6b-2bac-6ce073ba95ee.txt"
 
 .SS Multiple annotations
 You can also add weblinks to a task and even mix all kinds of annotations:
-	
 .RS
 $ task 1 annotate web: www.taskwarrior.org
+<<<<<<< HEAD
 $ task 1 annotate I want to consider this
 $ task 1 annotate -- man: ~/Documents/manual.pdf
+=======
+
+$ task 1 annot I want to consider this
+
+$ task 1 ann man: ~/Documents/manual.pdf
+>>>>>>> origin/master
 .RE
 
+(note: taskopen currently works only with "link-type" annotations, so the second annot above will not be listed)
 There are various ways to open either the URI or the pdf file. If taskopen finds more than one
-suitable annotation, it will output a list and ask for user interaction:
+annotation matching the filter, it will output a list and ask for user interaction:
 
 .RS
 $ taskopen 1
 
 Please select an annotation:
-   1) web: www.taskwarrior.org
-   2) man: ~/Documents/manual.pdf
-Type number(s): 
+   1) man: ~/Documents/manual.pdf
+   2) web: www.taskwarrior.org
+   3) ~/checklist.txt
+   4) Notes
+
+Type number(s):
 .RE
 
-However, you can directly address the desired annotation...
+Enter the number(s) of the annotation to open it, or any other character to abort. Multiple selections can be opened in sequence, by entering a comma-separated list and/or range (as in 1,3,4 or 2-4)
 
-by providing taskopen with the corresponding label:
+You can use filters to directly address the desired annotation(s)...
+
+by label:
 
 .RS
 $ taskopen 1 \\\\web
 .RE
 
-by adding a regular expression:
+by regular expression:
 
 .RS
-$ taskopen 1 -m Documents
+$ taskopen 1 -m Doc
 .RE
 
-or by adding a file type:
+or by file type:
 
 .RS
 $ taskopen 1 -t PDF
 .RE
+
+Filter options and taskwarrior attributes can be used in any combination.
 
 .SS Clean up annotations
 The -x option can be used to execute arbitrary commands. The decoded annotation, which will be a
