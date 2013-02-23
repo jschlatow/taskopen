@@ -33,91 +33,116 @@ Valid variable names and their default values are:
 
 .SS General configuration
 .TP
-.BR BROWSER
-TODO
+.BR BROWSER=xdg-open
+The executable which will be used to open URIs.
 
 .TP
-.BR EDITOR
-TODO
+.BR EDITOR=vim
+Your preferred editor.
 
 .TP
-.BR TASKBIN
-TODO
+.BR TASKBIN=task
+The path to your taskwarrior binary.
 
 .TP
-.BR PATH_EXT
-TODO
+.BR PATH_EXT=/usr/share/taskopen/scripts
+The given path(s) will be added to taskopen's PATH variable. The default value depends on the installation path.
 
 .TP
-.BR DEBUG
-TODO
+.BR DEBUG=0
+Set this to '1' if you want to enable additional debugging output.
 
 .SS "Notes" files
 
 .TP
-.BR NOTES_FOLDER
-TODO
+.BR NOTES_FOLDER=~/tasknotes/
+The directory in which the Notes files will be stored.
 
 .TP
-.BR NOTES_EXT
-TODO
+.BR NOTES_EXT=.txt
+The file extension used for Notes files.
 
 .TP
 .BR NOTES_FILE
-TODO
+This sets the actual path of the Notes files. The string "UUID" will be replaced with the task's UUID. If not set, the value will be assembled by taking NOTES_FOLDER and NOTES_EXT: ${NOTES_FOLDER}UUID${NOTES_EXT}
 
 .TP
 .BR NOTES_CMD
-TODO
+Sets the command that will be executed to open a Notes file. If not set, the value will be assembled by taking EDITOR and NOTES_FILE: ${EDITOR} "${NOTES_FILE}".
 
 .TP
-.BR NOTES_REGEX
-TODO
+.BR NOTES_REGEX=Notes
+The regular expression which identifies an annotation as a link to the Notes file.
 
 .SS Default arguments
 
 .TP
-.BR DEFAULT_FILTER (EXCLUDE)
-TODO
+.BR DEFAULT_FILTER=status.is:pending
+The default taskwarrior filter that will be applied to all queries. Can be deactivted by using the -a or -A switches.
 
 .TP
-.BR SORT
-TODO
+.BR DEFAULT_SORT
+Specify the default sorting which may be overridden by the -s option.
 
 .TP
-.BR DEFAULT-i
-TODO
+.BR "DEFAULT-i=ls -la"
+Default command for the -i parameter which allows using -i without an argument.
 
 .TP
 .BR DEFAULT-x
-TODO
+Default command for the -x parameter which allows using -x without an argument.
 
 .SS Classification
 
 .TP
-.BR NOTES_REGEX
-TODO
+.BR BROWSER_REGEX=www|http
+The regular expression which identifies annotations openable by BROWSER.
 
 .TP
-.BR BROWSER_REGEX
-TODO
-
-.TP
-.BR FILE_REGEX
-TODO
+.BR FILE_REGEX="\(rs.|\(rs/|~"
+The regular expression that identifies file paths in annotations which will be opened by EDITOR or xdg-open.
 
 .TP
 .BR CUSTOM1_REGEX
-TODO
+The regular expression that identifies annotations openable by CUSTOM1_CMD.
 
 .TP
 .BR CUSTOM1_CMD
-TODO
+The command with which annotations matchin CUSTOM1_REGEX will be opened.
+
+.TP
+.BR CUSTOM2_REGEX
+see CUSTOM1_REGEX
+
+.TP
+.BR CUSTOM2_CMD
+see CUSTOM1_CMD
 
 .SH EXAMPLES
 
-.SS Mutt
-TODO
+.SS "Using the notes.vim plugin for Notes files"
+
+.BR NOTES_FOLDER=~/Notes/vimnotes
+.br
+.BR NOTES_EXT=""
+.br
+.BR "NOTES_CMD=vim -c \(rs\(dq:Note UUID\(rs\(dq"
+
+.IP
+The notes.vim plugin can be found at
+.I <http://peterodding.com/code/vim/notes/>
+
+.SS "Link to mutt emails"
+.BR CUSTOM1_REGEX=Message-[iI][dD]:|message:
+.br
+.BR "CUSTOM1_CMD=pipe.sh echo muttjump"
+
+.IP
+Thanks to Jostein Berntsen, the old bash version of taskopen had support for linking to your emails by using mutt. This feature can still be enabled by setting the CUSTOM1_REGEX and CUSTOM1_CMD appropriately, given that taskopen's PATH contains the path to the corresponding helper scripts (see PATH_EXT).
+
+Taskopen then uses muttjump to open the mutt mailboxes natively or in a screen window (very quick
+and effective). The muttjump can be found at
+.I <https://github.com/weisslj/muttjump>
 
 .SH "CREDITS & COPYRIGHTS"
 Copyright (C) 2010 \- 2013, J. Schlatow

@@ -110,7 +110,7 @@ NOTES_EXT=".txt"
 # Default is: status.is:pending
 #DEFAULT_FILTER=
 
-# Default command for '-S'
+# Default command for '-i'
 # Default is: ls -la
 #DEFAULT-i="ls -la"
 
