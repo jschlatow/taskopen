@@ -103,7 +103,7 @@ NOTES_EXT=".txt"
 #NOTES_CMD="vim ~/tasknotes/UUID.txt"
 
 # Specify the default sorting.
-# Default is taskwarrior's default sorting
+# Default is taskwarrior's default sorting, i.e. sorting by task IDs.
 #DEFAULT_SORT="urgency-,label,annot"
 
 # Apply a default taskwarrior filter in order to exclude certain tasks.
