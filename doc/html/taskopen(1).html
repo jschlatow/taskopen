@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Feb 25 03:12:19 2013 -->
+<!-- CreationDate: Mon Feb 25 12:49:55 2013 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -13,236 +13,584 @@
        table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
        h1      { text-align: center }
 </style>
-<title></title>
+<title>taskopen</title>
+
 </head>
 <body>
+
+<h1 align="center">taskopen</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#OPTIONS">OPTIONS</a><br>
+<a href="#FILTERS">FILTERS</a><br>
+<a href="#LABELS">LABELS</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#FILES &amp; FOLDERS">FILES &amp; FOLDERS</a><br>
+<a href="#HISTORY">HISTORY</a><br>
+<a href="#CREDITS &amp; COPYRIGHTS">CREDITS &amp; COPYRIGHTS</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+<a href="#REPORTING BUGS">REPORTING BUGS</a><br>
 
 <hr>
 
 
-<p style="margin-top: 1em">taskopen &minus; A companion
-application for taskwarrior, that facilitates opening
-annotations.</p>
+<h2>NAME
+<a name="NAME"></a>
+</h2>
 
-<p style="margin-top: 1em">Any task in taskwarrior can have
-zero-or-more annotations. Taskopen can filter, list and open
-these annotations, and can determine several things about
-them, based on clues found in the format. An annotation can
-be a line of text, it can be a link to a file, a link to a
-program, or a link to a website. If the annotation starts
-with [label: ]Notes, then taskopen will open (creating if
-necessary) a text note that is specific to the task, and is
-named UUID.txt (where UUID is replaced with the actual task
-uuid). Taskopen can be custom-configured by editing the
-file, see</p>
 
-<p style="margin-top: 1em">Show a help text. Print version
-information. Print more verbose version and environment
-information. Use alternate taskopenrc file as specified
-by</p>
+<p style="margin-left:11%; margin-top: 1em">taskopen
+&minus; A companion application for taskwarrior, that
+facilitates opening annotations.</p>
 
-<p style="margin-top: 1em">Query all active tasks; clears
-the EXCLUDE filter. Query all tasks. This includes completed
-and deleted tasks as well. Depending on the size of your
-database this may be very slow. Only show/open notes, i.e.
-annotations matching NOTES_REGEX. Show all but notes;
-inverse of -n. Only show/open real files, i.e. annotations
-matching FILE_REGEX. Show all but real files; inverse of -f.
-Only include annotations that match Only open files whose
-type (as returned by the command) matches</p>
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
 
-<p style="margin-top: 1em">Batch mode, processes every
-matching annotation. Raw mode, opens the annotation text
-with your EDITOR. Delete the annotation instead of opening
-it. Force to open the file with EDITOR. Execute file,
-optionally prepend to the command line.</p>
 
-<p style="margin-top: 1em">List-only mode, does not open
-any file. Can be combined with -L. List-only mode, does not
-open any file. Shows command line that would be executed.
-Can be combined with -l. Sort annotations by the given key
-which can be a taskwarrior field or &rsquo;annot&rsquo;,
+<p style="margin-left:11%; margin-top: 1em"><b>taskopen
+[options] [filter1 filter2 filterN] [\\label]</b></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Any task in
+taskwarrior can have zero-or-more annotations. Taskopen can
+filter, list and open these annotations, and can determine
+several things about them, based on clues found in the
+format. An annotation can be a line of text, it can be a
+link to a file, a link to a program, or a link to a website.
+If the annotation starts with [label: ]Notes, then taskopen
+will open (creating if necessary) a text note that is
+specific to the task, and is named UUID.txt (where UUID is
+replaced with the actual task uuid). Taskopen can be
+custom-configured by editing the <i>.taskopenrc</i> file,
+see <b>taskopenrc</b>(5).</p>
+
+<h2>OPTIONS
+<a name="OPTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>General
+options</b></p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p><b>&minus;h</b></p></td>
+<td width="8%"></td>
+<td width="78%">
+
+
+<p>Show a help text.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p><b>&minus;v</b></p></td>
+<td width="8%"></td>
+<td width="78%">
+
+
+<p>Print version information.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p><b>&minus;V</b></p></td>
+<td width="8%"></td>
+<td width="78%">
+
+
+<p>Print more verbose version and environment
+information.</p> </td></tr>
+</table>
+
+<p style="margin-left:11%;"><b>&minus;c
+&lt;filepath&gt;</b></p>
+
+<p style="margin-left:22%;">Use alternate taskopenrc file
+as specified by <i>filepath.</i></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Filter
+options</b></p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p><b>&minus;a</b></p></td>
+<td width="8%"></td>
+<td width="78%">
+
+
+<p>Query all active tasks; clears the EXCLUDE filter.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p><b>&minus;A</b></p></td>
+<td width="8%"></td>
+<td width="78%">
+
+
+<p>Query all tasks. This includes completed and deleted
+tasks as well. Depending on the size of your database this
+may be very slow.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p><b>&minus;n</b></p></td>
+<td width="8%"></td>
+<td width="78%">
+
+
+<p>Only show/open notes, i.e. annotations matching
+NOTES_REGEX.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p><b>&minus;N</b></p></td>
+<td width="8%"></td>
+<td width="78%">
+
+
+<p>Show all but notes; inverse of -n.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p><b>&minus;f</b></p></td>
+<td width="8%"></td>
+<td width="78%">
+
+
+<p>Only show/open real files, i.e. annotations matching
+FILE_REGEX.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p><b>&minus;F</b></p></td>
+<td width="8%"></td>
+<td width="78%">
+
+
+<p>Show all but real files; inverse of -f.</p></td></tr>
+</table>
+
+<p style="margin-left:11%;"><b>&minus;m
+&rsquo;regex&rsquo;</b></p>
+
+<p style="margin-left:22%;">Only include annotations that
+match <i>regex.</i></p>
+
+<p style="margin-left:11%;"><b>&minus;t
+&rsquo;regex&rsquo;</b></p>
+
+<p style="margin-left:22%;">Only open files whose type (as
+returned by the <i>file</i> command) matches
+<i>regex.</i></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Execution
+options</b></p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p><b>&minus;b</b></p></td>
+<td width="8%"></td>
+<td width="78%">
+
+
+<p>Batch mode, processes every matching annotation.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p><b>&minus;r</b></p></td>
+<td width="8%"></td>
+<td width="78%">
+
+
+<p>Raw mode, opens the annotation text with your
+EDITOR.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p><b>&minus;D</b></p></td>
+<td width="8%"></td>
+<td width="78%">
+
+
+<p>Delete the annotation instead of opening it.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p><b>&minus;e</b></p></td>
+<td width="8%"></td>
+<td width="78%">
+
+
+<p>Force to open the file with EDITOR.</p></td></tr>
+</table>
+
+<p style="margin-left:11%;"><b>&minus;x [cmd]</b></p>
+
+<p style="margin-left:22%;">Execute file, optionally
+prepend <i>cmd</i> to the command line.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Output
+options</b></p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p><b>&minus;l</b></p></td>
+<td width="8%"></td>
+<td width="78%">
+
+
+<p>List-only mode, does not open any file. Can be combined
+with -L.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p><b>&minus;L</b></p></td>
+<td width="8%"></td>
+<td width="78%">
+
+
+<p>List-only mode, does not open any file. Shows command
+line that would be executed. Can be combined with -l.</p></td></tr>
+</table>
+
+<p style="margin-left:11%;"><b>&minus;s
+&rsquo;key1+,key2-&rsquo;</b></p>
+
+<p style="margin-left:22%;">Sort annotations by the given
+key which can be a taskwarrior field or &rsquo;annot&rsquo;,
 &rsquo;label&rsquo;, &rsquo;entry&rsquo;,
 &rsquo;size&rsquo;, &rsquo;type&rsquo;, &rsquo;time&rsquo;,
 &rsquo;mtime&rsquo; or &rsquo;atime&rsquo;. A
 &rsquo;+&rsquo; or &rsquo;-&rsquo; may be appended to the
-field indentifier in order to specify a sort order. Execute
-for each file and shows its output interleaved with the
-other output. A default can be set in the file.</p>
+field indentifier in order to specify a sort order.</p>
 
-<p style="margin-top: 1em">Any argument that is not
-recognized as an option or label will be passed to
-taskwarrior as an additional filter, i.e. any combination of
-taskwarrior filters can be used with taskopen. The default
-filter can be specified in the file, see</p>
+<p style="margin-left:11%;"><b>-i [cmd]</b></p>
 
-<p style="margin-top: 1em">Each annotation can have a
-&quot;label&quot;, which is a leading word with a colon and
-a space</p>
+<p style="margin-left:22%;">Execute <i>cmd</i> for each
+file and shows its output interleaved with the other output.
+A default can be set in the <i>taskopenrc</i> file.</p>
 
-<p style="margin-top: 1em">&lt;label&gt;: &lt;annotation
-text&gt;</p>
+<h2>FILTERS
+<a name="FILTERS"></a>
+</h2>
 
-<p style="margin-top: 1em">The label can be used to filter
-and/or sort the listings, and (in a future version) it can
-be used as to specify how the annotation should be handled.
-The label may match the NOTES_REGEX in which case the
-annotation is considered to be a link to the corresponding
-Notes file.</p>
 
-<p style="margin-top: 1em">Create a new taskwarrior task: $
-task add Example</p>
+<p style="margin-left:11%; margin-top: 1em">Any argument
+that is not recognized as an option or label will be passed
+to taskwarrior as an additional filter, i.e. any combination
+of taskwarrior filters can be used with taskopen. The
+default filter can be specified in the <i>taskopenrc</i>
+file, see <b>taskopenrc</b>(5).</p>
 
-<p style="margin-top: 1em">Add an annotation which links to
-a file: $ task 1 annotate -- ~/checklist.txt</p>
+<h2>LABELS
+<a name="LABELS"></a>
+</h2>
 
-<p style="margin-top: 1em">(Note that the &quot;--&quot;
-instructs taskwarrior to take the following arguments as the
-description part without doing any parser magic. This is
-particularly useful to circumvent bug #819.)</p>
 
-<p style="margin-top: 1em">Open the linked file by using
-the task&rsquo;s ID: $ taskopen 1</p>
+<p style="margin-left:11%; margin-top: 1em">Each annotation
+can have a &quot;label&quot;, which is a leading word with a
+colon and a space</p>
 
-<p style="margin-top: 1em">or by a filter expression: $
-taskopen Example</p>
+<p style="margin-left:22%; margin-top: 1em">&lt;label&gt;:
+&lt;annotation text&gt;</p>
 
-<p style="margin-top: 1em">Inspired by Alan Bowens
-&rsquo;tasknote&rsquo; you can add a default notes file to a
-task. These files will be automatically created by the
-task&rsquo;s UUID and don&rsquo;t require to annotate the
-task with a specific file path. The folder in which these
-files will be stored, the triggering text (default:
-&quot;Notes&quot;) as well as the command to be executed can
-be customised by editing the file.</p>
+<p style="margin-left:11%; margin-top: 1em">The label can
+be used to filter and/or sort the listings, and (in a future
+version) it can be used as to specify how the annotation
+should be handled. The label may match the NOTES_REGEX in
+which case the annotation is considered to be a link to the
+corresponding Notes file.</p>
 
-<p style="margin-top: 1em">As soon as you annotate a task
-with &rsquo;Notes&rsquo;: $ task 1 annotate Notes</p>
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
 
-<p style="margin-top: 1em">you can open and edit this file
-by: $ taskopen 1 -n</p>
 
-<p style="margin-top: 1em">which will use your default
-EDITOR to open a file like</p>
+<p style="margin-left:11%; margin-top: 1em"><b>Basic
+usage</b> <br>
+Create a new taskwarrior task:</p>
 
-<p style="margin-top: 1em">You can also add weblinks to a
-task and even mix all kinds of annotations: $ task 1
-annotate web: www.taskwarrior.org</p>
+<p style="margin-left:22%;">$ task add Example</p>
 
-<p style="margin-top: 1em">$ task 1 annot I want to
-consider this</p>
+<p style="margin-left:11%; margin-top: 1em">Add an
+annotation which links to a file:</p>
 
-<p style="margin-top: 1em">$ task 1 ann -- man:
-~/Documents/manual.pdf</p>
+<p style="margin-left:22%;">$ task 1 annotate --
+~/checklist.txt</p>
 
-<p style="margin-top: 1em">(note: taskopen currently works
-only with &quot;link-type&quot; annotations, so the second
-annot above will not be listed) There are various ways to
-open either the URI or the pdf file. If taskopen finds more
-than one annotation matching the filter, it will output a
-list and ask for user interaction:</p>
+<p style="margin-left:11%; margin-top: 1em">(Note that the
+&quot;--&quot; instructs taskwarrior to take the following
+arguments as the description part without doing any parser
+magic. This is particularly useful to circumvent bug
+#819.)</p>
 
-<p style="margin-top: 1em">$ taskopen 1</p>
+<p style="margin-left:11%; margin-top: 1em">Open the linked
+file by using the task&rsquo;s ID:</p>
 
-<p style="margin-top: 1em">Please select an annotation:
-<br>
+<p style="margin-left:22%;">$ taskopen 1</p>
+
+<p style="margin-left:11%; margin-top: 1em">or by a filter
+expression:</p>
+
+<p style="margin-left:22%;">$ taskopen Example</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Default
+notes</b> <br>
+Inspired by Alan Bowens &rsquo;tasknote&rsquo; you can add a
+default notes file to a task. These files will be
+automatically created by the task&rsquo;s UUID and
+don&rsquo;t require to annotate the task with a specific
+file path. The folder in which these files will be stored,
+the triggering text (default: &quot;Notes&quot;) as well as
+the command to be executed can be customised by editing the
+<i>taskopenrc</i> file.</p>
+
+<p style="margin-left:11%; margin-top: 1em">As soon as you
+annotate a task with &rsquo;Notes&rsquo;:</p>
+
+<p style="margin-left:22%;">$ task 1 annotate Notes</p>
+
+<p style="margin-left:11%; margin-top: 1em">you can open
+and edit this file by:</p>
+
+<p style="margin-left:22%;">$ taskopen 1 -n</p>
+
+<p style="margin-left:11%; margin-top: 1em">which will use
+your default EDITOR to open a file like
+<i>~/tasknotes/5727f1c7-2efe-fb6b-2bac-6ce073ba95ee.txt</i></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Multiple
+annotations</b> <br>
+You can also add weblinks to a task and even mix all kinds
+of annotations:</p>
+
+<p style="margin-left:22%;">$ task 1 annotate web:
+www.taskwarrior.org</p>
+
+<p style="margin-left:22%; margin-top: 1em">$ task 1 annot
+I want to consider this</p>
+
+<p style="margin-left:22%; margin-top: 1em">$ task 1 ann --
+man: ~/Documents/manual.pdf</p>
+
+<p style="margin-left:11%; margin-top: 1em">(note: taskopen
+currently works only with &quot;link-type&quot; annotations,
+so the second annot above will not be listed) There are
+various ways to open either the URI or the pdf file. If
+taskopen finds more than one annotation matching the filter,
+it will output a list and ask for user interaction:</p>
+
+<p style="margin-left:22%; margin-top: 1em">$ taskopen
+1</p>
+
+<p style="margin-left:22%; margin-top: 1em">Please select
+an annotation: <br>
 1) man: ~/Documents/manual.pdf <br>
 2) web: www.taskwarrior.org <br>
 3) Notes <br>
 4) ~/checklist.txt</p>
 
-<p style="margin-top: 1em">Type number(s):</p>
+<p style="margin-left:22%; margin-top: 1em">Type
+number(s):</p>
 
-<p style="margin-top: 1em">Enter the number(s) of the
-annotation to open it, or any other character to abort.
-Multiple selections can be opened in sequence, by entering a
-comma-separated list and/or range (as in 1,3,4 or 2-4)</p>
+<p style="margin-left:11%; margin-top: 1em">Enter the
+number(s) of the annotation to open it, or any other
+character to abort. Multiple selections can be opened in
+sequence, by entering a comma-separated list and/or range
+(as in 1,3,4 or 2-4)</p>
 
-<p style="margin-top: 1em">You can use filters to directly
-address the desired annotation(s)...</p>
+<p style="margin-left:11%; margin-top: 1em">You can use
+filters to directly address the desired annotation(s)...</p>
 
-<p style="margin-top: 1em">by label:</p>
+<p style="margin-left:11%; margin-top: 1em">by label:</p>
 
-<p style="margin-top: 1em">$ taskopen 1 \\web</p>
+<p style="margin-left:22%; margin-top: 1em">$ taskopen 1
+\\web</p>
 
-<p style="margin-top: 1em">by regular expression:</p>
+<p style="margin-left:11%; margin-top: 1em">by regular
+expression:</p>
 
-<p style="margin-top: 1em">$ taskopen 1 -m Doc</p>
+<p style="margin-left:22%; margin-top: 1em">$ taskopen 1 -m
+Doc</p>
 
-<p style="margin-top: 1em">or by file type:</p>
+<p style="margin-left:11%; margin-top: 1em">or by file
+type:</p>
 
-<p style="margin-top: 1em">$ taskopen 1 -t PDF</p>
+<p style="margin-left:22%; margin-top: 1em">$ taskopen 1 -t
+PDF</p>
 
-<p style="margin-top: 1em">Filter options and taskwarrior
-attributes can be used in any combination.</p>
+<p style="margin-left:11%; margin-top: 1em">Filter options
+and taskwarrior attributes can be used in any
+combination.</p>
 
-<p style="margin-top: 1em">The -x option can be used to
-execute arbitrary commands. The decoded annotation, which
-will be a file path in most cases, will be passed as a
-command line argument. This enables the user to do fancy
-things like removing unused files from the filesystem:</p>
+<p style="margin-left:11%; margin-top: 1em"><b>Clean up
+annotations</b> <br>
+The -x option can be used to execute arbitrary commands. The
+decoded annotation, which will be a file path in most cases,
+will be passed as a command line argument. This enables the
+user to do fancy things like removing unused files from the
+filesystem:</p>
 
-<p style="margin-top: 1em">$ taskopen -x &rsquo;rm&rsquo;
--A status.is:deleted</p>
+<p style="margin-left:22%; margin-top: 1em">$ taskopen -x
+&rsquo;rm&rsquo; -A status.is:deleted</p>
 
-<p style="margin-top: 1em">This command will show you a
-list of annotations of any deleted task. You can then select
-one or even multiple items of the list in order to remove
-the corresponding file from the filesystem.</p>
+<p style="margin-left:11%; margin-top: 1em">This command
+will show you a list of annotations of any deleted task. You
+can then select one or even multiple items of the list in
+order to remove the corresponding file from the
+filesystem.</p>
 
-<p style="margin-top: 1em">You may also decide to precheck
-the command that is going to be executed by taskopen by
-adding the -L argument.</p>
+<p style="margin-left:11%; margin-top: 1em">You may also
+decide to precheck the command that is going to be executed
+by taskopen by adding the -L argument.</p>
 
-<p style="margin-top: 1em">If you are sure that you want to
-execute the command on every file you may consider
-activating the batch mode by adding the -b option. Taskopen
-will then skip the user interaction and automatically select
-all entries from the list.</p>
+<p style="margin-left:11%; margin-top: 1em">If you are sure
+that you want to execute the command on every file you may
+consider activating the batch mode by adding the -b option.
+Taskopen will then skip the user interaction and
+automatically select all entries from the list.</p>
 
-<p style="margin-top: 1em">Interleaving of arbitrary
-information can be achieved by using the argument. This is
+
+<p style="margin-left:11%; margin-top: 1em"><b>Output/interleave
+additional information</b> <br>
+Interleaving of arbitrary information can be achieved by
+using the <i>-i &rsquo;cmd&rsquo;</i> argument. This is
 particularly useful when you are using rather general
-filters. The provided will be executed for every annotation
-that is going to be listed and the output of this command
-will be interleaved with the list items. Taskopen comes with
-a number of helper scripts that may be useful for this, e.g.
-for peeking into all your Notes files:</p>
+filters. The provided <i>cmd</i> will be executed for every
+annotation that is going to be listed and the output of this
+command will be interleaved with the list items. Taskopen
+comes with a number of helper scripts that may be useful for
+this, e.g. for peeking into all your Notes files:</p>
 
-<p style="margin-top: 1em">$ taskopen -i &rsquo;headindent
--n 5&rsquo; -n</p>
+<p style="margin-left:22%; margin-top: 1em">$ taskopen -i
+&rsquo;headindent -n 5&rsquo; -n</p>
 
-<p style="margin-top: 1em">~/.taskopenrc User configuration
-file - see also This can be overriden by the -c
+<h2>FILES &amp; FOLDERS
+<a name="FILES &amp; FOLDERS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">~/.taskopenrc</p>
+
+<p style="margin-left:22%;">User configuration file - see
+also <b>taskopenrc</b>(5). This can be overriden by the -c
 argument.</p>
 
-<p style="margin-top: 1em">~/.taskopen/scripts/
-User-specific extension scripts. Will be contained in
-taskopen&rsquo;s PATH variable by default.</p>
+<p style="margin-left:11%;">~/.taskopen/scripts/</p>
 
-<p style="margin-top: 1em">The first release of taskopen
+<p style="margin-left:22%;">User-specific extension
+scripts. Will be contained in taskopen&rsquo;s PATH variable
+by default.</p>
+
+<h2>HISTORY
+<a name="HISTORY"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>2010 &minus;
+2012</b></p>
+
+<p style="margin-left:22%;">The first release of taskopen
 was a quite simple bash script.</p>
 
-<p style="margin-top: 1em">Re-implementation of taskopen in
-perl.</p>
+<p style="margin-left:11%;"><b>early 2013</b></p>
 
-<p style="margin-top: 1em">Copyright (C) 2010 &minus; 2013,
-J. Schlatow</p>
+<p style="margin-left:22%;">Re-implementation of taskopen
+in perl.</p>
 
-<p style="margin-top: 1em">Taskopen is distributed under
-the GNU General Public License. See for more
-information.</p>
+<h2>CREDITS &amp; COPYRIGHTS
+<a name="CREDITS &amp; COPYRIGHTS"></a>
+</h2>
 
-<p style="margin-top: 1em">For more information regarding
-taskopen, see the following:</p>
 
-<p style="margin-top: 1em">The official site at</p>
+<p style="margin-left:11%; margin-top: 1em">Copyright (C)
+2010 &minus; 2013, J. Schlatow</p>
 
-<p style="margin-top: 1em">The official code repository
+<p style="margin-left:11%; margin-top: 1em">Taskopen is
+distributed under the GNU General Public License. See
+<i>http://www.opensource.org/licenses/gpl-2.0.php</i> for
+more information.</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>taskopenrc</b>(5)</p>
+
+<p style="margin-left:11%; margin-top: 1em">For more
+information regarding taskopen, see the following: <br>
+The official site at</p>
+
+
+<p style="margin-left:22%;"><i>&lt;https://github.com/ValiValpas/taskopen/&gt;</i></p>
+
+<p style="margin-left:11%;">The official code repository
 at</p>
 
-<p style="margin-top: 1em">Bugs in taskopen may be reported
-to the issue-tracker at</p>
+
+<p style="margin-left:22%;"><i>&lt;git://github.com/ValiValpas/taskopen.git&gt;</i></p>
+
+<h2>REPORTING BUGS
+<a name="REPORTING BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Bugs in
+taskopen may be reported to the issue-tracker at</p>
+
+
+<p style="margin-left:22%;"><i>&lt;https://github.com/ValiValpas/taskopen/issues&gt;</i></p>
 <hr>
 </body>
 </html>

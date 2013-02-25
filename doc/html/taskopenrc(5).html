@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Feb 25 03:12:19 2013 -->
+<!-- CreationDate: Mon Feb 25 12:49:55 2013 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -13,134 +13,274 @@
        table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
        h1      { text-align: center }
 </style>
-<title></title>
+<title>taskopenrc</title>
+
 </head>
 <body>
+
+<h1 align="center">taskopenrc</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#CONFIGURATION VARIABLES">CONFIGURATION VARIABLES</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#CREDITS &amp; COPYRIGHTS">CREDITS &amp; COPYRIGHTS</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+<a href="#REPORTING BUGS">REPORTING BUGS</a><br>
 
 <hr>
 
 
-<p style="margin-top: 1em">taskopenrc &minus; Configuration
-file for the command</p>
+<h2>NAME
+<a name="NAME"></a>
+</h2>
 
-<p style="margin-top: 1em">obtains its configuration data
-from a file called in the user&rsquo;s home directory.</p>
 
-<p style="margin-top: 1em">Each line in the taskopenrc file
-is either an assignment, a comment or empty.</p>
+<p style="margin-left:11%; margin-top: 1em">taskopenrc
+&minus; Configuration file for the <b>taskopen</b>(1)
+command</p>
 
-<p style="margin-top: 1em">An assignment consists of a
-variable name and a value separated by the equal sign
-(&quot;=&quot;):</p>
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
 
-<p style="margin-top: 1em">&lt;variable
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>~/.taskopenrc
+<br>
+taskopen -c /path/to/taskopenrc</b></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>taskopen</b>
+obtains its configuration data from a file called
+<i>~/.taskopenrc</i> in the user&rsquo;s home directory.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Each line in
+the taskopenrc file is either an assignment, a comment or
+empty.</p>
+
+<p style="margin-left:11%; margin-top: 1em">An assignment
+consists of a variable name and a value separated by the
+equal sign (&quot;=&quot;):</p>
+
+<p style="margin-left:22%; margin-top: 1em">&lt;variable
 name&gt;=&lt;value&gt;</p>
 
-<p style="margin-top: 1em">where the variable name is one
-of the names below.</p>
+<p style="margin-left:11%; margin-top: 1em">where the
+variable name is one of the names below.</p>
 
-<p style="margin-top: 1em">A hash mark (&quot;#&quot;) can
-be used to mark the beginning of a comment line.</p>
+<p style="margin-left:11%; margin-top: 1em">A hash mark
+(&quot;#&quot;) can be used to mark the beginning of a
+comment line.</p>
 
-<p style="margin-top: 1em">Valid variable names and their
-default values are:</p>
+<h2>CONFIGURATION VARIABLES
+<a name="CONFIGURATION VARIABLES"></a>
+</h2>
 
-<p style="margin-top: 1em">The executable which will be
+
+<p style="margin-left:11%; margin-top: 1em">Valid variable
+names and their default values are:</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>General
+configuration <br>
+BROWSER=xdg-open</b></p>
+
+<p style="margin-left:22%;">The executable which will be
 used to open URIs.</p>
 
-<p style="margin-top: 1em">Your preferred editor.</p>
+<p style="margin-left:11%;"><b>EDITOR=vim</b></p>
 
-<p style="margin-top: 1em">The path to your taskwarrior
+<p style="margin-left:22%;">Your preferred editor.</p>
+
+<p style="margin-left:11%;"><b>TASKBIN=task</b></p>
+
+<p style="margin-left:22%;">The path to your taskwarrior
 binary.</p>
 
-<p style="margin-top: 1em">The given path(s) will be
+
+<p style="margin-left:11%;"><b>PATH_EXT=/usr/share/taskopen/scripts</b></p>
+
+<p style="margin-left:22%;">The given path(s) will be
 prepended to taskopen&rsquo;s PATH variable. The default
 value depends on the installation path.</p>
 
-<p style="margin-top: 1em">Set this to &rsquo;1&rsquo; if
+<p style="margin-left:11%;"><b>DEBUG=0</b></p>
+
+<p style="margin-left:22%;">Set this to &rsquo;1&rsquo; if
 you want to enable additional debugging output.</p>
 
-<p style="margin-top: 1em">The directory in which the Notes
-files will be stored.</p>
+<p style="margin-left:11%; margin-top: 1em"><b>Notes files
+<br>
+NOTES_FOLDER=~/tasknotes/</b></p>
 
-<p style="margin-top: 1em">The file extension used for
+<p style="margin-left:22%;">The directory in which the
+Notes files will be stored.</p>
+
+<p style="margin-left:11%;"><b>NOTES_EXT=.txt</b></p>
+
+<p style="margin-left:22%;">The file extension used for
 Notes files.</p>
 
-<p style="margin-top: 1em">This sets the actual path of the
-Notes files. The string &quot;UUID&quot; will be replaced
-with the task&rsquo;s UUID. If not set, the value will be
-assembled by taking NOTES_FOLDER and NOTES_EXT:
+<p style="margin-left:11%;"><b>NOTES_FILE</b></p>
+
+<p style="margin-left:22%;">This sets the actual path of
+the Notes files. The string &quot;UUID&quot; will be
+replaced with the task&rsquo;s UUID. If not set, the value
+will be assembled by taking NOTES_FOLDER and NOTES_EXT:
 ${NOTES_FOLDER}UUID${NOTES_EXT}</p>
 
-<p style="margin-top: 1em">Sets the command that will be
+<p style="margin-left:11%;"><b>NOTES_CMD</b></p>
+
+<p style="margin-left:22%;">Sets the command that will be
 executed to open a Notes file. If not set, the value will be
 assembled by taking EDITOR and NOTES_FILE: ${EDITOR}
 &quot;${NOTES_FILE}&quot;.</p>
 
-<p style="margin-top: 1em">The regular expression which
+<p style="margin-left:11%;"><b>NOTES_REGEX=Notes</b></p>
+
+<p style="margin-left:22%;">The regular expression which
 identifies an annotation as a link to the Notes file.</p>
 
-<p style="margin-top: 1em">The default taskwarrior filter
+<p style="margin-left:11%; margin-top: 1em"><b>Default
+arguments <br>
+DEFAULT_FILTER=status.is:pending</b></p>
+
+<p style="margin-left:22%;">The default taskwarrior filter
 that will be applied to all queries. Can be deactivted by
 using the -a or -A switches.</p>
 
-<p style="margin-top: 1em">Specify the default sorting
+<p style="margin-left:11%;"><b>DEFAULT_SORT</b></p>
+
+<p style="margin-left:22%;">Specify the default sorting
 which may be overridden by the -s option.</p>
 
-<p style="margin-top: 1em">Default command for the -i
+<p style="margin-left:11%;"><b>DEFAULT-i=ls -la</b></p>
+
+<p style="margin-left:22%;">Default command for the -i
 parameter which allows using -i without an argument.</p>
 
-<p style="margin-top: 1em">Default command for the -x
+<p style="margin-left:11%;"><b>DEFAULT-x</b></p>
+
+<p style="margin-left:22%;">Default command for the -x
 parameter which allows using -x without an argument.</p>
 
-<p style="margin-top: 1em">The regular expression which
+
+<p style="margin-left:11%; margin-top: 1em"><b>Classification
+<br>
+BROWSER_REGEX=www|http</b></p>
+
+<p style="margin-left:22%;">The regular expression which
 identifies annotations openable by BROWSER.</p>
 
-<p style="margin-top: 1em">The regular expression that
+
+<p style="margin-left:11%;"><b>FILE_REGEX=&quot;\.|\/|~&quot;</b></p>
+
+<p style="margin-left:22%;">The regular expression that
 identifies file paths in annotations which will be opened by
 EDITOR or xdg-open.</p>
 
-<p style="margin-top: 1em">The regular expression that
+<p style="margin-left:11%;"><b>CUSTOM1_REGEX</b></p>
+
+<p style="margin-left:22%;">The regular expression that
 identifies annotations openable by CUSTOM1_CMD.</p>
 
-<p style="margin-top: 1em">The command with which
+<p style="margin-left:11%;"><b>CUSTOM1_CMD</b></p>
+
+<p style="margin-left:22%;">The command with which
 annotations matchin CUSTOM1_REGEX will be opened.</p>
 
-<p style="margin-top: 1em">see CUSTOM1_REGEX</p>
+<p style="margin-left:11%;"><b>CUSTOM2_REGEX</b></p>
 
-<p style="margin-top: 1em">see CUSTOM1_CMD</p>
+<p style="margin-left:22%;">see CUSTOM1_REGEX</p>
 
-<p style="margin-top: 1em">The notes.vim plugin can be
-found at</p>
+<p style="margin-left:11%;"><b>CUSTOM2_CMD</b></p>
 
-<p style="margin-top: 1em">Thanks to Jostein Berntsen, the
-old bash version of taskopen had support for linking to your
-emails by using mutt. This feature can still be enabled by
-setting the CUSTOM1_REGEX and CUSTOM1_CMD appropriately,
-given that taskopen&rsquo;s PATH contains the path to the
-corresponding helper scripts (see PATH_EXT).</p>
+<p style="margin-left:22%;">see CUSTOM1_CMD</p>
 
-<p style="margin-top: 1em">Taskopen then uses muttjump to
-open the mutt mailboxes natively or in a screen window (very
-quick and effective). The muttjump can be found at</p>
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
 
-<p style="margin-top: 1em">Copyright (C) 2010 &minus; 2013,
-J. Schlatow</p>
 
-<p style="margin-top: 1em">Taskopen is distributed under
-the GNU General Public License. See for more
-information.</p>
+<p style="margin-left:11%; margin-top: 1em"><b>Using the
+notes.vim plugin for Notes files <br>
+NOTES_FOLDER=~/Notes/vimnotes <br>
+NOTES_EXT=&quot;&quot; <br>
+NOTES_CMD=vim -c \&quot;:Note UUID\&quot;</b></p>
 
-<p style="margin-top: 1em">For more information regarding
-taskopen, see the following:</p>
+<p style="margin-left:22%; margin-top: 1em">The notes.vim
+plugin can be found at
+<i>&lt;http://peterodding.com/code/vim/notes/&gt;</i></p>
 
-<p style="margin-top: 1em">The official site at</p>
+<p style="margin-left:11%; margin-top: 1em"><b>Link to mutt
+emails <br>
+CUSTOM1_REGEX=Message-[iI][dD]:|message: <br>
+CUSTOM1_CMD=pipe.sh echo muttjump</b></p>
 
-<p style="margin-top: 1em">The official code repository
+<p style="margin-left:22%; margin-top: 1em">Thanks to
+Jostein Berntsen, the old bash version of taskopen had
+support for linking to your emails by using mutt. This
+feature can still be enabled by setting the CUSTOM1_REGEX
+and CUSTOM1_CMD appropriately, given that taskopen&rsquo;s
+PATH contains the path to the corresponding helper scripts
+(see PATH_EXT).</p>
+
+<p style="margin-left:22%; margin-top: 1em">Taskopen then
+uses muttjump to open the mutt mailboxes natively or in a
+screen window (very quick and effective). The muttjump can
+be found at
+<i>&lt;https://github.com/weisslj/muttjump&gt;</i></p>
+
+<h2>CREDITS &amp; COPYRIGHTS
+<a name="CREDITS &amp; COPYRIGHTS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright (C)
+2010 &minus; 2013, J. Schlatow</p>
+
+<p style="margin-left:11%; margin-top: 1em">Taskopen is
+distributed under the GNU General Public License. See
+<i>http://www.opensource.org/licenses/gpl-2.0.php</i> for
+more information.</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>taskopen</b>(1)</p>
+
+<p style="margin-left:11%; margin-top: 1em">For more
+information regarding taskopen, see the following: <br>
+The official site at</p>
+
+
+<p style="margin-left:22%;"><i>&lt;https://github.com/ValiValpas/taskopen/&gt;</i></p>
+
+<p style="margin-left:11%;">The official code repository
 at</p>
 
-<p style="margin-top: 1em">Bugs in taskopen may be reported
-to the issue-tracker at</p>
+
+<p style="margin-left:22%;"><i>&lt;git://github.com/ValiValpas/taskopen.git&gt;</i></p>
+
+<h2>REPORTING BUGS
+<a name="REPORTING BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Bugs in
+taskopen may be reported to the issue-tracker at</p>
+
+
+<p style="margin-left:22%;"><i>&lt;https://github.com/ValiValpas/taskopen/issues&gt;</i></p>
 <hr>
 </body>
 </html>
