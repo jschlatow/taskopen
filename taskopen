@@ -33,7 +33,7 @@ use strict;
 use warnings;
 
 # DON'T TOUCH THE FOLLOWING LINES
-my $VERSION="v1.0-devel-46-g57ead8d";
+my $VERSION="v1.0";
 my $REVNUM="154";
 my $REVHASH="57ead8d";
 # END-DON'T-TOUCH
