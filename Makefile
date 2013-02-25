@@ -19,6 +19,6 @@ install: taskopen.pl
 	install -m 755 scripts/* $(DESTDIR)/$(PREFIX)/share/taskopen/scripts/
 
 clean:
-	rm taskopen.pl
+	rm -f taskopen.pl
 
 .PHONY: install clean
