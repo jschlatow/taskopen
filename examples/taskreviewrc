@@ -1,5 +1,10 @@
-#- taskreviewrc - Review configuration file
-
+#- taskreviewrc - Review configuration file with instructions
+#
+# Intended as basis for a daily/ weekly/ project task review process.
+# Using UUID.review.txt files as review log files, and using their access/ modification times 
+# to drive the review sequencing logic, as opposed to using review-specific date-stamps, UDAs, tags
+# or other taskwarrior attributes. 
+#
 # Add an alias to taskrc:
 # alias.review=taskopen -c ~/.taskreviewrc -n
 #
