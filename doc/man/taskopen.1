@@ -79,7 +79,7 @@ Force to open the file with EDITOR.
 .BR "\-x [cmd]"
 Execute file, optionally prepend
 .I cmd
-to the command line.
+to the command line. See USER COMMANDS for further DETAILS
 
 
 .SS Output options
@@ -99,7 +99,7 @@ Execute
 .I cmd
 for each file and shows its output interleaved with the other output. A default can be set in the
 .I taskopenrc
-file.
+file. See USER COMMANDS for further details.
 
 .SH FILTERS
 Any argument that is not recognized as an option or label will be passed to taskwarrior as an
@@ -119,6 +119,38 @@ Each annotation can have a "label", which is a leading word with a colon and a s
 The label can be used to filter and/or sort the listings, and (in a future version) it can be used
 as to specify how the annotation should be handled. The label may match the NOTES_REGEX in which
 case the annotation is considered to be a link to the corresponding Notes file.
+
+.SH "USER COMMANDS"
+A user command can be specified on the command line by \-i, \-x or in the taskopenrc file. By
+default, the decoded annotation (usually a file path) will be passed as an argument to the user-specified command. This
+behaviour can be overridden by using one or more of the following environment variables explicitly:
+
+.TP
+.BR $FILE
+Contains the decoded annotation (usually a file path or a URI).
+
+.TP
+.BR $UUID
+Contains the UUID of the corresponding task.
+
+.TP
+.BR $ID
+Contains the ID of the corresponding task; may be empty.
+
+.TP
+.BR $LABEL
+Contains the LABEL text of the annotation; may be empty.
+
+.TP
+.BR $ANNOTATION
+Contains the undecoded annotation text.
+
+.RE
+This way, for instance, you can choose to pass the UUID instead of the file path to you command like
+this:
+.RS
+$ taskopen -i 'echo $UUID'
+.RE
 
 .SH EXAMPLES
 

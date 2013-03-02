@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Feb 25 12:49:55 2013 -->
+<!-- CreationDate: Sat Mar  2 07:08:46 2013 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -26,6 +26,7 @@
 <a href="#OPTIONS">OPTIONS</a><br>
 <a href="#FILTERS">FILTERS</a><br>
 <a href="#LABELS">LABELS</a><br>
+<a href="#USER COMMANDS">USER COMMANDS</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#FILES &amp; FOLDERS">FILES &amp; FOLDERS</a><br>
 <a href="#HISTORY">HISTORY</a><br>
@@ -268,7 +269,8 @@ EDITOR.</p> </td></tr>
 <p style="margin-left:11%;"><b>&minus;x [cmd]</b></p>
 
 <p style="margin-left:22%;">Execute file, optionally
-prepend <i>cmd</i> to the command line.</p>
+prepend <i>cmd</i> to the command line. See USER COMMANDS
+for further DETAILS</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>Output
 options</b></p>
@@ -316,7 +318,8 @@ field indentifier in order to specify a sort order.</p>
 
 <p style="margin-left:22%;">Execute <i>cmd</i> for each
 file and shows its output interleaved with the other output.
-A default can be set in the <i>taskopenrc</i> file.</p>
+A default can be set in the <i>taskopenrc</i> file. See USER
+COMMANDS for further details.</p>
 
 <h2>FILTERS
 <a name="FILTERS"></a>
@@ -348,6 +351,82 @@ version) it can be used as to specify how the annotation
 should be handled. The label may match the NOTES_REGEX in
 which case the annotation is considered to be a link to the
 corresponding Notes file.</p>
+
+<h2>USER COMMANDS
+<a name="USER COMMANDS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">A user command
+can be specified on the command line by &minus;i, &minus;x
+or in the taskopenrc file. By default, the decoded
+annotation (usually a file path) will be passed as an
+argument to the user-specified command. This behaviour can
+be overridden by using one or more of the following
+environment variables explicitly:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="9%">
+
+
+<p><b>$FILE</b></p></td>
+<td width="2%"></td>
+<td width="78%">
+
+
+<p>Contains the decoded annotation (usually a file path or
+a URI).</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="9%">
+
+
+<p><b>$UUID</b></p></td>
+<td width="2%"></td>
+<td width="78%">
+
+
+<p>Contains the UUID of the corresponding task.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="9%">
+
+
+<p><b>$ID</b></p></td>
+<td width="2%"></td>
+<td width="78%">
+
+
+<p>Contains the ID of the corresponding task; may be
+empty.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="9%">
+
+
+<p><b>$LABEL</b></p></td>
+<td width="2%"></td>
+<td width="78%">
+
+
+<p>Contains the LABEL text of the annotation; may be
+empty.</p> </td></tr>
+</table>
+
+<p style="margin-left:11%;"><b>$ANNOTATION</b></p>
+
+<p style="margin-left:22%;">Contains the undecoded
+annotation text.</p>
+
+<p style="margin-left:11%; margin-top: 1em">This way, for
+instance, you can choose to pass the UUID instead of the
+file path to you command like this:</p>
+
+<p style="margin-left:22%;">$ taskopen -i &rsquo;echo
+$UUID&rsquo;</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>

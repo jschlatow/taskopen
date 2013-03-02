@@ -87,7 +87,7 @@ TASKBIN='task'
 # If you sync tasks NOTES_FOLDER should be a location that syncs and is available to
 # other computers, i.e. /users/dropbox/tasknotes
 # NOTES_FOLDER to store notes in, must already exist!
-NOTES_FOLDER="~/tasknotes/"
+NOTES_FOLDER="$HOME/tasknotes/"
 
 # Preferred extension for tasknotes
 NOTES_EXT=".txt"
@@ -95,12 +95,12 @@ NOTES_EXT=".txt"
 # Path to notes file. UUID will be replaced with the actual uuid of
 # the task. If NOTES_CMD 
 # Default is: ${NOTES_FOLDER}UUID${NOTES_EXT}
-#NOTES_FILE="~/tasknotes/UUID.txt"
+#NOTES_FILE="$HOME/tasknotes/UUID.txt"
 
 # Command that opens notes. UUID will be replaced with the actual uuid of 
 # the task.
 # Default is: $EDITOR $NOTES_FILE
-#NOTES_CMD="vim ~/tasknotes/UUID.txt"
+#NOTES_CMD="vim "$HOME/tasknotes/$UUID.txt""
 
 # Specify the default sorting.
 # Default is taskwarrior's default sorting, i.e. sorting by task IDs.
@@ -212,7 +212,7 @@ if (exists $config{"NOTES_CMD"}) {
     $NOTES_CMD = $config{"NOTES_CMD"};
 }
 else {
-    $NOTES_CMD = "$EDITOR $NOTES_FILE";
+    $NOTES_CMD = qq/$EDITOR \"$NOTES_FILE\"/;
 }
 
 my $EXCLUDE;
@@ -254,7 +254,8 @@ if (exists $config{"DEFAULT-x"}) {
     $DEFAULT_x = $config{"DEFAULT-x"};
 }
 else {
-    $DEFAULT_x = qq/$ENV{"SHELL"} -c/;
+#    $DEFAULT_x = qq/$ENV{"SHELL"} -c/;
+    $DEFAULT_x = "\$FILE";
 }
 
 my $NOTES_REGEX;
@@ -380,6 +381,36 @@ sub diag {
     print "\n";
 }
 
+sub execute {
+    _execute(0, $_[0])
+}
+
+sub execute_fork {
+    _execute(1, $_[0])
+}
+
+sub _execute {
+    my $fork = $_[0];
+    my $cmd  = $_[1];
+
+    if ($DEBUG > 0) {
+        if ($fork > 0) {
+            print "forking: ";
+        }
+        else {
+            print "executing: ";
+        }
+        print "$cmd\n";
+    }
+
+    if ($fork > 0) {
+        system($cmd);
+    }
+    else {
+        exec($cmd);
+    }
+}
+
 sub parse_number {
     my $input = $_[0];
     my $max   = $_[1];
@@ -426,7 +457,7 @@ sub get_filepath {
     
     if ($file =~ m/^$NOTES_REGEX/ || $ann->{"raw"} =~ m/^$NOTES_REGEX/) {
         $file = $NOTES_FILE;
-        $file =~ s/UUID/$ann->{"uuid"}/g;
+        $file =~ s/([^\$])UUID/$1$ann->{"uuid"}/g;
     }
 
    $file =~ s/^~/$HOME/;
@@ -457,11 +488,41 @@ sub raw_edit {
     return $result;
 }
 
+sub reset_env {
+    delete $ENV{"UUID"};
+    delete $ENV{"FILE"};
+    delete $ENV{"ID"};
+    delete $ENV{"LABEL"};
+    delete $ENV{"ANNOTATION"};
+}
+
+sub prepare_cmd {
+    my $cmd  = $_[0];
+    my $ann  = $_[1];
+    my $file = $_[2];
+
+    if ($cmd !~ m/\$/) {
+        $cmd = qq/$cmd "$file"/;
+    }
+    else {
+        $ENV{"FILE"}       = $file;
+        $ENV{"UUID"}       = $ann->{"uuid"};
+        $ENV{"ID"}         = $ann->{"id"};
+        $ENV{"LABEL"}      = $ann->{"label"};
+        $ENV{"ANNOTATION"} = $ann->{"raw"};
+    }
+
+    return $cmd;
+}
+
 sub create_cmd {
     my $ann = $_[0];
     my $FORCE = $_[1];
     my $file = $ann->{"annot"};
 
+    reset_env();
+
+    my $cmd;
     if ($FORCE->{"action"}) {
         if ($FORCE->{"action"} eq "\\del") {
             return qq/$TASKBIN $ann->{'uuid'} denotate -- "$ann->{'raw'}"/;
@@ -482,44 +543,42 @@ sub create_cmd {
         }
         else {
             $file = get_filepath($ann);
-            return qq/$FORCE->{"action"} "$file"/;
+            $cmd = qq/$FORCE->{"action"}/;
         }
-    }
-
-    my $cmd;
-    if ($file =~ m/^$NOTES_REGEX/ || $ann->{"raw"} =~ m/^$NOTES_REGEX/) {
-        $cmd = $NOTES_CMD;
-        $cmd =~ s/UUID/$ann->{"uuid"}/g;
-        $cmd = qq/$ENV{"SHELL"} -c "$cmd"/;
-    }
-    elsif ($file =~ m/^$BROWSER_REGEX/ ) {
-        if ($file =~ m/^www/) {
-            # prepend http://
-            $cmd = qq{$BROWSER "http://$file"};
-        }
-        else {
-            $cmd = qq{$BROWSER "$file"};
-        }
-    }
-    elsif ($CUSTOM1_REGEX && $file =~ m/^$CUSTOM1_REGEX/) {
-        $cmd = qq{$CUSTOM1_CMD "$file"};
-    }
-    elsif ($CUSTOM2_REGEX && $file =~ m/^$CUSTOM2_REGEX/) {
-        $cmd = qq{$CUSTOM2_CMD "$file"};
     }
     else {
-        $file = get_filepath($ann);
-        my $filetype = qx{file "$file"};
-        if ($filetype =~ m/text/ ) {
-            $cmd = qq/$ENV{'SHELL'} -c "$EDITOR '$file'"/;
+        if ($file =~ m/^$NOTES_REGEX/ || $ann->{"raw"} =~ m/^$NOTES_REGEX/) {
+            # $file = get_filepath($ann);
+            $cmd = $NOTES_CMD;
+            $cmd =~ s/([^\$])UUID/$1\$UUID/g;
+        }
+        elsif ($file =~ m/^$BROWSER_REGEX/ ) {
+            if ($file =~ m/^www/) {
+                # prepend http://
+                $file = "http://$file";
+            }
+            $cmd = qq{$BROWSER};
+        }
+        elsif ($CUSTOM1_REGEX && $file =~ m/^$CUSTOM1_REGEX/) {
+            $cmd = qq{$CUSTOM1_CMD};
+        }
+        elsif ($CUSTOM2_REGEX && $file =~ m/^$CUSTOM2_REGEX/) {
+            $cmd = qq{$CUSTOM2_CMD};
         }
         else {
-            # use XDG for unknown file types
-            $cmd = qq{$XDG "$file"};
+            $file = get_filepath($ann);
+            my $filetype = qx{file "$file"};
+            if ($filetype =~ m/text/ ) {
+                $cmd = qq/$EDITOR/;
+            }
+            else {
+                # use XDG for unknown file types
+                $cmd = qq{$XDG};
+            }
         }
     }
 
-    return $cmd;
+    return prepare_cmd($cmd, $ann, $file);
 }
 
 sub sort_hasharr
@@ -929,8 +988,10 @@ if ($#annotations > 0 || ($MODE && $MODE eq "list")) {
         }
 
         if ($SHOW) {
+            reset_env();
             my $filepath = get_filepath($ann);
-            my $output = qx/$SHOW_CMD "$filepath"/;
+            my $cmd = prepare_cmd($SHOW_CMD, $ann, $filepath);
+            my $output = qx/$cmd/;
             chomp($output);
             print "       $output\n";
         }
@@ -968,11 +1029,11 @@ if ($#choices > 0) {
 
     foreach my $choice (@choices) {
         my $ann = $annotations[$choice-1];
-        system(create_cmd($ann, \%FORCE));
+        execute_fork(create_cmd($ann, \%FORCE));
     }
 }
 else {
     my $ann = $annotations[$choices[0]-1];
-    exec(create_cmd($ann, \%FORCE));
+    execute(create_cmd($ann, \%FORCE));
 }
 

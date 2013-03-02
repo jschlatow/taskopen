@@ -55,7 +55,7 @@ Set this to '1' if you want to enable additional debugging output.
 .SS "Notes" files
 
 .TP
-.BR NOTES_FOLDER=~/tasknotes/
+.BR NOTES_FOLDER=$HOME/tasknotes/
 The directory in which the Notes files will be stored.
 
 .TP
@@ -108,7 +108,11 @@ The regular expression that identifies annotations openable by CUSTOM1_CMD.
 
 .TP
 .BR CUSTOM1_CMD
-The command with which annotations matchin CUSTOM1_REGEX will be opened.
+The command with which annotations matching CUSTOM1_REGEX will be opened. You may use the following
+environment variables: $FILE, $UUID, $ID, $LABEL and $ANNOTATION. By Default, the value of $FILE
+will be appended to the command. See
+.BR taskopen (1)
+for further details.
 
 .TP
 .BR CUSTOM2_REGEX
@@ -122,11 +126,11 @@ see CUSTOM1_CMD
 
 .SS "Using the notes.vim plugin for Notes files"
 
-.BR NOTES_FOLDER=~/Notes/vimnotes
+.BR NOTES_FOLDER=$HOME/Notes/vimnotes
 .br
 .BR NOTES_EXT=""
 .br
-.BR "NOTES_CMD=vim -c \(rs\(dq:Note UUID\(rs\(dq"
+.BR "NOTES_CMD=\(dqvim -c \(dq:Note $UUID\(dq\(dq"
 
 .IP
 The notes.vim plugin can be found at
@@ -135,7 +139,7 @@ The notes.vim plugin can be found at
 .SS "Link to mutt emails"
 .BR CUSTOM1_REGEX=Message-[iI][dD]:|message:
 .br
-.BR "CUSTOM1_CMD=pipe.sh echo muttjump"
+.BR "CUSTOM1_CMD=\(dqecho \(dq$FILE\(dq | muttjump\(dq"
 
 .IP
 Thanks to Jostein Berntsen, the old bash version of taskopen had support for linking to your emails by using mutt. This feature can still be enabled by setting the CUSTOM1_REGEX and CUSTOM1_CMD appropriately, given that taskopen's PATH contains the path to the corresponding helper scripts (see PATH_EXT).

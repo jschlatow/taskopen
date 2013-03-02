@@ -1,0 +1,4 @@
+New features in taskopen 1.1
+
+  - Allowing the following environment variables in customizable commands: $FILE, $UUID, $ID,
+    $ANNOTATION and $LABEL.
