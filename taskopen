@@ -77,9 +77,9 @@ unless (-e $cfgfile) {
         exit 0;
     }
     else {
-        open(CONFIG, ">$cfgfile") or die "can't open $cfgfile: $!";
+        open(my $fh, '>', $cfgfile) or die "can't open $cfgfile: $!";
         # write default config
-        print CONFIG q<
+        print $fh q<
 #BROWSER='xdg-open'
 #EDITOR='vim'
 TASKBIN='task'
@@ -138,12 +138,13 @@ NOTES_EXT=".txt"
 #CUSTOM2_REGEX=""
 #CUSTOM2_CMD=""
 >;
+        close $fh;
     }
 }
 
 my %config;
-open(CONFIG, "$cfgfile") or die "can't open $cfgfile: $!";
-while (<CONFIG>) {
+open(my $fh, '<', $cfgfile) or die "can't open $cfgfile: $!";
+while (<$fh>) {
     chomp;
     s/#.*//; # Remove comments
     s/^\s+//; # Remove opening whitespace
@@ -154,6 +155,7 @@ while (<CONFIG>) {
     $value =~ s/'(.*)'/$1/;
     $config{$key} = $value;
 }
+close $fh;
 
 if (exists $config{"PATH_EXT"}) {
     $ENV{"PATH"} = qq/$config{"PATH_EXT"}:$ENV{"PATH"}/;
@@ -469,15 +471,15 @@ sub raw_edit {
     my $old = $_[0];
 
     my $filename = tmpnam();
-    open(FILE, ">$filename") or die "can't open $filename: $!";
-    print(FILE $old);
-    close(FILE); 
+    open(my $fh, '>', $filename) or die "can't open $filename: $!";
+    print($fh $old);
+    close($fh); 
 
     system(qq/$EDITOR "$filename"/);
 
-    open(FILE, "<$filename") or die "can't open $filename: $!'";
-    my @lines = <FILE>;
-    close(FILE);
+    open($fh, '<', $filename) or die "can't open $filename: $!'";
+    my @lines = <my $fh>;
+    close($fh);
     unlink($filename);
 
     # taskwarrior does not support multi-line annotations
