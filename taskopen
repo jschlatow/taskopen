@@ -353,8 +353,14 @@ sub diag {
     my $task_version = qx{$TASKBIN _version};
     chomp($task_version);
 
-    my $xdg_version  = qx{$XDG --version};
-    chomp($xdg_version);
+    # FIXME no xdg --version on OSX
+    my $xdg_version;
+    if ($^O =~ m/.*darwin.*/) { 
+        $xdg_version = "N/A on OSX";
+    } else {
+        $xdg_version  = qx{$XDG --version};
+        chomp($xdg_version);
+    }
 
     print "Environment\n";
     print "    Platform:      $^O\n";
