@@ -197,8 +197,20 @@ my $EDITOR;
 if (exists $config{"EDITOR"}) {
     $EDITOR = $config{"EDITOR"};
 }
-else {
+elsif (exists $ENV{"VISUAL"}) {
+    $EDITOR = $ENV{"VISUAL"};
+}
+elsif (exists $ENV{"EDITOR"}) {
+    $EDITOR = $ENV{"EDITOR"};
+}
+elsif (!system("which vim &> /dev/null")) {
     $EDITOR = "vim";
+}
+elsif (!system("which nano &> /dev/null")) {
+    $EDITOR = "nano";
+}
+else {
+    die "Cannot find any editor. Please specify EDITOR in your ~/.taskopenrc\n";
 }
 
 my $NOTES_FILE;
