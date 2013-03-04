@@ -11,73 +11,19 @@
 # Add a cronjob which executes:
 #
 #    $ task (age.over:1wk AND annotation.not:Review) mod annotate Review
-#    $ taskopen -c ~/.taskreviewrc -n -i "create_file.sh"
+#    $ taskopen -c ~/.taskreviewrc -n -i '[ -e "$1" ] || touch "$1"'
 #
 # (Note that "-i" is used here as a variant of "-b -x" without user interaction.)
 #
-# Where create_file.sh should be something like this:
+# Start a review, which can be restricted to a subset by using filters:
 #
-# [ -e "$1" ] || touch "$1"
-#
-#    Start a review, which can be restricted to a subset by using filters: $ task review project:taskopen
+#    $ task review project:taskopen
 
-#BROWSER='xdg-open'
-#EDITOR='vim'
-TASKBIN='task'
-
-# If you sync tasks NOTES_FOLDER should be a location that syncs and is available to
-# other computers, i.e. /users/dropbox/tasknotes
-# NOTES_FOLDER to store notes in, must already exist!
+# Reuse the NOTES feature
 NOTES_FOLDER="~/taskreview/"
-
-# Preferred extension for tasknotes
 NOTES_EXT=".review.txt"
-
-# Path to notes file. UUID will be replaced with the actual uuid of
-# the task. If NOTES_CMD 
-# Default is: ${NOTES_FOLDER}UUID${NOTES_EXT}
-NOTES_FILE="~/taskreview/UUID.review.txt"
-
-# Command that opens notes. UUID will be replaced with the actual uuid of 
-# the task.
-# Default is: $EDITOR $NOTES_FILE
-NOTES_CMD="do_review.sh"
-
-# Specify the default sorting.
-# Default is taskwarrior's default sorting, i.e. sorting by task IDs.
-DEFAULT_SORT="priority-,atime-,mtime-"
-
-# Apply a default taskwarrior filter in order to exclude certain tasks.
-# Default is: status.is:pending
-#DEFAULT_FILTER=
-
-# Default command for '-i'
-# Default is: ls -la
-#DEFAULT-i="ls -la"
-
-# Add some paths to the taskopen's PATH variable
-#PATH_EXT=/path/to/taskopen/scripts
-PATH_EXT=/usr/share/taskopen/scripts
-
-# Regular expression that referes to the NOTES_FILE.
-# Default is: Notes
+NOTES_CMD="do_review.sh $FILE $UUID"
 NOTES_REGEX="Review"
 
-# Regular expression that identifies annotations openable by BROWSER.
-# Default is: www|http
-#BROWSER_REGEX="www|http"
-
-# Regular expression that identifies file paths in annotations. Will be opened by EDITOR or
-# xdg-open.
-# Default is: \.|\/|~
-#FILE_REGEX="\.|\/|~"
-
-# Custom regular expression that specifies annotations passed to CUSTOM1_CMD, e.g:
-#CUSTOM1_REGEX="Message-[Ii][Dd]:|message:"
-#CUSTOM1_CMD="muttjumpwrapper"
-
-# Custom regular expression that specifies annotations passed to CUSTOM2_CMD.
-#CUSTOM2_REGEX=""
-#CUSTOM2_CMD=""
-
+DEFAULT_SORT="priority-,atime-,mtime-"
                                                                                                                                            77,0-1        Bot
