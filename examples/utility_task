@@ -12,8 +12,8 @@
 # Created task 102
 #
 # task 102 annotate -- backup_home_directory: ~/bin/mybackup_app -f home
-# task 102 annotate -- backup_etc_directory: /usr/bin/unison -opts /etc
-# task 102 annotate -- backup_var_directory: /usr/bin/rsync -opts /var
+# task 102 annot -- backup_etc_directory: /usr/bin/unison -opts /etc
+# task 102 ann -- backup_var_directory: /usr/bin/rsync -opts /var
 #
 # then, when you want to back up your files, run taskopen
 #
