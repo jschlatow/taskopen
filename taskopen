@@ -45,7 +45,7 @@ if ($^O =~ m/.*darwin.*/) { #OSX
    $XDG = "open";
 }
 
-if (qq/uname -s/ =~ m/.*CYGWIN.*/) { #CYGWIN
+if ($^O =~ m/.*cygwin.*/) { #CYGWIN
    $XDG = "cygstart";
 }
 
