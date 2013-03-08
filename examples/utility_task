@@ -1,0 +1,24 @@
+# EXAMPLE: utility tasks
+#
+# DESCRIPTION
+# Taskopen can be used to execute arbitrary commands that exist as annotations to taskwarrior tasks.
+# A utility task is one that carries a "payload" of one or more commands, and is intended for a specific function
+# (this is an alternative approach to ../examples/templates)
+
+# SETUP
+
+# Add a new task
+# task add backup files due:eow
+# Created task 102
+#
+# task 102 annotate -- backup_home_directory: ~/bin/mybackup_app -f home
+# task 102 annot -- backup_etc_directory: /usr/bin/unison -opts /etc
+# task 102 ann -- backup_var_directory: /usr/bin/rsync -opts /var
+#
+# then, when you want to back up your files, run taskopen
+#
+# $ taskopen backup -x
+#
+# choose the desired actions(s) from the list and voila!
+# (just don't use the made-up commands used as examples)
+~                                                          
