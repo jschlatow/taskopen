@@ -100,6 +100,9 @@ Execute
 for each file and shows its output interleaved with the other output. A default can be set in the
 .I taskopenrc
 file. See USER COMMANDS for further details.
+.TP
+.BR "\-p 'cmd'"
+Pipe the output of taskopen to 'cmd'. This is supposed to behave just like "taskopen | cmd".
 
 .SH FILTERS
 Any argument that is not recognized as an option or label will be passed to taskwarrior as an

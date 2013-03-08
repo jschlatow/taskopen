@@ -67,7 +67,7 @@ unless (-e $cfgfile) {
            $choice ne "N" && 
            $choice ne "")
     {
-        print qq{Config file "$cfgfile" does not exist. Do you want to create it? (Y/n) };
+        print STDOUT qq{Config file "$cfgfile" does not exist. Do you want to create it? (Y/n) };
         $choice = <STDIN>;
         chomp($choice);
     }
@@ -794,6 +794,18 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
         # just skip (handled above)
         $i++;
     }
+    elsif ($arg eq "-p") {
+        if ($i < $#ARGV && $ARGV[$i+1] !~ m/^-/) {
+            my $cmd = $ARGV[++$i];
+            open(PIPE, "|-", $cmd) or die "Cannot execute '$cmd'!\n";
+            select(PIPE);
+            $|++;
+        }
+        else {
+            print STDERR "Missing argument after $arg\n";
+            exit 1;
+        }
+    }
     else {
         $FILTER = "$FILTER $arg";
     }
@@ -848,6 +860,7 @@ if ($HELP) {
     print "  -x ['cmd']        Execute file, optionally prepend cmd to the command line\n";
     print "  -i ['cmd']        Execute 'cmd <filename>' for each file and shows its output interleaved with the other output.\n";
     print "  -c filepath       Use alternate taskopenrc file as specified by 'filepath'\n";
+    print "  -p 'cmd'          Pipe output into 'cmd' (as in 'taskopen | cmd')\n";
     print "\n";
 
 	exit 1;
@@ -1026,7 +1039,9 @@ if ($#annotations > 0 || ($MODE && $MODE eq "list")) {
     }
     else {
         # read input
-        print "Type number(s): ";
+        select(STDOUT);
+        close(PIPE);
+        print STDOUT "Type number(s): ";
         my $choice = <STDIN>;
         chomp ($choice);
 
@@ -1040,7 +1055,7 @@ if ($#annotations > 0 || ($MODE && $MODE eq "list")) {
 if ($#choices > 0) {
     my $tmp = join(",", @choices);
     print "\n";
-    print qq/Do you really want to process files $tmp? (y\/N)\n/;
+    print STDOUT qq/Do you really want to process files $tmp? (y\/N)\n/;
     my $choice = <STDIN>;
     chomp ($choice);
     if ($choice !~ m/^y/i) {
