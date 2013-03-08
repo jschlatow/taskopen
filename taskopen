@@ -73,7 +73,7 @@ unless (-e $cfgfile) {
     }
 
     if ($choice eq "n" || $choice eq "N") {
-        print qq/Can not continue without a config file.\n/;
+        print STDERR qq/Can not continue without a config file.\n/;
         exit 0;
     }
     else {
@@ -443,7 +443,7 @@ sub parse_number {
                 my $start = $1;
                 my $end   = $2;
                 if ($start < 1 || $end > $max) {
-                    print qq/"$item" is an invalid range\n/;
+                    print STDERR qq/"$item" is an invalid range\n/;
                     exit 1;
                 }
                 while ($start <= $end) {
@@ -453,20 +453,20 @@ sub parse_number {
             }
             elsif ($item =~ m/\d+/) {
                 if ($item < 1 || $item > $max) {
-                    print qq/"$item" is an invalid number\n/;
+                    print STDERR qq/"$item" is an invalid number\n/;
                     exit 1;
                 }
                 push(@result, $item);
             }
             else {
-                print qq/"$item" is not a number\n/;
+                print STDERR qq/"$item" is not a number\n/;
                 exit 1;
             }
         }
         return @result;
     }
     else {
-        print qq/Invalid input "$input"\n/;
+        print STDERR qq/Invalid input "$input"\n/;
         exit 1;
     }
 }
@@ -639,7 +639,7 @@ sub set_action
     my $action= $_[2];
 
     if ($force->{"action"}) {
-        print qq/Cannot use $arg in conjunction with $force->{"arg"}\n/;
+        print STDERR qq/Cannot use $arg in conjunction with $force->{"arg"}\n/;
         exit 1;
     }
     else {
@@ -654,7 +654,7 @@ sub set_mode
     my $val  = $_[1];
 
     if ($$mode && $$mode ne $val) {
-        print qq/Cannot use combine arguments -b with -l or -L\n/;
+        print STDERR qq/Cannot use combine arguments -b with -l or -L\n/;
         exit 1;
     }
     else {
@@ -697,36 +697,36 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     }
     elsif ($arg eq "-n") {
         if ($REGEX_CODE =~ m/N/) {
-            print "Cannot combine argument -n with -N\n";
+            print STDERR "Cannot combine argument -n with -N\n";
             exit 1;
         }
         if (length($REGEX_CODE) == 1) {
-            print "Cannot combine argument -n with -f\n";
+            print STDERR "Cannot combine argument -n with -f\n";
             exit 1;
         }
         $REGEX_CODE = "n";
     }
     elsif ($arg eq "-N") {
         if ($REGEX_CODE eq "n") {
-            print "Cannot combine argument -N with -n\n";
+            print STDERR "Cannot combine argument -N with -n\n";
             exit 1;
         }
         $REGEX_CODE =~ s/n/N/;
     }
     elsif ($arg eq "-f") {
         if ($REGEX_CODE =~ m/F/) {
-            print "Cannot combine argument -f with -F\n";
+            print STDERR "Cannot combine argument -f with -F\n";
             exit 1;
         }
         if (length($REGEX_CODE) == 1) {
-            print "Cannot combine argument -f with -n\n";
+            print STDERR "Cannot combine argument -f with -n\n";
             exit 1;
         }
         $REGEX_CODE = "f";
     }
     elsif ($arg eq "-F") {
         if ($REGEX_CODE eq "f") {
-            print "Cannot combine argument -F with -f\n";
+            print STDERR "Cannot combine argument -F with -f\n";
             exit 1;
         }
         $REGEX_CODE =~ s/f/F/;
@@ -750,21 +750,21 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     elsif ($arg eq "-s") {
         $SORT = $ARGV[++$i];
         if (!$SORT || $SORT =~ m/^-/) {
-            print "Missing argument after $arg\n";
+            print STDERR "Missing argument after $arg\n";
             exit 1;
         }
     }
     elsif ($arg eq "-m") {
         $MATCH = $ARGV[++$i];
         if (!$MATCH || $MATCH =~ m/^-/) {
-            print "Missing expression after -m\n";
+            print STDERR "Missing expression after -m\n";
             exit 1;
         }
     }
     elsif ($arg eq "-t") {
         $TYPE = $ARGV[++$i];
         if (!$TYPE || $TYPE =~ m/^-/) {
-            printf "Missing expression after -t\n";
+            printf STDERR "Missing expression after -t\n";
             exit 1;
         }
     }
@@ -859,7 +859,7 @@ if ($SORT) {
 }
 
 if ($DEBUG > 0) {
-    printf("[DEBUG] Applying filter: $EXCLUDE$FILTER\n");
+    print "[DEBUG] Applying filter: $EXCLUDE$FILTER\n";
 }
 my $ID = qx{$TASKBIN $ID_CMD $EXCLUDE$FILTER};
 chomp($ID);
@@ -924,7 +924,7 @@ foreach my $task (@decoded_json) {
                                     $entry{$1} = qx{file "$filepath"};
                                 }
                                 else {
-                                    print qq/Unknown sort key "$1"\n/;
+                                    print STDERR qq/Unknown sort key "$1"\n/;
                                     exit 1;
                                 }
                             }
@@ -943,7 +943,7 @@ foreach my $task (@decoded_json) {
                                 push(@annotations, \%entry);
                             }
                             elsif ($DEBUG > 0) {
-                                printf(qq/[DEBUG] Skipping file "$entry{'file'}" whose type doesn't match '$TYPE'\n/);
+                                print qq/[DEBUG] Skipping file "$entry{'file'}" whose type doesn't match '$TYPE'\n/;
                             }
                         }
                         else {
@@ -952,26 +952,26 @@ foreach my $task (@decoded_json) {
                     }
                     elsif ($DEBUG > 0) {
                         if (!$label) {
-                            printf(qq/[DEBUG] Skipping unlabeled annotation "$ann->{"description"}"\n/);
+                            print qq/[DEBUG] Skipping unlabeled annotation "$ann->{"description"}"\n/;
                         }
                         else {
-                            printf(qq/[DEBUG] Skipping label "$label"\n/);
+                            print qq/[DEBUG] Skipping label "$label"\n/;
                         }
                     }
                 }
                 elsif ($MATCH && ($DEBUG > 0)) {
-                    printf(qq/[DEBUG] Skipping annotation which doesn't match '$MATCH': $ann->{"description"}\n/);
+                    print qq/[DEBUG] Skipping annotation which doesn't match '$MATCH': $ann->{"description"}\n/;
                 }
             }
             elsif ($DEBUG > 0) {
-                printf(qq/[DEBUG] Skipping annotation "$ann->{"description"}"\n/);
+                print qq/[DEBUG] Skipping annotation "$ann->{"description"}"\n/;
             }
         }
     }
 }
 
 if ($#annotations < 0) {
-    print "No annotation found.\n";
+    print STDERR "No annotation found.\n";
     exit 1;
 }
 
