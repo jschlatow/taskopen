@@ -588,7 +588,7 @@ sub create_cmd {
         else {
             $file = get_filepath($ann);
             my $filetype = qx{file "$file"};
-            if ($filetype =~ m/text/ ) {
+            if ($filetype =~ m/text|empty/ ) {
                 $cmd = qq/$EDITOR/;
             }
             else {
