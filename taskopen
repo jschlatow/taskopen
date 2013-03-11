@@ -359,8 +359,15 @@ sub diag {
 
     # FIXME no xdg --version on OSX
     my $xdg_version;
-    if ($^O =~ m/.*darwin.*/) { 
+    if ($^O =~ m/.*darwin.*/) {    #OSX
         $xdg_version = "N/A on OSX";
+    } elsif ($^O =~ m/.*cygwin.*/) { #CYGWIN
+        my @output = qx{$XDG --version};
+        if ($output[0] =~ m/.*\s+(.*)$/) {
+            $xdg_version = $1;
+        } else {
+            $xdg_version = "Couldn't parse '$XDG --version'";
+        }
     } else {
         $xdg_version  = qx{$XDG --version};
         chomp($xdg_version);
