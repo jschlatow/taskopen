@@ -45,6 +45,10 @@ if ($^O =~ m/.*darwin.*/) { #OSX
    $XDG = "open";
 }
 
+if ($^O =~ m/.*cygwin.*/) { #CYGWIN
+   $XDG = "cygstart";
+}
+
 my $cfgfile = "$HOME/.taskopenrc";
 
 # find alternative config file specification in argument list
