@@ -2,3 +2,12 @@ New features in taskopen 1.1
 
   - Allowing the following environment variables in customizable commands: $FILE, $UUID, $ID,
     $ANNOTATION and $LABEL.
+  - Better cygwin support (thanks to Jostein).
+  - New argument "-p <cmd>" allows piping taskopen's output into another command (like clog e.g.).
+  - More examples.
+
+Bugfixes and minor improvements taskopen 1.1
+
+  - Fixed handling of UTF8 characters (#73).
+  - Improved selection of editor binary.
+  - Open empty files with EDITOR.
