@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -CLASo -w
 
 ###############################################################################
 # taskopen - file based notes with taskwarrior
@@ -979,7 +979,7 @@ foreach my $task (@decoded_json) {
                             print qq/[DEBUG] Skipping unlabeled annotation "$ann->{"description"}"\n/;
                         }
                         else {
-                            print qq/[DEBUG] Skipping label "$label"\n/;
+                            print qq/[DEBUG] Skipping label "$label" (!= "$LABEL")\n/;
                         }
                     }
                 }
