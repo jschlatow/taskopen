@@ -683,6 +683,7 @@ my $LIST_EXEC;
 my %FORCE;
 my $MATCH;
 my $TYPE;
+my $BROKEN = 0;
 my $MODE;
 my $SHOW;
 for (my $i = 0; $i <= $#ARGV; ++$i) {
@@ -751,6 +752,9 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     }
     elsif ($arg eq "-b") {
         set_mode(\$MODE, "batch");
+    }
+    elsif ($arg eq "-B") {
+        $BROKEN = 1;
     }
     elsif ($arg eq "-D") {
         set_action(\%FORCE, "-D", "\\del");
@@ -859,6 +863,7 @@ if ($HELP) {
     print "  -N                Show all but notes files; inverse of -n\n";
     print "  -f                Only show/open real files, i.e. annotations matching '$FILE_REGEX'\n";
     print "  -F                Show all but real files; inverse of -f\n";
+    print "  -B                Show only files that don't exist (combine with -f)\n";
     print "  -a                Query all active tasks; clears the DEFAULT_FILTER\n";
     print "  -A                Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
     print "  -D                Delete the annotation rather than opening it\n";
@@ -914,6 +919,16 @@ foreach my $task (@decoded_json) {
                                       "raw"         => $ann->{"description"},
                                       "label"       => $label,
                                       "description" => $task->{"description"});
+
+                        if ($BROKEN) {
+                            my $filepath = get_filepath(\%entry);
+                            if (-e $filepath) {
+                                if ($DEBUG > 0) {
+                                    print qq/[DEBUG] Skipping existing file "$filepath".\n/;
+                                }
+                                next;
+                            } 
+                        }
 
                         # Copy sort keys
                         foreach my $key (@SORT_KEYS) {

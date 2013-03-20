@@ -5,6 +5,7 @@ New features in taskopen 1.1
   - Better cygwin support (thanks to Jostein).
   - New argument "-p <cmd>" allows piping taskopen's output into another command (like clog e.g.).
   - More examples.
+  - Filter broken links, i.e. non existing files.
 
 Bugfixes and minor improvements taskopen 1.1
 

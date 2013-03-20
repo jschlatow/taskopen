@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Fri Mar  8 05:24:12 2013 -->
+<!-- CreationDate: Wed Mar 20 10:55:49 2013 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -199,6 +199,18 @@ FILE_REGEX.</p> </td></tr>
 
 
 <p>Show all but real files; inverse of -f.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p><b>&minus;B</b></p></td>
+<td width="8%"></td>
+<td width="78%">
+
+
+<p>Show only files that don&rsquo;t exist; should be used
+with -f or -n.</p></td></tr>
 </table>
 
 <p style="margin-left:11%;"><b>&minus;m
@@ -583,6 +595,21 @@ that you want to execute the command on every file you may
 consider activating the batch mode by adding the -b option.
 Taskopen will then skip the user interaction and
 automatically select all entries from the list.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Repair
+broken links</b> <br>
+The -B option can be used to detect links to files that
+don&rsquo;t exist and to repair the annotations, e.g.:</p>
+
+<p style="margin-left:22%; margin-top: 1em">$ taskopen -b
+-f -B -r</p>
+
+<p style="margin-left:11%; margin-top: 1em">This command
+operates in batch mode (-b), but only on annotations
+matching FILE_REGEX (-f) that link to non-existing files
+(-B). For each of those annotations it jumps into raw
+editing mode (-r) so that you can correct the annotation
+text.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>Output/interleave

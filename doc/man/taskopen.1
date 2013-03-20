@@ -51,6 +51,9 @@ Only show/open real files, i.e. annotations matching FILE_REGEX.
 .BR \-F
 Show all but real files; inverse of -f.
 .TP
+.BR \-B
+Show only files that don't exist; should be used with -f or -n.
+.TP
 .BR "\-m 'regex'"
 Only include annotations that match
 .I regex.
@@ -272,6 +275,18 @@ You may also decide to precheck the command that is going to be executed by task
 If you are sure that you want to execute the command on every file you may consider activating the
 batch mode by adding the -b option. Taskopen will then skip the user interaction and automatically select all
 entries from the list.
+
+.SS Repair broken links
+The -B option can be used to detect links to files that don't exist and to repair the annotations,
+e.g.:
+
+.RS
+$ taskopen -b -f -B -r
+.RE
+
+This command operates in batch mode (-b), but only on annotations matching FILE_REGEX (-f) that link to non-existing files
+(-B). For each of those annotations it jumps into raw editing mode (-r) so that you can correct the
+annotation text.
 
 .SS Output/interleave additional information
 Interleaving of arbitrary information can be achieved by using the
