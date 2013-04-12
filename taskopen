@@ -281,6 +281,86 @@ else {
     $FILE_REGEX = "\\\.|\\\/|~";
 }
 
+my $NV_REGEX;
+if (exists $config{"NV_REGEX"}) {
+    $NV_REGEX = $config{"NV_REGEX"};
+}
+else {
+    $NV_REGEX = "nv://";
+}
+
+my $NV_CMD;
+if (exists $config{"NV_CMD"}) {
+    $NV_CMD = $config{"NV_CMD"};
+}
+else {
+    $NV_CMD = $XDG;
+}
+
+my $TEL_REGEX;
+if (exists $config{"TEL_REGEX"}) {
+    $TEL_REGEX = $config{"TEL_REGEX"};
+}
+else {
+    $TEL_REGEX = "tel:";
+}
+
+my $TEL_CMD;
+if (exists $config{"TEL_CMD"}) {
+     $TEL_CMD = $config{"TEL_CMD"};
+}
+else {
+    $TEL_CMD = $XDG;
+}
+
+my $XMPP_REGEX;
+if (exists $config{"XMPP_REGEX"}) {
+    $XMPP_REGEX = $config{"XMPP_REGEX"};
+}
+else {
+    $XMPP_REGEX = "xmpp:";
+}
+
+my $XMPP_CMD;
+if (exists $config{"XMPP_CMD"}) {
+    $XMPP_CMD = $config{"XMPP_CMD"};
+}
+else {
+    $XMPP_CMD = $XDG;
+}
+
+my $MAILTO_REGEX;
+if (exists $config{"MAILTO_REGEX"}) {
+    $MAILTO_REGEX = $config{"MAILTO_REGEX"};
+}
+else {
+    $MAILTO_REGEX = "mailto:";
+}
+
+my $MAILTO_CMD;
+if (exists $config{"MAILTO_CMD"}) {
+    $MAILTO_CMD = $config{"MAILTO_CMD"};
+}
+else {
+    $MAILTO_CMD = $XDG;
+}
+
+my $GEO_REGEX;
+if (exists $config{"GEO_REGEX"}) {
+    $GEO_REGEX = $config{"GEO_REGEX"};
+}
+else {
+    $GEO_REGEX = "geo:";
+}
+
+my $GEO_CMD;
+if (exists $config{"GEO_CMD"}) {
+    $GEO_CMD = $config{"GEO_CMD"};
+}
+else {
+    $GEO_CMD = $BROWSER;
+}
+
 my $CUSTOM1_REGEX;
 if (exists $config{"CUSTOM1_REGEX"}) {
     $CUSTOM1_REGEX = $config{"CUSTOM1_REGEX"};
@@ -320,6 +400,22 @@ if ($CUSTOM1_REGEX) {
 if ($CUSTOM2_REGEX) {
     $REGEX_CODE = "${REGEX_CODE}2";
 }
+if ($NV_REGEX) {
+    $REGEX_CODE = "${REGEX_CODE}3";
+}
+if ($TEL_REGEX) {
+    $REGEX_CODE = "${REGEX_CODE}4";
+}
+if ($XMPP_REGEX) {
+    $REGEX_CODE = "${REGEX_CODE}5";
+}
+if ($MAILTO_REGEX) {
+    $REGEX_CODE = "${REGEX_CODE}6";
+}
+if ($GEO_REGEX) {
+    $REGEX_CODE = "${REGEX_CODE}7";
+}
+
 
 sub print_version {
     print "$VERSION $REVNUM $REVHASH\n";
@@ -506,6 +602,22 @@ sub create_cmd {
     }
     elsif ($CUSTOM2_REGEX && $file =~ m/^$CUSTOM2_REGEX/) {
         $cmd = qq{$CUSTOM2_CMD "$file"};
+    }
+    elsif ($file =~ m/^$NV_REGEX/) {
+        $cmd = qq{$XDG "$file"};
+    }
+    elsif ($file =~ m/^$TEL_REGEX/) {
+        $cmd = qq{$XDG "$file"};
+    }
+    elsif ($file =~ m/^$XMPP_REGEX/) {
+        $cmd = qq{$XDG "$file"};
+    }
+    elsif ($file =~ m/^$MAILTO_REGEX/) {
+            $cmd = qq{$XDG "$file"};
+}
+    elsif ($file =~ m/^$GEO_REGEX/) {
+    		$file =~ s/geo://;
+            $cmd = qq{$BROWSER "https://maps.google.com/maps?q=$file"};
     }
     else {
         $file = get_filepath($ann);
@@ -739,6 +851,22 @@ foreach my $code (split("", $REGEX_CODE)) {
     elsif ($code eq "2") {
         $tmpregex = "${tmpregex}${CUSTOM2_REGEX}|";
     }
+    elsif ($code eq "3") {
+        $tmpregex = "${tmpregex}${NV_REGEX}|";
+    }
+    elsif ($code eq "4") {
+        $tmpregex = "${tmpregex}${TEL_REGEX}|";
+    }
+    elsif ($code eq "5") {
+        $tmpregex = "${tmpregex}${XMPP_REGEX}|";
+    }
+    elsif ($code eq "6") {
+       $tmpregex = "${tmpregex}${MAILTO_REGEX}|";
+    }
+    elsif ($code eq "7") {
+       $tmpregex = "${tmpregex}${GEO_REGEX}|";
+    }
+
 }
 chop($tmpregex);
 my $FILEREGEX = qr{^((?:$tmpregex).*)};
