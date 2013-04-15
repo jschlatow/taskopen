@@ -6,9 +6,11 @@ New features in taskopen 1.1
   - New argument "-p <cmd>" allows piping taskopen's output into another command (like clog e.g.).
   - More examples.
   - Filter broken links, i.e. non existing files.
+  - Support for auto-attaching annotations if none has been found (#81).
 
 Bugfixes and minor improvements taskopen 1.1
 
   - Fixed handling of UTF8 characters (#73).
   - Improved selection of editor binary.
   - Open empty files with EDITOR.
+  - Fixed install script for OSX (#76).

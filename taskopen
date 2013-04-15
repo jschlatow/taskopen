@@ -141,6 +141,10 @@ NOTES_EXT=".txt"
 # Custom regular expression that specifies annotations passed to CUSTOM2_CMD.
 #CUSTOM2_REGEX=""
 #CUSTOM2_CMD=""
+
+# Execute an arbitrary if there is no annotation available. The corresponding taskwarrior IDs will
+# be passed as arguments, e.g. "attach.sh 21 42"
+#NO_ANNOTATION_HOOK=attach.sh
 >;
         close $fh;
     }
@@ -332,6 +336,11 @@ else {
     $CUSTOM2_CMD = "";
 }
 
+my $NO_ANNOTATION_HOOK;
+if (exists $config{"NO_ANNOTATION_HOOK"}) {
+    $NO_ANNOTATION_HOOK = $config{"NO_ANNOTATION_HOOK"};
+}
+
 my $REGEX_CODE = "fbn";
 if ($CUSTOM1_REGEX) {
     $REGEX_CODE = "${REGEX_CODE}1";
@@ -383,31 +392,32 @@ sub diag {
 
     print "Current configuration\n";
     print "  Binaries and paths:\n";
-    print "    BROWSER       = $BROWSER\n";
-    print "    TASKBIN       = $TASKBIN\n";
-    print "    EDITOR        = $EDITOR\n";
-    print "    XDG           = $XDG\n";
-    print "    PATH          = $ENV{'PATH'}\n";
+    print "    BROWSER            = $BROWSER\n";
+    print "    TASKBIN            = $TASKBIN\n";
+    print "    EDITOR             = $EDITOR\n";
+    print "    XDG                = $XDG\n";
+    print "    PATH               = $ENV{'PATH'}\n";
     print "\n";
     print "  Others:\n";
-    print "    NOTES_FOLDER  = $FOLDER\n";
-    print "    NOTES_EXT     = $EXT\n";
-    print "    NOTES_FILE    = $NOTES_FILE\n";
-    print "    NOTES_CMD     = $NOTES_CMD\n";
-    print "    DEFAULT_FILTER= $EXCLUDE\n";
-    print "    DEFAULT_SORT  = $DEFAULT_SORT\n";
-    print "           current: $SORT\n";
-    print "    DEFAULT-i     = $DEFAULT_i\n";
-    print "           current: $SHOW_CMD\n";
-    print "    DEFAULT-x     = $DEFAULT_x\n";
-    print "    DEBUG         = $DEBUG\n";
-    print "    NOTES_REGEX   = $NOTES_REGEX\n";
-    print "    BROWSER_REGEX = $BROWSER_REGEX\n";
-    print "    FILE_REGEX    = $FILE_REGEX\n";
-    print "    CUSTOM1_REGEX = $CUSTOM1_REGEX\n";
-    print "    CUSTOM1_CMD   = $CUSTOM1_CMD\n";
-    print "    CUSTOM2_REGEX = $CUSTOM2_REGEX\n";
-    print "    CUSTOM2_CMD   = $CUSTOM2_CMD\n";
+    print "    NOTES_FOLDER       = $FOLDER\n";
+    print "    NOTES_EXT          = $EXT\n";
+    print "    NOTES_FILE         = $NOTES_FILE\n";
+    print "    NOTES_CMD          = $NOTES_CMD\n";
+    print "    DEFAULT_FILTER     = $EXCLUDE\n";
+    print "    DEFAULT_SORT       = $DEFAULT_SORT\n";
+    print "                current: $SORT\n";
+    print "    DEFAULT-i          = $DEFAULT_i\n";
+    print "                current: $SHOW_CMD\n";
+    print "    DEFAULT-x          = $DEFAULT_x\n";
+    print "    DEBUG              = $DEBUG\n";
+    print "    NOTES_REGEX        = $NOTES_REGEX\n";
+    print "    BROWSER_REGEX      = $BROWSER_REGEX\n";
+    print "    FILE_REGEX         = $FILE_REGEX\n";
+    print "    CUSTOM1_REGEX      = $CUSTOM1_REGEX\n";
+    print "    CUSTOM1_CMD        = $CUSTOM1_CMD\n";
+    print "    CUSTOM2_REGEX      = $CUSTOM2_REGEX\n";
+    print "    CUSTOM2_CMD        = $CUSTOM2_CMD\n";
+    print "    NO_ANNOTATION_HOOK = $NO_ANNOTATION_HOOK\n";
 
     print "\n";
 }
@@ -893,125 +903,145 @@ if ($DEBUG > 0) {
 my $ID = qx{$TASKBIN $ID_CMD $EXCLUDE$FILTER};
 chomp($ID);
 
-# query IDs and parse json
-my $json = qx{$TASKBIN $ID _query};
-my @decoded_json = @{decode_json("$json")};
+sub parse_annotations {
+    my $ID = $_[0];
 
-# Reorganize data
-my @annotations;
-foreach my $task (@decoded_json) {
-    if (exists $task->{"annotations"}) {
-        foreach my $ann (@{$task->{"annotations"}}) {
-            $ann->{"description"} =~ m/(?:(\S+):\s+)?(.*)/;
-            my $file = $2;
-            my $label = $1;
-            if ( ($file  && $file  =~ m/$FILEREGEX/ ) ||
-                 ($label && $label =~ m/$LABELREGEX/) )
-            {
-                if (!$MATCH || ($file =~ m/$MATCH/)) {
-                    if (!$label) {
-                        $label = "";
-                    }
-                    if (!$LABEL || ($LABEL eq $label) ) {
-                        my %entry = ( "annot"       => $file,
-                                      "uuid"        => $task->{"uuid"},
-                                      "id"          => $task->{"id"},
-                                      "raw"         => $ann->{"description"},
-                                      "label"       => $label,
-                                      "description" => $task->{"description"});
+    # query IDs and parse json
+    my $json = qx{$TASKBIN $ID _query};
+    my @decoded_json = @{decode_json("$json")};
 
-                        if ($BROKEN) {
-                            my $filepath = get_filepath(\%entry);
-                            if (-e $filepath) {
-                                if ($DEBUG > 0) {
-                                    print qq/[DEBUG] Skipping existing file "$filepath".\n/;
-                                }
-                                next;
-                            } 
+    # Reorganize data
+    my @annotations;
+    foreach my $task (@decoded_json) {
+        if (exists $task->{"annotations"}) {
+            foreach my $ann (@{$task->{"annotations"}}) {
+                $ann->{"description"} =~ m/(?:(\S+):\s+)?(.*)/;
+                my $file = $2;
+                my $label = $1;
+                if ( ($file  && $file  =~ m/$FILEREGEX/ ) ||
+                     ($label && $label =~ m/$LABELREGEX/) )
+                {
+                    if (!$MATCH || ($file =~ m/$MATCH/)) {
+                        if (!$label) {
+                            $label = "";
                         }
+                        if (!$LABEL || ($LABEL eq $label) ) {
+                            my %entry = ( "annot"       => $file,
+                                          "uuid"        => $task->{"uuid"},
+                                          "id"          => $task->{"id"},
+                                          "raw"         => $ann->{"description"},
+                                          "label"       => $label,
+                                          "description" => $task->{"description"});
 
-                        # Copy sort keys
-                        foreach my $key (@SORT_KEYS) {
-                            $key =~ m/(.*?)(\+|-)?$/;
-                            if (!exists $entry{$1}) {
-                                if (exists $ann->{$1})
-                                {
-                                    $entry{$1} = $ann->{$1};
+                            if ($BROKEN) {
+                                my $filepath = get_filepath(\%entry);
+                                if (-e $filepath) {
+                                    if ($DEBUG > 0) {
+                                        print qq/[DEBUG] Skipping existing file "$filepath".\n/;
+                                    }
+                                    next;
+                                } 
+                            }
+
+                            # Copy sort keys
+                            foreach my $key (@SORT_KEYS) {
+                                $key =~ m/(.*?)(\+|-)?$/;
+                                if (!exists $entry{$1}) {
+                                    if (exists $ann->{$1})
+                                    {
+                                        $entry{$1} = $ann->{$1};
+                                    }
+                                    elsif (exists $task->{$1})
+                                    {
+                                        $entry{$1} = $task->{$1};
+                                    }
+                                    elsif ($1 eq "size") {
+                                        my $filepath = get_filepath(\%entry);
+                                        $entry{$1} = qx{stat -c "%s" "$filepath"};
+                                    }
+                                    elsif ($1 eq "mtime") {
+                                        my $filepath = get_filepath(\%entry);
+                                        $entry{$1} = qx{stat -c "%Y" "$filepath"};
+                                    }
+                                    elsif ($1 eq "time") {
+                                        my $filepath = get_filepath(\%entry);
+                                        $entry{$1} = qx{stat -c "%W" "$filepath"};
+                                    }
+                                    elsif ($1 eq "atime") {
+                                        my $filepath = get_filepath(\%entry);
+                                        $entry{$1} = qx{stat -c "%X" "$filepath"};
+                                    }
+                                    elsif ($1 eq "type") {
+                                        my $filepath = get_filepath(\%entry);
+                                        $entry{$1} = qx{file "$filepath"};
+                                    }
+                                    else {
+                                        print STDERR qq/Unknown sort key "$1"\n/;
+                                        exit 1;
+                                    }
                                 }
-                                elsif (exists $task->{$1})
-                                {
-                                    $entry{$1} = $task->{$1};
-                                }
-                                elsif ($1 eq "size") {
+                            }
+                            
+                            if ($TYPE) {
+                                my $filetype;
+                                if (!$entry{"type"}) {
                                     my $filepath = get_filepath(\%entry);
-                                    $entry{$1} = qx{stat -c "%s" "$filepath"};
-                                }
-                                elsif ($1 eq "mtime") {
-                                    my $filepath = get_filepath(\%entry);
-                                    $entry{$1} = qx{stat -c "%Y" "$filepath"};
-                                }
-                                elsif ($1 eq "time") {
-                                    my $filepath = get_filepath(\%entry);
-                                    $entry{$1} = qx{stat -c "%W" "$filepath"};
-                                }
-                                elsif ($1 eq "atime") {
-                                    my $filepath = get_filepath(\%entry);
-                                    $entry{$1} = qx{stat -c "%X" "$filepath"};
-                                }
-                                elsif ($1 eq "type") {
-                                    my $filepath = get_filepath(\%entry);
-                                    $entry{$1} = qx{file "$filepath"};
+                                    $filetype = qx{file "$filepath"};
                                 }
                                 else {
-                                    print STDERR qq/Unknown sort key "$1"\n/;
-                                    exit 1;
+                                    $filetype = $entry{"type"};
+                                }
+                                if ($filetype =~ m/$TYPE/) {
+                                    push(@annotations, \%entry);
+                                }
+                                elsif ($DEBUG > 0) {
+                                    print qq/[DEBUG] Skipping file "$entry{'file'}" whose type doesn't match '$TYPE'\n/;
                                 }
                             }
-                        }
-                        
-                        if ($TYPE) {
-                            my $filetype;
-                            if (!$entry{"type"}) {
-                                my $filepath = get_filepath(\%entry);
-                                $filetype = qx{file "$filepath"};
-                            }
                             else {
-                                $filetype = $entry{"type"};
-                            }
-                            if ($filetype =~ m/$TYPE/) {
                                 push(@annotations, \%entry);
                             }
-                            elsif ($DEBUG > 0) {
-                                print qq/[DEBUG] Skipping file "$entry{'file'}" whose type doesn't match '$TYPE'\n/;
+                        }
+                        elsif ($DEBUG > 0) {
+                            if (!$label) {
+                                print qq/[DEBUG] Skipping unlabeled annotation "$ann->{"description"}"\n/;
+                            }
+                            else {
+                                print qq/[DEBUG] Skipping label "$label" (!= "$LABEL")\n/;
                             }
                         }
-                        else {
-                            push(@annotations, \%entry);
-                        }
                     }
-                    elsif ($DEBUG > 0) {
-                        if (!$label) {
-                            print qq/[DEBUG] Skipping unlabeled annotation "$ann->{"description"}"\n/;
-                        }
-                        else {
-                            print qq/[DEBUG] Skipping label "$label" (!= "$LABEL")\n/;
-                        }
+                    elsif ($MATCH && ($DEBUG > 0)) {
+                        print qq/[DEBUG] Skipping annotation which doesn't match '$MATCH': $ann->{"description"}\n/;
                     }
                 }
-                elsif ($MATCH && ($DEBUG > 0)) {
-                    print qq/[DEBUG] Skipping annotation which doesn't match '$MATCH': $ann->{"description"}\n/;
+                elsif ($DEBUG > 0) {
+                    print qq/[DEBUG] Skipping annotation "$ann->{"description"}"\n/;
                 }
-            }
-            elsif ($DEBUG > 0) {
-                print qq/[DEBUG] Skipping annotation "$ann->{"description"}"\n/;
             }
         }
     }
+
+    return @annotations;
 }
 
+my @annotations = parse_annotations($ID);
+
 if ($#annotations < 0) {
-    print STDERR "No annotation found.\n";
-    exit 1;
+    print STDERR "No annotation found.";
+    if ($NO_ANNOTATION_HOOK) {
+        print STDERR " Executing NO_ANNOTATION_HOOK:\n";
+        execute_fork("$NO_ANNOTATION_HOOK $ID");
+        @annotations = parse_annotations($ID);
+        if ($#annotations < 0) {
+            print STDERR "Still no annotations found.\n";
+            exit 1;
+        }
+    }
+    else {
+        print STDERR "\n";
+        exit 1;
+    }
 }
 
 if ($#SORT_KEYS >= 0) {

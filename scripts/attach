@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Only add an annotation if we are operating on a single ID
+if [ $# -eq 1 ]; then
+    task $1 annotate Notes
+fi
