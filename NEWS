@@ -7,6 +7,7 @@ New features in taskopen 1.1
   - More examples.
   - Filter broken links, i.e. non existing files.
   - Support for auto-attaching annotations if none has been found (#81).
+  - Added helper script "attach", which uses ranger as a file chooser (#33).
 
 Bugfixes and minor improvements taskopen 1.1
 
