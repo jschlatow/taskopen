@@ -8,6 +8,8 @@
 
 # Only add an annotation if we are operating on a single ID
 if [ $# -eq 1 ]; then
+    desc=$(task $1 info | awk '$0 ~ /^Description/ {print substr($0, index($0,$2))}')
+    echo "Attaching to task $1 '$desc'."
     filename=$(mktemp)
     echo -n "Type a label: "
     read label
