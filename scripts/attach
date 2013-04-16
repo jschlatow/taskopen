@@ -17,6 +17,7 @@ if [ $# -eq 1 ]; then
     if [ "$label" != "" ]; then
         ann="$label: "
     fi
+    #ranger --choosefile=$filename --selectfile=/path/to/start-point
     ranger --choosefile=$filename
     ann="$ann$(cat $filename)"
     task $1 annotate -- $ann
