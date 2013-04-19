@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# REQUIRES: ranger
+# REQUIRES: ranger, awk
 
 # INSTALLATION
 # Add this to your ~/.taskrc:

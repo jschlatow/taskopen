@@ -8,6 +8,8 @@ It also depends on the JSON module, i.e.
  * _perl-json_ on archlinux
  * to be continued...
 
+The helper scripts are usually run by bash. Some of the scripts also depend on (g)awk.
+
 #What does it do?
 It allows you to link almost any file, webpage or command to a taskwarrior task by adding a filepath, web-link or uri as an annotation. Text notes, images, PDF files, web addresses, spreadsheets and many other types of links can then be filtered, listed and opened by using taskopen. Some actions are sane defaults, others can be custom-configured, and everything else will use your systems mime-types to open the link. 
 
