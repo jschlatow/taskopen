@@ -95,7 +95,7 @@ List-only mode, does not open any file. Shows command line that would be execute
 with -l.
 .TP
 .BR "\-s 'key1+,key2-'"
-Sort annotations by the given key which can be a taskwarrior field or 'annot', 'label', 'entry', 'size', 'type', 'time', 'mtime' or 'atime'. A '+' or '-' may be appended to the field indentifier in order to specify a sort order.
+Sort annotations by the given key which can be any taskwarrior attribute (preceded by 'task_') or 'annot', 'label', 'entry', 'size', 'type', 'time', 'mtime' or 'atime'. A '+' or '-' may be appended to the field indentifier in order to specify a sort order.
 .TP
 .BR "-i [cmd]"
 Execute
@@ -150,6 +150,12 @@ Contains the LABEL text of the annotation; may be empty.
 .TP
 .BR $ANNOTATION
 Contains the undecoded annotation text.
+
+.TP
+.BR $TASK_*
+Such as TASK_PROJECT, which contains the value of the taskwarrior attribute "project" as soon as you
+let taskopen know about this attribute by adding it to the TASK_ATTRIBUTES variable in your
+taskopenrc.
 
 .RE
 This way, for instance, you can choose to pass the UUID instead of the file path to you command like

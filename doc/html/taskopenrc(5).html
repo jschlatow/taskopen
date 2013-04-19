@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Apr 15 09:58:49 2013 -->
+<!-- CreationDate: Fri Apr 19 16:46:25 2013 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -209,10 +209,20 @@ further details.</p>
 
 <p style="margin-left:11%;"><b>NO_ANNOTATION_HOOK</b></p>
 
-<p style="margin-left:22%;">Execute an arbitrary if there
-is no annotation available. The corresponding taskwarrior
+<p style="margin-left:22%;">Execute an arbitrary script if
+there is no annotation found. The corresponding taskwarrior
 IDs will be passed as arguments, e.g. &quot;attach.sh 21
 42&quot;</p>
+
+<p style="margin-left:11%;"><b>TASK_ATTRIBUTES</b></p>
+
+<p style="margin-left:22%;">Add arbitrary taskwarrior
+attributes (comma separated) as sort keys and environment
+variables for use within user commands. In order to prevent
+name conflicts, the corresponding sort keys are preceded by
+&quot;task_&quot; (e.g. &quot;task_project&quot;).
+Environment variables are additionally in upper case (e.g.
+TASK_PROJECT).</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>
@@ -248,6 +258,19 @@ uses muttjump to open the mutt mailboxes natively or in a
 screen window (very quick and effective). The muttjump can
 be found at
 <i>&lt;https://github.com/weisslj/muttjump&gt;</i></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Integrating
+user-defined attributes (UDAs) <br>
+TASK_ATTRIBUTES=url,costs <br>
+CUSTOM1_REGEX=URL <br>
+CUSTOM1_CMD=&quot;xdg-open $TASK_URL&quot; <br>
+DEFAULT_SORT=&quot;task_costs-,id+&quot;</b></p>
+
+<p style="margin-left:22%; margin-top: 1em">You can make
+taskopen agnostic to any taskwarrior attributes by adding
+them to TASK_ATTRIBUTES. This enables the use of these
+attributes within user commands (see taskopen (1)) or as
+sort keys.</p>
 
 <h2>CREDITS &amp; COPYRIGHTS
 <a name="CREDITS &amp; COPYRIGHTS"></a>

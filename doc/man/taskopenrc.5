@@ -127,6 +127,12 @@ see CUSTOM1_CMD
 Execute an arbitrary script if there is no annotation found. The corresponding taskwarrior IDs will
 be passed as arguments, e.g. "attach.sh 21 42"
 
+.TP
+.BR TASK_ATTRIBUTES
+Add arbitrary taskwarrior attributes (comma separated) as sort keys and environment variables for
+use within user commands. In order to prevent name conflicts, the corresponding sort keys are preceded by "task_" (e.g.
+"task_project"). Environment variables are additionally in upper case (e.g. TASK_PROJECT).
+
 .SH EXAMPLES
 
 .SS "Using the notes.vim plugin for Notes files"
@@ -152,6 +158,21 @@ Thanks to Jostein Berntsen, the old bash version of taskopen had support for lin
 Taskopen then uses muttjump to open the mutt mailboxes natively or in a screen window (very quick
 and effective). The muttjump can be found at
 .I <https://github.com/weisslj/muttjump>
+
+.SS "Integrating user-defined attributes (UDAs)"
+
+.BR TASK_ATTRIBUTES=url,costs
+.br
+.BR "CUSTOM1_REGEX=URL"
+.br
+.BR "CUSTOM1_CMD=\(dqxdg-open $TASK_URL\(dq"
+.br
+.BR "DEFAULT_SORT=\(dqtask_costs-,id+\(dq"
+
+.IP
+You can make taskopen agnostic to any taskwarrior attributes by adding them to TASK_ATTRIBUTES.
+This enables the use of these attributes within user commands (see taskopen (1)) or as
+sort keys.
 
 .SH "CREDITS & COPYRIGHTS"
 Copyright (C) 2010 \- 2013, J. Schlatow

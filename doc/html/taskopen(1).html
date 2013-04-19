@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Apr 15 09:58:39 2013 -->
+<!-- CreationDate: Fri Apr 19 16:46:25 2013 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -319,7 +319,8 @@ line that would be executed. Can be combined with -l.</p></td></tr>
 &rsquo;key1+,key2-&rsquo;</b></p>
 
 <p style="margin-left:22%;">Sort annotations by the given
-key which can be a taskwarrior field or &rsquo;annot&rsquo;,
+key which can be any taskwarrior attribute (preceded by
+&rsquo;task_&rsquo;) or &rsquo;annot&rsquo;,
 &rsquo;label&rsquo;, &rsquo;entry&rsquo;,
 &rsquo;size&rsquo;, &rsquo;type&rsquo;, &rsquo;time&rsquo;,
 &rsquo;mtime&rsquo; or &rsquo;atime&rsquo;. A
@@ -439,6 +440,14 @@ empty.</p> </td></tr>
 
 <p style="margin-left:22%;">Contains the undecoded
 annotation text.</p>
+
+<p style="margin-left:11%;"><b>$TASK_*</b></p>
+
+<p style="margin-left:22%;">Such as TASK_PROJECT, which
+contains the value of the taskwarrior attribute
+&quot;project&quot; as soon as you let taskopen know about
+this attribute by adding it to the TASK_ATTRIBUTES variable
+in your taskopenrc.</p>
 
 <p style="margin-left:11%; margin-top: 1em">This way, for
 instance, you can choose to pass the UUID instead of the

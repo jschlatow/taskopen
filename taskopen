@@ -145,6 +145,11 @@ NOTES_EXT=".txt"
 # Execute an arbitrary if there is no annotation available. The corresponding taskwarrior IDs will
 # be passed as arguments, e.g. "attach.sh 21 42"
 #NO_ANNOTATION_HOOK=attach.sh
+
+# Make additional taskwarrior attributes available as sort keys and environment variables.
+# E.g. TASK_ATTRIBUTES="project,tags" allows to sort by "task_project" or "task_tags" and to use 
+# "$TASK_PROJECT" or "$TASK_TAGS" within your (custom) commands.
+#TASK_ATTRIBUTES=""
 >;
         close $fh;
     }
@@ -336,6 +341,11 @@ else {
     $CUSTOM2_CMD = "";
 }
 
+my @TASK_ATTRIBUTES;
+if (exists $config{"TASK_ATTRIBUTES"}) {
+    @TASK_ATTRIBUTES = split(",", $config{"TASK_ATTRIBUTES"});
+}
+
 my $NO_ANNOTATION_HOOK;
 if (exists $config{"NO_ANNOTATION_HOOK"}) {
     $NO_ANNOTATION_HOOK = $config{"NO_ANNOTATION_HOOK"};
@@ -418,6 +428,7 @@ sub diag {
     print "    CUSTOM2_REGEX      = $CUSTOM2_REGEX\n";
     print "    CUSTOM2_CMD        = $CUSTOM2_CMD\n";
     print "    NO_ANNOTATION_HOOK = $NO_ANNOTATION_HOOK\n";
+    print "    TASK_ATTRIBUTES    = @TASK_ATTRIBUTES\n";
 
     print "\n";
 }
@@ -535,6 +546,11 @@ sub reset_env {
     delete $ENV{"ID"};
     delete $ENV{"LABEL"};
     delete $ENV{"ANNOTATION"};
+
+    foreach my $att (@TASK_ATTRIBUTES) {
+        my $uc_att = uc($att);
+        delete $ENV{"TASK_$uc_att"};
+    }
 }
 
 sub prepare_cmd {
@@ -551,6 +567,13 @@ sub prepare_cmd {
         $ENV{"ID"}         = $ann->{"id"};
         $ENV{"LABEL"}      = $ann->{"label"};
         $ENV{"ANNOTATION"} = $ann->{"raw"};
+
+        foreach my $att (@TASK_ATTRIBUTES) {
+            if (exists $ann->{"task_$att"}) {
+                my $uc_att = uc($att);
+                $ENV{"TASK_$uc_att"} = $ann->{"task_$att"};
+            }
+        }
     }
 
     return $cmd;
@@ -943,6 +966,20 @@ sub parse_annotations {
                                 } 
                             }
 
+                            foreach my $att (@TASK_ATTRIBUTES) {
+                                if (exists $task->{$att}) {
+                                    if (ref($task->{$att}) eq "ARRAY") {
+                                        $entry{"task_$att"} = join(",", @{$task->{$att}});
+                                    }
+                                    else {
+                                        $entry{"task_$att"} = $task->{$att};
+                                    }
+                                }
+                                else {
+                                    $entry{"task_$att"} = "";
+                                }
+                            }
+
                             # Copy sort keys
                             foreach my $key (@SORT_KEYS) {
                                 $key =~ m/(.*?)(\+|-)?$/;
@@ -951,9 +988,15 @@ sub parse_annotations {
                                     {
                                         $entry{$1} = $ann->{$1};
                                     }
+                                    elsif (exists $ann->{"task_$1"})
+                                    {
+                                        $entry{$1} = $ann->{"task_$1"};
+                                    }
                                     elsif (exists $task->{$1})
                                     {
-                                        $entry{$1} = $task->{$1};
+                                        # FIXME this is only present due to backwards compatibility
+                                        printf STDERR qq/You are using the taskwarrior attribute "$1" for sorting. Please use "task_$1" instead and add "$1" to TASK_ATTRIBUTES in your taskopenrc.\n/;
+                                        exit 1;
                                     }
                                     elsif ($1 eq "size") {
                                         my $filepath = get_filepath(\%entry);
@@ -981,7 +1024,7 @@ sub parse_annotations {
                                     }
                                 }
                             }
-                            
+
                             if ($TYPE) {
                                 my $filetype;
                                 if (!$entry{"type"}) {
