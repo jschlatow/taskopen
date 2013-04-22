@@ -926,6 +926,11 @@ if ($DEBUG > 0) {
 my $ID = qx{$TASKBIN $ID_CMD $EXCLUDE$FILTER};
 chomp($ID);
 
+if ($ID eq "") {
+    print STDERR "There is no task that matches: $EXCLUDE$FILTER\n";
+    exit 1;
+}
+
 sub parse_annotations {
     my $ID = $_[0];
 
