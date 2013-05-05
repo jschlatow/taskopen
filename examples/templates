@@ -1,0 +1,26 @@
+# EXAMPLE: templates
+# 
+# DESCRIPTION
+# Taskopen can be used to implement template-like tasks for taskwarrior. A template task can be seen
+# as a neat way to manage a whole set of tasks. The idea is that a template task may be a recurring
+# task like a montly "backup" task which can be expanded into a chain of sub-tasks as soon as it pops up.
+#
+# SETUP
+
+# Add something like this to your ~/.taskopenrc:
+#     CUSTOM2_REGEX=".*\.tmpl"
+#     CUSTOM2_CMD="$FILE $UUID"
+# 
+# Create a .tmpl file and make it executable, e.g. ~/taskopen/backup.tmpl:
+#     #!/bin/bash
+#     task del $1               # delete the "parent" task
+#     task add backup VM        # add sub-task 1
+#     task add backup laptop    # add sub-task 2
+#     task add backup dropbox   # add sub-task 3
+#
+# USAGE
+# Add an annotation like this:
+#     $ task 1 annotate -- ~/taskopen/backup.tmpl
+#
+# Use taskopen to expand the task (which executes backup.tmpl):
+#     $ taskopen 1

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Feb 25 12:53:21 2013 -->
+<!-- CreationDate: Sun May  5 12:55:52 2013 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -117,7 +117,7 @@ you want to enable additional debugging output.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>Notes files
 <br>
-NOTES_FOLDER=~/tasknotes/</b></p>
+NOTES_FOLDER=$HOME/tasknotes/</b></p>
 
 <p style="margin-left:22%;">The directory in which the
 Notes files will be stored.</p>
@@ -193,7 +193,11 @@ identifies annotations openable by CUSTOM1_CMD.</p>
 <p style="margin-left:11%;"><b>CUSTOM1_CMD</b></p>
 
 <p style="margin-left:22%;">The command with which
-annotations matchin CUSTOM1_REGEX will be opened.</p>
+annotations matching CUSTOM1_REGEX will be opened. You may
+use the following environment variables: $FILE, $UUID, $ID,
+$LABEL and $ANNOTATION. By Default, the value of $FILE will
+be appended to the command. See <b>taskopen</b>(1) for
+further details.</p>
 
 <p style="margin-left:11%;"><b>CUSTOM2_REGEX</b></p>
 
@@ -203,6 +207,23 @@ annotations matchin CUSTOM1_REGEX will be opened.</p>
 
 <p style="margin-left:22%;">see CUSTOM1_CMD</p>
 
+<p style="margin-left:11%;"><b>NO_ANNOTATION_HOOK</b></p>
+
+<p style="margin-left:22%;">Execute an arbitrary script if
+there is no annotation found. The corresponding taskwarrior
+IDs will be passed as arguments, e.g. &quot;attach.sh 21
+42&quot;</p>
+
+<p style="margin-left:11%;"><b>TASK_ATTRIBUTES</b></p>
+
+<p style="margin-left:22%;">Add arbitrary taskwarrior
+attributes (comma separated) as sort keys and environment
+variables for use within user commands. In order to prevent
+name conflicts, the corresponding sort keys are preceded by
+&quot;task_&quot; (e.g. &quot;task_project&quot;).
+Environment variables are additionally in upper case (e.g.
+TASK_PROJECT).</p>
+
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>
 </h2>
@@ -210,9 +231,9 @@ annotations matchin CUSTOM1_REGEX will be opened.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>Using the
 notes.vim plugin for Notes files <br>
-NOTES_FOLDER=~/Notes/vimnotes <br>
+NOTES_FOLDER=$HOME/Notes/vimnotes <br>
 NOTES_EXT=&quot;&quot; <br>
-NOTES_CMD=vim -c \&quot;:Note UUID\&quot;</b></p>
+NOTES_CMD=&quot;vim -c &quot;:Note $UUID&quot;&quot;</b></p>
 
 <p style="margin-left:22%; margin-top: 1em">The notes.vim
 plugin can be found at
@@ -221,7 +242,8 @@ plugin can be found at
 <p style="margin-left:11%; margin-top: 1em"><b>Link to mutt
 emails <br>
 CUSTOM1_REGEX=Message-[iI][dD]:|message: <br>
-CUSTOM1_CMD=pipe.sh echo muttjump</b></p>
+CUSTOM1_CMD=&quot;echo &quot;$FILE&quot; |
+muttjump&quot;</b></p>
 
 <p style="margin-left:22%; margin-top: 1em">Thanks to
 Jostein Berntsen, the old bash version of taskopen had
@@ -236,6 +258,19 @@ uses muttjump to open the mutt mailboxes natively or in a
 screen window (very quick and effective). The muttjump can
 be found at
 <i>&lt;https://github.com/weisslj/muttjump&gt;</i></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Integrating
+user-defined attributes (UDAs) <br>
+TASK_ATTRIBUTES=url,costs <br>
+CUSTOM1_REGEX=URL <br>
+CUSTOM1_CMD=&quot;xdg-open $TASK_URL&quot; <br>
+DEFAULT_SORT=&quot;task_costs-,id+&quot;</b></p>
+
+<p style="margin-left:22%; margin-top: 1em">You can make
+taskopen agnostic to any taskwarrior attributes by adding
+them to TASK_ATTRIBUTES. This enables the use of these
+attributes within user commands (see taskopen (1)) or as
+sort keys.</p>
 
 <h2>CREDITS &amp; COPYRIGHTS
 <a name="CREDITS &amp; COPYRIGHTS"></a>

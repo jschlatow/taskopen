@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w -CLASo
 
 ###############################################################################
 # taskopen - file based notes with taskwarrior
@@ -33,9 +33,9 @@ use strict;
 use warnings;
 
 # DON'T TOUCH THE FOLLOWING LINES
-my $VERSION="v1.0";
-my $REVNUM="154";
-my $REVHASH="57ead8d";
+my $VERSION="v1.0.1";
+my $REVNUM="210";
+my $REVHASH="df13bee";
 # END-DON'T-TOUCH
 
 my $HOME = $ENV{"HOME"};
@@ -43,6 +43,10 @@ my $XDG = "xdg-open";
 
 if ($^O =~ m/.*darwin.*/) { #OSX
    $XDG = "open";
+}
+
+if ($^O =~ m/.*cygwin.*/) { #CYGWIN
+   $XDG = "cygstart";
 }
 
 my $cfgfile = "$HOME/.taskopenrc";
@@ -67,19 +71,19 @@ unless (-e $cfgfile) {
            $choice ne "N" && 
            $choice ne "")
     {
-        print qq{Config file "$cfgfile" does not exist. Do you want to create it? (Y/n) };
+        print STDOUT qq{Config file "$cfgfile" does not exist. Do you want to create it? (Y/n) };
         $choice = <STDIN>;
         chomp($choice);
     }
 
     if ($choice eq "n" || $choice eq "N") {
-        print qq/Can not continue without a config file.\n/;
+        print STDERR qq/Can not continue without a config file.\n/;
         exit 0;
     }
     else {
-        open(CONFIG, ">$cfgfile") or die "can't open $cfgfile: $!";
+        open(my $fh, '>', $cfgfile) or die "can't open $cfgfile: $!";
         # write default config
-        print CONFIG q<
+        print $fh q<
 #BROWSER='xdg-open'
 #EDITOR='vim'
 TASKBIN='task'
@@ -87,7 +91,7 @@ TASKBIN='task'
 # If you sync tasks NOTES_FOLDER should be a location that syncs and is available to
 # other computers, i.e. /users/dropbox/tasknotes
 # NOTES_FOLDER to store notes in, must already exist!
-NOTES_FOLDER="~/tasknotes/"
+NOTES_FOLDER="$HOME/tasknotes/"
 
 # Preferred extension for tasknotes
 NOTES_EXT=".txt"
@@ -95,12 +99,12 @@ NOTES_EXT=".txt"
 # Path to notes file. UUID will be replaced with the actual uuid of
 # the task. If NOTES_CMD 
 # Default is: ${NOTES_FOLDER}UUID${NOTES_EXT}
-#NOTES_FILE="~/tasknotes/UUID.txt"
+#NOTES_FILE="$HOME/tasknotes/UUID.txt"
 
 # Command that opens notes. UUID will be replaced with the actual uuid of 
 # the task.
 # Default is: $EDITOR $NOTES_FILE
-#NOTES_CMD="vim ~/tasknotes/UUID.txt"
+#NOTES_CMD="vim "$HOME/tasknotes/$UUID.txt""
 
 # Specify the default sorting.
 # Default is taskwarrior's default sorting, i.e. sorting by task IDs.
@@ -137,13 +141,23 @@ NOTES_EXT=".txt"
 # Custom regular expression that specifies annotations passed to CUSTOM2_CMD.
 #CUSTOM2_REGEX=""
 #CUSTOM2_CMD=""
+
+# Execute an arbitrary if there is no annotation available. The corresponding taskwarrior IDs will
+# be passed as arguments, e.g. "attach.sh 21 42"
+#NO_ANNOTATION_HOOK=attach.sh
+
+# Make additional taskwarrior attributes available as sort keys and environment variables.
+# E.g. TASK_ATTRIBUTES="project,tags" allows to sort by "task_project" or "task_tags" and to use 
+# "$TASK_PROJECT" or "$TASK_TAGS" within your (custom) commands.
+#TASK_ATTRIBUTES=""
 >;
+        close $fh;
     }
 }
 
 my %config;
-open(CONFIG, "$cfgfile") or die "can't open $cfgfile: $!";
-while (<CONFIG>) {
+open(my $fh, '<', $cfgfile) or die "can't open $cfgfile: $!";
+while (<$fh>) {
     chomp;
     s/#.*//; # Remove comments
     s/^\s+//; # Remove opening whitespace
@@ -154,6 +168,7 @@ while (<CONFIG>) {
     $value =~ s/'(.*)'/$1/;
     $config{$key} = $value;
 }
+close $fh;
 
 if (exists $config{"PATH_EXT"}) {
     $ENV{"PATH"} = qq/$config{"PATH_EXT"}:$ENV{"PATH"}/;
@@ -195,8 +210,20 @@ my $EDITOR;
 if (exists $config{"EDITOR"}) {
     $EDITOR = $config{"EDITOR"};
 }
-else {
+elsif (exists $ENV{"VISUAL"}) {
+    $EDITOR = $ENV{"VISUAL"};
+}
+elsif (exists $ENV{"EDITOR"}) {
+    $EDITOR = $ENV{"EDITOR"};
+}
+elsif (!system("which vim &> /dev/null")) {
     $EDITOR = "vim";
+}
+elsif (!system("which nano &> /dev/null")) {
+    $EDITOR = "nano";
+}
+else {
+    die "Cannot find any editor. Please specify EDITOR in your ~/.taskopenrc\n";
 }
 
 my $NOTES_FILE;
@@ -212,7 +239,7 @@ if (exists $config{"NOTES_CMD"}) {
     $NOTES_CMD = $config{"NOTES_CMD"};
 }
 else {
-    $NOTES_CMD = "$EDITOR $NOTES_FILE";
+    $NOTES_CMD = qq/$EDITOR \"$NOTES_FILE\"/;
 }
 
 my $EXCLUDE;
@@ -254,7 +281,8 @@ if (exists $config{"DEFAULT-x"}) {
     $DEFAULT_x = $config{"DEFAULT-x"};
 }
 else {
-    $DEFAULT_x = qq/$ENV{"SHELL"} -c/;
+#    $DEFAULT_x = qq/$ENV{"SHELL"} -c/;
+    $DEFAULT_x = "\$FILE";
 }
 
 my $NOTES_REGEX;
@@ -313,6 +341,16 @@ else {
     $CUSTOM2_CMD = "";
 }
 
+my @TASK_ATTRIBUTES;
+if (exists $config{"TASK_ATTRIBUTES"}) {
+    @TASK_ATTRIBUTES = split(",", $config{"TASK_ATTRIBUTES"});
+}
+
+my $NO_ANNOTATION_HOOK;
+if (exists $config{"NO_ANNOTATION_HOOK"}) {
+    $NO_ANNOTATION_HOOK = $config{"NO_ANNOTATION_HOOK"};
+}
+
 my $REGEX_CODE = "fbn";
 if ($CUSTOM1_REGEX) {
     $REGEX_CODE = "${REGEX_CODE}1";
@@ -338,8 +376,21 @@ sub diag {
     my $task_version = qx{$TASKBIN _version};
     chomp($task_version);
 
-    my $xdg_version  = qx{$XDG --version};
-    chomp($xdg_version);
+    # FIXME no xdg --version on OSX
+    my $xdg_version;
+    if ($^O =~ m/.*darwin.*/) {    #OSX
+        $xdg_version = "N/A on OSX";
+    } elsif ($^O =~ m/.*cygwin.*/) { #CYGWIN
+        my @output = qx{$XDG --version};
+        if ($output[0] =~ m/.*\s+(.*)$/) {
+            $xdg_version = $1;
+        } else {
+            $xdg_version = "Couldn't parse '$XDG --version'";
+        }
+    } else {
+        $xdg_version  = qx{$XDG --version};
+        chomp($xdg_version);
+    }
 
     print "Environment\n";
     print "    Platform:      $^O\n";
@@ -351,33 +402,65 @@ sub diag {
 
     print "Current configuration\n";
     print "  Binaries and paths:\n";
-    print "    BROWSER       = $BROWSER\n";
-    print "    TASKBIN       = $TASKBIN\n";
-    print "    EDITOR        = $EDITOR\n";
-    print "    XDG           = $XDG\n";
-    print "    PATH          = $ENV{'PATH'}\n";
+    print "    BROWSER            = $BROWSER\n";
+    print "    TASKBIN            = $TASKBIN\n";
+    print "    EDITOR             = $EDITOR\n";
+    print "    XDG                = $XDG\n";
+    print "    PATH               = $ENV{'PATH'}\n";
     print "\n";
     print "  Others:\n";
-    print "    NOTES_FOLDER  = $FOLDER\n";
-    print "    NOTES_EXT     = $EXT\n";
-    print "    NOTES_FILE    = $NOTES_FILE\n";
-    print "    NOTES_CMD     = $NOTES_CMD\n";
-    print "    DEFAULT_FILTER= $EXCLUDE\n";
-    print "    DEFAULT_SORT  = $DEFAULT_SORT\n";
-    print "           current: $SORT\n";
-    print "    DEFAULT-i     = $DEFAULT_i\n";
-    print "           current: $SHOW_CMD\n";
-    print "    DEFAULT-x     = $DEFAULT_x\n";
-    print "    DEBUG         = $DEBUG\n";
-    print "    NOTES_REGEX   = $NOTES_REGEX\n";
-    print "    BROWSER_REGEX = $BROWSER_REGEX\n";
-    print "    FILE_REGEX    = $FILE_REGEX\n";
-    print "    CUSTOM1_REGEX = $CUSTOM1_REGEX\n";
-    print "    CUSTOM1_CMD   = $CUSTOM1_CMD\n";
-    print "    CUSTOM2_REGEX = $CUSTOM2_REGEX\n";
-    print "    CUSTOM2_CMD   = $CUSTOM2_CMD\n";
+    print "    NOTES_FOLDER       = $FOLDER\n";
+    print "    NOTES_EXT          = $EXT\n";
+    print "    NOTES_FILE         = $NOTES_FILE\n";
+    print "    NOTES_CMD          = $NOTES_CMD\n";
+    print "    DEFAULT_FILTER     = $EXCLUDE\n";
+    print "    DEFAULT_SORT       = $DEFAULT_SORT\n";
+    print "                current: $SORT\n";
+    print "    DEFAULT-i          = $DEFAULT_i\n";
+    print "                current: $SHOW_CMD\n";
+    print "    DEFAULT-x          = $DEFAULT_x\n";
+    print "    DEBUG              = $DEBUG\n";
+    print "    NOTES_REGEX        = $NOTES_REGEX\n";
+    print "    BROWSER_REGEX      = $BROWSER_REGEX\n";
+    print "    FILE_REGEX         = $FILE_REGEX\n";
+    print "    CUSTOM1_REGEX      = $CUSTOM1_REGEX\n";
+    print "    CUSTOM1_CMD        = $CUSTOM1_CMD\n";
+    print "    CUSTOM2_REGEX      = $CUSTOM2_REGEX\n";
+    print "    CUSTOM2_CMD        = $CUSTOM2_CMD\n";
+    print "    NO_ANNOTATION_HOOK = $NO_ANNOTATION_HOOK\n";
+    print "    TASK_ATTRIBUTES    = @TASK_ATTRIBUTES\n";
 
     print "\n";
+}
+
+sub execute {
+    _execute(0, $_[0])
+}
+
+sub execute_fork {
+    _execute(1, $_[0])
+}
+
+sub _execute {
+    my $fork = $_[0];
+    my $cmd  = $_[1];
+
+    if ($DEBUG > 0) {
+        if ($fork > 0) {
+            print "forking: ";
+        }
+        else {
+            print "executing: ";
+        }
+        print "$cmd\n";
+    }
+
+    if ($fork > 0) {
+        system($cmd);
+    }
+    else {
+        exec($cmd);
+    }
 }
 
 sub parse_number {
@@ -392,7 +475,7 @@ sub parse_number {
                 my $start = $1;
                 my $end   = $2;
                 if ($start < 1 || $end > $max) {
-                    print qq/"$item" is an invalid range\n/;
+                    print STDERR qq/"$item" is an invalid range\n/;
                     exit 1;
                 }
                 while ($start <= $end) {
@@ -402,20 +485,20 @@ sub parse_number {
             }
             elsif ($item =~ m/\d+/) {
                 if ($item < 1 || $item > $max) {
-                    print qq/"$item" is an invalid number\n/;
+                    print STDERR qq/"$item" is an invalid number\n/;
                     exit 1;
                 }
                 push(@result, $item);
             }
             else {
-                print qq/"$item" is not a number\n/;
+                print STDERR qq/"$item" is not a number\n/;
                 exit 1;
             }
         }
         return @result;
     }
     else {
-        print qq/Invalid input "$input"\n/;
+        print STDERR qq/Invalid input "$input"\n/;
         exit 1;
     }
 }
@@ -426,7 +509,7 @@ sub get_filepath {
     
     if ($file =~ m/^$NOTES_REGEX/ || $ann->{"raw"} =~ m/^$NOTES_REGEX/) {
         $file = $NOTES_FILE;
-        $file =~ s/UUID/$ann->{"uuid"}/g;
+        $file =~ s/([^\$])UUID/$1$ann->{"uuid"}/g;
     }
 
    $file =~ s/^~/$HOME/;
@@ -438,15 +521,15 @@ sub raw_edit {
     my $old = $_[0];
 
     my $filename = tmpnam();
-    open(FILE, ">$filename") or die "can't open $filename: $!";
-    print(FILE $old);
-    close(FILE); 
+    open(my $fh, '>', $filename) or die "can't open $filename: $!";
+    print($fh $old);
+    close($fh); 
 
     system(qq/$EDITOR "$filename"/);
 
-    open(FILE, "<$filename") or die "can't open $filename: $!'";
-    my @lines = <FILE>;
-    close(FILE);
+    open($fh, '<', $filename) or die "can't open $filename: $!'";
+    my @lines = <my $fh>;
+    close($fh);
     unlink($filename);
 
     # taskwarrior does not support multi-line annotations
@@ -457,11 +540,53 @@ sub raw_edit {
     return $result;
 }
 
+sub reset_env {
+    delete $ENV{"UUID"};
+    delete $ENV{"FILE"};
+    delete $ENV{"ID"};
+    delete $ENV{"LABEL"};
+    delete $ENV{"ANNOTATION"};
+
+    foreach my $att (@TASK_ATTRIBUTES) {
+        my $uc_att = uc($att);
+        delete $ENV{"TASK_$uc_att"};
+    }
+}
+
+sub prepare_cmd {
+    my $cmd  = $_[0];
+    my $ann  = $_[1];
+    my $file = $_[2];
+
+    if ($cmd !~ m/\$/) {
+        $cmd = qq/$cmd "$file"/;
+    }
+    else {
+        $ENV{"FILE"}       = $file;
+        $ENV{"UUID"}       = $ann->{"uuid"};
+        $ENV{"ID"}         = $ann->{"id"};
+        $ENV{"LABEL"}      = $ann->{"label"};
+        $ENV{"ANNOTATION"} = $ann->{"raw"};
+
+        foreach my $att (@TASK_ATTRIBUTES) {
+            if (exists $ann->{"task_$att"}) {
+                my $uc_att = uc($att);
+                $ENV{"TASK_$uc_att"} = $ann->{"task_$att"};
+            }
+        }
+    }
+
+    return $cmd;
+}
+
 sub create_cmd {
     my $ann = $_[0];
     my $FORCE = $_[1];
     my $file = $ann->{"annot"};
 
+    reset_env();
+
+    my $cmd;
     if ($FORCE->{"action"}) {
         if ($FORCE->{"action"} eq "\\del") {
             return qq/$TASKBIN $ann->{'uuid'} denotate -- "$ann->{'raw'}"/;
@@ -482,44 +607,42 @@ sub create_cmd {
         }
         else {
             $file = get_filepath($ann);
-            return qq/$FORCE->{"action"} "$file"/;
+            $cmd = qq/$FORCE->{"action"}/;
         }
-    }
-
-    my $cmd;
-    if ($file =~ m/^$NOTES_REGEX/ || $ann->{"raw"} =~ m/^$NOTES_REGEX/) {
-        $cmd = $NOTES_CMD;
-        $cmd =~ s/UUID/$ann->{"uuid"}/g;
-        $cmd = qq/$ENV{"SHELL"} -c "$cmd"/;
-    }
-    elsif ($file =~ m/^$BROWSER_REGEX/ ) {
-        if ($file =~ m/^www/) {
-            # prepend http://
-            $cmd = qq{$BROWSER "http://$file"};
-        }
-        else {
-            $cmd = qq{$BROWSER "$file"};
-        }
-    }
-    elsif ($CUSTOM1_REGEX && $file =~ m/^$CUSTOM1_REGEX/) {
-        $cmd = qq{$CUSTOM1_CMD "$file"};
-    }
-    elsif ($CUSTOM2_REGEX && $file =~ m/^$CUSTOM2_REGEX/) {
-        $cmd = qq{$CUSTOM2_CMD "$file"};
     }
     else {
-        $file = get_filepath($ann);
-        my $filetype = qx{file "$file"};
-        if ($filetype =~ m/text/ ) {
-            $cmd = qq/$ENV{'SHELL'} -c "$EDITOR '$file'"/;
+        if ($file =~ m/^$NOTES_REGEX/ || $ann->{"raw"} =~ m/^$NOTES_REGEX/) {
+            # $file = get_filepath($ann);
+            $cmd = $NOTES_CMD;
+            $cmd =~ s/([^\$])UUID/$1\$UUID/g;
+        }
+        elsif ($file =~ m/^$BROWSER_REGEX/ ) {
+            if ($file =~ m/^www/) {
+                # prepend http://
+                $file = "http://$file";
+            }
+            $cmd = qq{$BROWSER};
+        }
+        elsif ($CUSTOM1_REGEX && $file =~ m/^$CUSTOM1_REGEX/) {
+            $cmd = qq{$CUSTOM1_CMD};
+        }
+        elsif ($CUSTOM2_REGEX && $file =~ m/^$CUSTOM2_REGEX/) {
+            $cmd = qq{$CUSTOM2_CMD};
         }
         else {
-            # use XDG for unknown file types
-            $cmd = qq{$XDG "$file"};
+            $file = get_filepath($ann);
+            my $filetype = qx{file "$file"};
+            if ($filetype =~ m/text|empty/ ) {
+                $cmd = qq/$EDITOR/;
+            }
+            else {
+                # use XDG for unknown file types
+                $cmd = qq{$XDG};
+            }
         }
     }
 
-    return $cmd;
+    return prepare_cmd($cmd, $ann, $file);
 }
 
 sub sort_hasharr
@@ -560,7 +683,7 @@ sub set_action
     my $action= $_[2];
 
     if ($force->{"action"}) {
-        print qq/Cannot use $arg in conjunction with $force->{"arg"}\n/;
+        print STDERR qq/Cannot use $arg in conjunction with $force->{"arg"}\n/;
         exit 1;
     }
     else {
@@ -575,7 +698,7 @@ sub set_mode
     my $val  = $_[1];
 
     if ($$mode && $$mode ne $val) {
-        print qq/Cannot use combine arguments -b with -l or -L\n/;
+        print STDERR qq/Cannot use combine arguments -b with -l or -L\n/;
         exit 1;
     }
     else {
@@ -593,6 +716,7 @@ my $LIST_EXEC;
 my %FORCE;
 my $MATCH;
 my $TYPE;
+my $BROKEN = 0;
 my $MODE;
 my $SHOW;
 for (my $i = 0; $i <= $#ARGV; ++$i) {
@@ -618,36 +742,36 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     }
     elsif ($arg eq "-n") {
         if ($REGEX_CODE =~ m/N/) {
-            print "Cannot combine argument -n with -N\n";
+            print STDERR "Cannot combine argument -n with -N\n";
             exit 1;
         }
         if (length($REGEX_CODE) == 1) {
-            print "Cannot combine argument -n with -f\n";
+            print STDERR "Cannot combine argument -n with -f\n";
             exit 1;
         }
         $REGEX_CODE = "n";
     }
     elsif ($arg eq "-N") {
         if ($REGEX_CODE eq "n") {
-            print "Cannot combine argument -N with -n\n";
+            print STDERR "Cannot combine argument -N with -n\n";
             exit 1;
         }
         $REGEX_CODE =~ s/n/N/;
     }
     elsif ($arg eq "-f") {
         if ($REGEX_CODE =~ m/F/) {
-            print "Cannot combine argument -f with -F\n";
+            print STDERR "Cannot combine argument -f with -F\n";
             exit 1;
         }
         if (length($REGEX_CODE) == 1) {
-            print "Cannot combine argument -f with -n\n";
+            print STDERR "Cannot combine argument -f with -n\n";
             exit 1;
         }
         $REGEX_CODE = "f";
     }
     elsif ($arg eq "-F") {
         if ($REGEX_CODE eq "f") {
-            print "Cannot combine argument -F with -f\n";
+            print STDERR "Cannot combine argument -F with -f\n";
             exit 1;
         }
         $REGEX_CODE =~ s/f/F/;
@@ -662,6 +786,9 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     elsif ($arg eq "-b") {
         set_mode(\$MODE, "batch");
     }
+    elsif ($arg eq "-B") {
+        $BROKEN = 1;
+    }
     elsif ($arg eq "-D") {
         set_action(\%FORCE, "-D", "\\del");
     }
@@ -671,21 +798,21 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     elsif ($arg eq "-s") {
         $SORT = $ARGV[++$i];
         if (!$SORT || $SORT =~ m/^-/) {
-            print "Missing argument after $arg\n";
+            print STDERR "Missing argument after $arg\n";
             exit 1;
         }
     }
     elsif ($arg eq "-m") {
         $MATCH = $ARGV[++$i];
         if (!$MATCH || $MATCH =~ m/^-/) {
-            print "Missing expression after -m\n";
+            print STDERR "Missing expression after -m\n";
             exit 1;
         }
     }
     elsif ($arg eq "-t") {
         $TYPE = $ARGV[++$i];
         if (!$TYPE || $TYPE =~ m/^-/) {
-            printf "Missing expression after -t\n";
+            printf STDERR "Missing expression after -t\n";
             exit 1;
         }
     }
@@ -714,6 +841,18 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     elsif ($arg eq "-c") {
         # just skip (handled above)
         $i++;
+    }
+    elsif ($arg eq "-p") {
+        if ($i < $#ARGV && $ARGV[$i+1] !~ m/^-/) {
+            my $cmd = $ARGV[++$i];
+            open(PIPE, "|-", $cmd) or die "Cannot execute '$cmd'!\n";
+            select(PIPE);
+            $|++;
+        }
+        else {
+            print STDERR "Missing argument after $arg\n";
+            exit 1;
+        }
     }
     else {
         $FILTER = "$FILTER $arg";
@@ -757,6 +896,7 @@ if ($HELP) {
     print "  -N                Show all but notes files; inverse of -n\n";
     print "  -f                Only show/open real files, i.e. annotations matching '$FILE_REGEX'\n";
     print "  -F                Show all but real files; inverse of -f\n";
+    print "  -B                Show only files that don't exist (combine with -f)\n";
     print "  -a                Query all active tasks; clears the DEFAULT_FILTER\n";
     print "  -A                Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
     print "  -D                Delete the annotation rather than opening it\n";
@@ -769,6 +909,7 @@ if ($HELP) {
     print "  -x ['cmd']        Execute file, optionally prepend cmd to the command line\n";
     print "  -i ['cmd']        Execute 'cmd <filename>' for each file and shows its output interleaved with the other output.\n";
     print "  -c filepath       Use alternate taskopenrc file as specified by 'filepath'\n";
+    print "  -p 'cmd'          Pipe output into 'cmd' (as in 'taskopen | cmd')\n";
     print "\n";
 
 	exit 1;
@@ -780,120 +921,175 @@ if ($SORT) {
 }
 
 if ($DEBUG > 0) {
-    printf("[DEBUG] Applying filter: $EXCLUDE$FILTER\n");
+    print "[DEBUG] Applying filter: $EXCLUDE$FILTER\n";
 }
 my $ID = qx{$TASKBIN $ID_CMD $EXCLUDE$FILTER};
 chomp($ID);
 
-# query IDs and parse json
-my $json = qx{$TASKBIN $ID _query};
-my @decoded_json = @{decode_json("$json")};
+if ($ID eq "") {
+    print STDERR "There is no task that matches: $EXCLUDE$FILTER\n";
+    exit 1;
+}
 
-# Reorganize data
-my @annotations;
-foreach my $task (@decoded_json) {
-    if (exists $task->{"annotations"}) {
-        foreach my $ann (@{$task->{"annotations"}}) {
-            $ann->{"description"} =~ m/(?:(\S+):\s+)?(.*)/;
-            my $file = $2;
-            my $label = $1;
-            if ( ($file  && $file  =~ m/$FILEREGEX/ ) ||
-                 ($label && $label =~ m/$LABELREGEX/) )
-            {
-                if (!$MATCH || ($file =~ m/$MATCH/)) {
-                    if (!$label) {
-                        $label = "";
-                    }
-                    if (!$LABEL || ($LABEL eq $label) ) {
-                        my %entry = ( "annot"       => $file,
-                                      "uuid"        => $task->{"uuid"},
-                                      "id"          => $task->{"id"},
-                                      "raw"         => $ann->{"description"},
-                                      "label"       => $label,
-                                      "description" => $task->{"description"});
+sub parse_annotations {
+    my $ID = $_[0];
 
-                        # Copy sort keys
-                        foreach my $key (@SORT_KEYS) {
-                            $key =~ m/(.*?)(\+|-)?$/;
-                            if (!exists $entry{$1}) {
-                                if (exists $ann->{$1})
-                                {
-                                    $entry{$1} = $ann->{$1};
-                                }
-                                elsif (exists $task->{$1})
-                                {
-                                    $entry{$1} = $task->{$1};
-                                }
-                                elsif ($1 eq "size") {
-                                    my $filepath = get_filepath(\%entry);
-                                    $entry{$1} = qx{stat -c "%s" "$filepath"};
-                                }
-                                elsif ($1 eq "mtime") {
-                                    my $filepath = get_filepath(\%entry);
-                                    $entry{$1} = qx{stat -c "%Y" "$filepath"};
-                                }
-                                elsif ($1 eq "time") {
-                                    my $filepath = get_filepath(\%entry);
-                                    $entry{$1} = qx{stat -c "%W" "$filepath"};
-                                }
-                                elsif ($1 eq "atime") {
-                                    my $filepath = get_filepath(\%entry);
-                                    $entry{$1} = qx{stat -c "%X" "$filepath"};
-                                }
-                                elsif ($1 eq "type") {
-                                    my $filepath = get_filepath(\%entry);
-                                    $entry{$1} = qx{file "$filepath"};
+    # query IDs and parse json
+    my $json = qx{$TASKBIN $ID _query};
+    my @decoded_json = @{decode_json("$json")};
+
+    # Reorganize data
+    my @annotations;
+    foreach my $task (@decoded_json) {
+        if (exists $task->{"annotations"}) {
+            foreach my $ann (@{$task->{"annotations"}}) {
+                $ann->{"description"} =~ m/(?:(\S+):\s+)?(.*)/;
+                my $file = $2;
+                my $label = $1;
+                if ( ($file  && $file  =~ m/$FILEREGEX/ ) ||
+                     ($label && $label =~ m/$LABELREGEX/) )
+                {
+                    if (!$MATCH || ($file =~ m/$MATCH/)) {
+                        if (!$label) {
+                            $label = "";
+                        }
+                        if (!$LABEL || ($LABEL eq $label) ) {
+                            my %entry = ( "annot"       => $file,
+                                          "uuid"        => $task->{"uuid"},
+                                          "id"          => $task->{"id"},
+                                          "raw"         => $ann->{"description"},
+                                          "label"       => $label,
+                                          "description" => $task->{"description"});
+
+                            if ($BROKEN) {
+                                my $filepath = get_filepath(\%entry);
+                                if (-e $filepath) {
+                                    if ($DEBUG > 0) {
+                                        print qq/[DEBUG] Skipping existing file "$filepath".\n/;
+                                    }
+                                    next;
+                                } 
+                            }
+
+                            foreach my $att (@TASK_ATTRIBUTES) {
+                                if (exists $task->{$att}) {
+                                    if (ref($task->{$att}) eq "ARRAY") {
+                                        $entry{"task_$att"} = join(",", @{$task->{$att}});
+                                    }
+                                    else {
+                                        $entry{"task_$att"} = $task->{$att};
+                                    }
                                 }
                                 else {
-                                    print qq/Unknown sort key "$1"\n/;
-                                    exit 1;
+                                    $entry{"task_$att"} = "";
                                 }
                             }
-                        }
-                        
-                        if ($TYPE) {
-                            my $filetype;
-                            if (!$entry{"type"}) {
-                                my $filepath = get_filepath(\%entry);
-                                $filetype = qx{file "$filepath"};
+
+                            # Copy sort keys
+                            foreach my $key (@SORT_KEYS) {
+                                $key =~ m/(.*?)(\+|-)?$/;
+                                if (!exists $entry{$1}) {
+                                    if (exists $ann->{$1})
+                                    {
+                                        $entry{$1} = $ann->{$1};
+                                    }
+                                    elsif (exists $ann->{"task_$1"})
+                                    {
+                                        $entry{$1} = $ann->{"task_$1"};
+                                    }
+                                    elsif (exists $task->{$1})
+                                    {
+                                        # FIXME this is only present due to backwards compatibility
+                                        printf STDERR qq/You are using the taskwarrior attribute "$1" for sorting. Please use "task_$1" instead and add "$1" to TASK_ATTRIBUTES in your taskopenrc.\n/;
+                                        exit 1;
+                                    }
+                                    elsif ($1 eq "size") {
+                                        my $filepath = get_filepath(\%entry);
+                                        $entry{$1} = qx{stat -c "%s" "$filepath"};
+                                    }
+                                    elsif ($1 eq "mtime") {
+                                        my $filepath = get_filepath(\%entry);
+                                        $entry{$1} = qx{stat -c "%Y" "$filepath"};
+                                    }
+                                    elsif ($1 eq "time") {
+                                        my $filepath = get_filepath(\%entry);
+                                        $entry{$1} = qx{stat -c "%W" "$filepath"};
+                                    }
+                                    elsif ($1 eq "atime") {
+                                        my $filepath = get_filepath(\%entry);
+                                        $entry{$1} = qx{stat -c "%X" "$filepath"};
+                                    }
+                                    elsif ($1 eq "type") {
+                                        my $filepath = get_filepath(\%entry);
+                                        $entry{$1} = qx{file "$filepath"};
+                                    }
+                                    else {
+                                        print STDERR qq/Unknown sort key "$1"\n/;
+                                        exit 1;
+                                    }
+                                }
+                            }
+
+                            if ($TYPE) {
+                                my $filetype;
+                                if (!$entry{"type"}) {
+                                    my $filepath = get_filepath(\%entry);
+                                    $filetype = qx{file "$filepath"};
+                                }
+                                else {
+                                    $filetype = $entry{"type"};
+                                }
+                                if ($filetype =~ m/$TYPE/) {
+                                    push(@annotations, \%entry);
+                                }
+                                elsif ($DEBUG > 0) {
+                                    print qq/[DEBUG] Skipping file "$entry{'file'}" whose type doesn't match '$TYPE'\n/;
+                                }
                             }
                             else {
-                                $filetype = $entry{"type"};
-                            }
-                            if ($filetype =~ m/$TYPE/) {
                                 push(@annotations, \%entry);
                             }
-                            elsif ($DEBUG > 0) {
-                                printf(qq/[DEBUG] Skipping file "$entry{'file'}" whose type doesn't match '$TYPE'\n/);
+                        }
+                        elsif ($DEBUG > 0) {
+                            if (!$label) {
+                                print qq/[DEBUG] Skipping unlabeled annotation "$ann->{"description"}"\n/;
+                            }
+                            else {
+                                print qq/[DEBUG] Skipping label "$label" (!= "$LABEL")\n/;
                             }
                         }
-                        else {
-                            push(@annotations, \%entry);
-                        }
                     }
-                    elsif ($DEBUG > 0) {
-                        if (!$label) {
-                            printf(qq/[DEBUG] Skipping unlabeled annotation "$ann->{"description"}"\n/);
-                        }
-                        else {
-                            printf(qq/[DEBUG] Skipping label "$label"\n/);
-                        }
+                    elsif ($MATCH && ($DEBUG > 0)) {
+                        print qq/[DEBUG] Skipping annotation which doesn't match '$MATCH': $ann->{"description"}\n/;
                     }
                 }
-                elsif ($MATCH && ($DEBUG > 0)) {
-                    printf(qq/[DEBUG] Skipping annotation which doesn't match '$MATCH': $ann->{"description"}\n/);
+                elsif ($DEBUG > 0) {
+                    print qq/[DEBUG] Skipping annotation "$ann->{"description"}"\n/;
                 }
-            }
-            elsif ($DEBUG > 0) {
-                printf(qq/[DEBUG] Skipping annotation "$ann->{"description"}"\n/);
             }
         }
     }
+
+    return @annotations;
 }
 
+my @annotations = parse_annotations($ID);
+
 if ($#annotations < 0) {
-    print "No annotation found.\n";
-    exit 1;
+    print STDERR "No annotation found.";
+    if ($NO_ANNOTATION_HOOK) {
+        print STDERR " Executing NO_ANNOTATION_HOOK:\n";
+        execute_fork("$NO_ANNOTATION_HOOK $ID");
+        @annotations = parse_annotations($ID);
+        if ($#annotations < 0) {
+            print STDERR "Still no annotations found.\n";
+            exit 1;
+        }
+    }
+    else {
+        print STDERR "\n";
+        exit 1;
+    }
 }
 
 if ($#SORT_KEYS >= 0) {
@@ -929,8 +1125,10 @@ if ($#annotations > 0 || ($MODE && $MODE eq "list")) {
         }
 
         if ($SHOW) {
+            reset_env();
             my $filepath = get_filepath($ann);
-            my $output = qx/$SHOW_CMD "$filepath"/;
+            my $cmd = prepare_cmd($SHOW_CMD, $ann, $filepath);
+            my $output = qx/$cmd/;
             chomp($output);
             print "       $output\n";
         }
@@ -945,7 +1143,9 @@ if ($#annotations > 0 || ($MODE && $MODE eq "list")) {
     }
     else {
         # read input
-        print "Type number(s): ";
+        select(STDOUT);
+        close(PIPE);
+        print STDOUT "Type number(s): ";
         my $choice = <STDIN>;
         chomp ($choice);
 
@@ -959,7 +1159,7 @@ if ($#annotations > 0 || ($MODE && $MODE eq "list")) {
 if ($#choices > 0) {
     my $tmp = join(",", @choices);
     print "\n";
-    print qq/Do you really want to process files $tmp? (y\/N)\n/;
+    print STDOUT qq/Do you really want to process files $tmp? (y\/N)\n/;
     my $choice = <STDIN>;
     chomp ($choice);
     if ($choice !~ m/^y/i) {
@@ -968,11 +1168,11 @@ if ($#choices > 0) {
 
     foreach my $choice (@choices) {
         my $ann = $annotations[$choice-1];
-        system(create_cmd($ann, \%FORCE));
+        execute_fork(create_cmd($ann, \%FORCE));
     }
 }
 else {
     my $ann = $annotations[$choices[0]-1];
-    exec(create_cmd($ann, \%FORCE));
+    execute(create_cmd($ann, \%FORCE));
 }
 

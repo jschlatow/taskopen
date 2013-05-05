@@ -1,0 +1,18 @@
+New features in taskopen 1.0.1
+
+  - Allowing the following environment variables in customizable commands: $FILE, $UUID, $ID,
+    $ANNOTATION and $LABEL.
+  - Better cygwin support (thanks to Jostein).
+  - New argument "-p <cmd>" allows piping taskopen's output into another command (like clog e.g.).
+  - More examples.
+  - Filter broken links, i.e. non existing files.
+  - Support for auto-attaching annotations if none has been found (#81).
+  - Added helper script "attach", which uses ranger as a file chooser (#33).
+  - Added support for arbitrary taskwarrior attributes and UDAs in particular (#78).
+
+Bugfixes and minor improvements taskopen 1.0.1
+
+  - Fixed handling of UTF8 characters (#73).
+  - Improved selection of editor binary.
+  - Open empty files with EDITOR.
+  - Fixed install script for OSX (#76).

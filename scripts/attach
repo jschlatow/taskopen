@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# REQUIRES: ranger, awk
+
+# INSTALLATION
+# Add this to your ~/.taskrc:
+#  alias.attach=execute /path/to/attach
+
+# Only add an annotation if we are operating on a single ID
+if [ $# -eq 1 ]; then
+    desc=$(task $1 info | awk '$0 ~ /^Description/ {print substr($0, index($0,$2))}')
+    echo "Attaching to task $1 '$desc'."
+    filename=$(mktemp)
+    echo -n "Type a label: "
+    read label
+    ann=""
+    if [ "$label" != "" ]; then
+        ann="$label: "
+    fi
+    #ranger --choosefile=$filename --selectfile=/path/to/start-point
+    ranger --choosefile=$filename
+    ann="$ann$(cat $filename)"
+    task $1 annotate -- $ann
+    rm $filename
+fi
