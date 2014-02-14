@@ -1,3 +1,6 @@
+Bugfixes in taskopen 1.0.2
+  - Fix compatibility issue with taskwarrior 2.4.0
+
 New features in taskopen 1.0.1
 
   - Allowing the following environment variables in customizable commands: $FILE, $UUID, $ID,
