@@ -935,7 +935,7 @@ sub parse_annotations {
     my $ID = $_[0];
 
     # query IDs and parse json
-    my $json = qx{$TASKBIN $ID _query};
+    my $json = qx{$TASKBIN $ID export};
     my @decoded_json = @{decode_json("$json")};
 
     # Reorganize data
