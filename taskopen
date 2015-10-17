@@ -445,6 +445,9 @@ sub _execute {
     my $fork = $_[0];
     my $cmd  = $_[1];
 
+    # see #89
+    $cmd =~ s/\$/\\\$/g;
+
     if ($DEBUG > 0) {
         if ($fork > 0) {
             print "forking: ";
