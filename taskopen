@@ -1079,7 +1079,7 @@ sub parse_annotations {
 my @annotations = parse_annotations($ID);
 
 if ($#annotations < 0) {
-    print STDERR "No annotation found.";
+    print STDERR "No compatible annotation found.";
     if ($NO_ANNOTATION_HOOK) {
         print STDERR " Executing NO_ANNOTATION_HOOK:\n";
         execute_fork("$NO_ANNOTATION_HOOK $ID");
