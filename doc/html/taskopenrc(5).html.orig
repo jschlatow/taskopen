@@ -1,5 +1,9 @@
-<!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Jun 21 21:34:41 2016 -->
+<!-- Creator     : groff version 1.22.2 -->
+<<<<<<< HEAD
+<!-- CreationDate: Mon Feb 25 12:53:21 2013 -->
+=======
+<!-- CreationDate: Fri Apr 19 16:46:25 2013 -->
+>>>>>>> devel
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -45,6 +49,7 @@ command</p>
 <a name="SYNOPSIS"></a>
 </h2>
 
+<<<<<<< HEAD
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>~/.taskopenrc
@@ -57,6 +62,20 @@ taskopen -c /path/to/taskopenrc</b></p>
 
 
 
+=======
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>~/.taskopenrc
+<br>
+taskopen -c /path/to/taskopenrc</b></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+
+>>>>>>> devel
 <p style="margin-left:11%; margin-top: 1em"><b>taskopen</b>
 obtains its configuration data from a file called
 <i>~/.taskopenrc</i> in the user&rsquo;s home directory.</p>
@@ -82,6 +101,7 @@ comment line.</p>
 <h2>CONFIGURATION VARIABLES
 <a name="CONFIGURATION VARIABLES"></a>
 </h2>
+<<<<<<< HEAD
 
 
 <p style="margin-left:11%; margin-top: 1em">Valid variable
@@ -91,13 +111,30 @@ names and their default values are:</p>
 configuration <br>
 BROWSER=xdg-open</b></p>
 
+=======
+
+
+<p style="margin-left:11%; margin-top: 1em">Valid variable
+names and their default values are:</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>General
+configuration <br>
+BROWSER=xdg-open</b></p>
+
+>>>>>>> devel
 <p style="margin-left:22%;">The executable which will be
 used to open URIs.</p>
 
 <p style="margin-left:11%;"><b>EDITOR=vim</b></p>
+<<<<<<< HEAD
 
 <p style="margin-left:22%;">Your preferred editor.</p>
 
+=======
+
+<p style="margin-left:22%;">Your preferred editor.</p>
+
+>>>>>>> devel
 <p style="margin-left:11%;"><b>TASKBIN=task</b></p>
 
 <p style="margin-left:22%;">The path to your taskwarrior
@@ -117,7 +154,11 @@ you want to enable additional debugging output.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>Notes files
 <br>
+<<<<<<< HEAD
+NOTES_FOLDER=~/tasknotes/</b></p>
+=======
 NOTES_FOLDER=$HOME/tasknotes/</b></p>
+>>>>>>> devel
 
 <p style="margin-left:22%;">The directory in which the
 Notes files will be stored.</p>
@@ -193,6 +234,28 @@ identifies annotations openable by CUSTOM1_CMD.</p>
 <p style="margin-left:11%;"><b>CUSTOM1_CMD</b></p>
 
 <p style="margin-left:22%;">The command with which
+<<<<<<< HEAD
+annotations matchin CUSTOM1_REGEX will be opened.</p>
+
+<p style="margin-left:11%;"><b>CUSTOM2_REGEX</b></p>
+
+<p style="margin-left:22%;">see CUSTOM1_REGEX</p>
+
+<p style="margin-left:11%;"><b>CUSTOM2_CMD</b></p>
+
+<p style="margin-left:22%;">see CUSTOM1_CMD</p>
+
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>Using the
+notes.vim plugin for Notes files <br>
+NOTES_FOLDER=~/Notes/vimnotes <br>
+NOTES_EXT=&quot;&quot; <br>
+NOTES_CMD=vim -c \&quot;:Note UUID\&quot;</b></p>
+=======
 annotations matching CUSTOM1_REGEX will be opened. You may
 use the following environment variables: $FILE, $UUID, $ID,
 $LABEL and $ANNOTATION. By Default, the value of $FILE will
@@ -234,6 +297,7 @@ notes.vim plugin for Notes files <br>
 NOTES_FOLDER=$HOME/Notes/vimnotes <br>
 NOTES_EXT=&quot;&quot; <br>
 NOTES_CMD=&quot;vim -c &quot;:Note $UUID&quot;&quot;</b></p>
+>>>>>>> devel
 
 <p style="margin-left:22%; margin-top: 1em">The notes.vim
 plugin can be found at
@@ -242,8 +306,12 @@ plugin can be found at
 <p style="margin-left:11%; margin-top: 1em"><b>Link to mutt
 emails <br>
 CUSTOM1_REGEX=Message-[iI][dD]:|message: <br>
+<<<<<<< HEAD
+CUSTOM1_CMD=pipe.sh echo muttjump</b></p>
+=======
 CUSTOM1_CMD=&quot;echo &quot;$FILE&quot; |
 muttjump&quot;</b></p>
+>>>>>>> devel
 
 <p style="margin-left:22%; margin-top: 1em">Thanks to
 Jostein Berntsen, the old bash version of taskopen had
@@ -259,6 +327,21 @@ screen window (very quick and effective). The muttjump can
 be found at
 <i>&lt;https://github.com/weisslj/muttjump&gt;</i></p>
 
+<<<<<<< HEAD
+<h2>CREDITS &amp; COPYRIGHTS
+<a name="CREDITS &amp; COPYRIGHTS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright (C)
+2010 &minus; 2013, J. Schlatow</p>
+
+<p style="margin-left:11%; margin-top: 1em">Taskopen is
+distributed under the GNU General Public License. See
+<i>http://www.opensource.org/licenses/gpl-2.0.php</i> for
+more information.</p>
+
+=======
 <p style="margin-left:11%; margin-top: 1em"><b>Integrating
 user-defined attributes (UDAs) <br>
 TASK_ATTRIBUTES=url,costs <br>
@@ -278,13 +361,14 @@ sort keys.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright (C)
-2010 &minus; 2016, J. Schlatow</p>
+2010 &minus; 2013, J. Schlatow</p>
 
 <p style="margin-left:11%; margin-top: 1em">Taskopen is
 distributed under the GNU General Public License. See
 <i>http://www.opensource.org/licenses/gpl-2.0.php</i> for
 more information.</p>
 
+>>>>>>> devel
 <h2>SEE ALSO
 <a name="SEE ALSO"></a>
 </h2>

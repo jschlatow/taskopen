@@ -3,7 +3,7 @@
 ###############################################################################
 # taskopen - file based notes with taskwarrior
 #
-# Copyright 2010-2013, Johannes Schlatow.
+# Copyright 2010-2016, Johannes Schlatow.
 # All rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify it under
@@ -366,7 +366,7 @@ sub print_version {
 sub print_version_long {
     print "\n";
     print "Taskopen, release $VERSION, revision $REVNUM ($REVHASH)\n";
-    print "Copyright 2010-2013, Johannes Schlatow.\n";
+    print "Copyright 2010-2016, Johannes Schlatow.\n";
     print "\n";
 }
 
