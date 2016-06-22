@@ -426,9 +426,6 @@ sub _execute {
     my $fork = $_[0];
     my $cmd  = $_[1];
 
-    # see #89
-    $cmd =~ s/\$/\\\$/g;
-
     if ($DEBUG > 0) {
         if ($fork > 0) {
             print "forking: ";
@@ -543,7 +540,7 @@ sub prepare_cmd {
     my $file = $_[2];
 
     if ($cmd !~ m/\$/) {
-        $cmd = qq/$cmd "$file"/;
+        $cmd = qq/$cmd '$file'/;
     }
     else {
         $ENV{"FILE"}       = $file;
