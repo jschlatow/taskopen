@@ -134,6 +134,9 @@ NOTES_EXT=".txt"
 # Default is: \.|\/|~
 #FILE_REGEX="\.|\/|~"
 
+# Regular expression that identifies a text annotation. Automatically triggers raw edit mode like '-r'.
+#TEXT_REGEX=".*"
+
 # Custom regular expression that specifies annotations passed to CUSTOM1_CMD, e.g:
 #CUSTOM1_REGEX="Message-[Ii][Dd]:|message:"
 #CUSTOM1_CMD="muttjumpwrapper"
@@ -335,7 +338,16 @@ if (exists $config{"NO_ANNOTATION_HOOK"}) {
 
 my $REGEX_CODE = "fbn";
 if (keys(%custom_regex)) {
-	$REGEX_CODE = "${REGEX_CODE}c"
+	$REGEX_CODE = "${REGEX_CODE}c";
+}
+
+my $TEXT_REGEX;
+if (exists $config{"TEXT_REGEX"}) {
+    $TEXT_REGEX = $config{"TEXT_REGEX"};
+    $REGEX_CODE = "${REGEX_CODE}t";
+}
+else {
+    $REGEX_CODE = "${REGEX_CODE}T";
 }
 
 sub print_version {
@@ -402,6 +414,7 @@ sub diag {
     print "    NOTES_REGEX        = $NOTES_REGEX\n";
     print "    BROWSER_REGEX      = $BROWSER_REGEX\n";
     print "    FILE_REGEX         = $FILE_REGEX\n";
+    print "    TEXT_REGEX         = $TEXT_REGEX\n";
     print "    NO_ANNOTATION_HOOK = $NO_ANNOTATION_HOOK\n";
     print "    TASK_ATTRIBUTES    = @TASK_ATTRIBUTES\n";
     print "  Custom regex commands:\n";
@@ -484,7 +497,7 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
             exit 1;
         }
         if (length($REGEX_CODE) == 1) {
-            print STDERR "Cannot combine argument -n with -f\n";
+            print STDERR "Cannot combine argument -n with -f/-t\n";
             exit 1;
         }
         $REGEX_CODE = "n";
@@ -502,7 +515,7 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
             exit 1;
         }
         if (length($REGEX_CODE) == 1) {
-            print STDERR "Cannot combine argument -f with -n\n";
+            print STDERR "Cannot combine argument -f with -n/-t\n";
             exit 1;
         }
         $REGEX_CODE = "f";
@@ -513,6 +526,24 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
             exit 1;
         }
         $REGEX_CODE =~ s/f/F/;
+    }
+    elsif ($arg eq "-t") {
+	     if ($REGEX_CODE =~ m/T/) {
+            print STDERR "Cannot combine argument -t with -T\n";
+            exit 1;
+	     }
+        if (length($REGEX_CODE) == 1) {
+            print STDERR "Cannot combine argument -t with -n/-f\n";
+            exit 1;
+        }
+        $REGEX_CODE = "t";
+    }
+    elsif ($arg eq "-T") {
+        if ($REGEX_CODE eq "t") {
+            print STDERR "Cannot combine argument -T with -t\n";
+            exit 1;
+        }
+        $REGEX_CODE =~ s/t/T/;
     }
     elsif ($arg eq "-a") {
         $EXCLUDE = "";
@@ -743,6 +774,23 @@ sub prepare_cmd {
     return $cmd;
 }
 
+sub modify_annotation {
+	my $ann = $_[0];
+	my $raw = $_[1];
+
+   if ($raw ne $ann->{"raw"}) {
+       # TODO remove as soon as tw bug TW-1821 has been fixed ('/'s must still be escaped)
+       if ($ann->{'raw'} =~ m/\// || $raw =~ m/\//) {
+           return qq{echo "Cannot replace annotations which contain '/'s (see #1174)."}
+       }
+       # END REMOVE
+       return qq%$TASKBIN $ann->{"uuid"} mod /$ann->{"raw"}/$raw/%;
+   }
+   else {
+       return qq/echo "No changes detected"/;
+   }
+}
+
 sub create_cmd {
     my $ann = $_[0];
     my $FORCE = $_[1];
@@ -757,17 +805,7 @@ sub create_cmd {
         }
         elsif ($FORCE->{"action"} eq "\\raw") {
             my $raw = raw_edit($ann->{"raw"});
-            if ($raw ne $ann->{"raw"}) {
-                # TODO remove as soon as tw bug #1174 has been fixed
-                if ($ann->{'raw'} =~ m/\// || $raw =~ m/\//) {
-                    return qq{echo "Cannot replace annotations which contain '/'s (see #1174)."}
-                }
-                # END REMOVE
-                return qq%$TASKBIN $ann->{"uuid"} mod /$ann->{"raw"}/$raw/%;
-            }
-            else {
-                return qq/echo "No changes detected"/;
-            }
+            return modify_annotation($ann, $raw);
         }
         else {
             $file = get_filepath($ann);
@@ -775,7 +813,7 @@ sub create_cmd {
         }
     }
     else {
-        if ($file =~ m/^$NOTES_REGEX/ || $ann->{"raw"} =~ m/^$NOTES_REGEX/) {
+        if ($REGEX_CODE !~ m/N/ and ($file =~ m/^$NOTES_REGEX/ || $ann->{"raw"} =~ m/^$NOTES_REGEX/)) {
             # $file = get_filepath($ann);
             $cmd = $NOTES_CMD;
             $cmd =~ s/([^\$])UUID/$1\$UUID/g;
@@ -787,6 +825,17 @@ sub create_cmd {
             }
             $cmd = qq{$BROWSER};
         }
+        elsif ($REGEX_CODE !~ m/F/ and $file =~ m/^$FILE_REGEX/) {
+            $file = get_filepath($ann);
+            my $filetype = qx{file "$file"};
+            if ($filetype =~ m/text|empty/ ) {
+                $cmd = qq/$EDITOR/;
+            }
+            else {
+                # use XDG for unknown file types
+                $cmd = qq{$XDG};
+            }
+        }
         else {
 	         my $found = 0;
 	         for my $regex (keys %custom_regex) {
@@ -797,15 +846,13 @@ sub create_cmd {
 			      }
 	         }
 	         if (not $found) {
-            	$file = get_filepath($ann);
-            	my $filetype = qx{file "$file"};
-            	if ($filetype =~ m/text|empty/ ) {
-                	 $cmd = qq/$EDITOR/;
-            	}
-            	else {
-                	 # use XDG for unknown file types
-                	 $cmd = qq{$XDG};
-            	}
+		         if ($REGEX_CODE !~ m/T/ and length $TEXT_REGEX and $file =~ m/^$TEXT_REGEX/ ) {
+            		my $raw = raw_edit($ann->{"raw"});
+            		return modify_annotation($ann, $raw);
+		         }
+		         else {
+			         die("no command to execute");
+		         }
 	         }
         }
     }
@@ -862,6 +909,9 @@ foreach my $code (split("", $REGEX_CODE)) {
         	  $tmpregex = "${tmpregex}${regex}|";
 	     }
     }
+    elsif ($code eq "t") {
+	    $tmpregex = "${tmpregex}${TEXT_REGEX}|"
+    }
 }
 chop($tmpregex);
 my $FILEREGEX = qr{^((?:$tmpregex).*)};
@@ -882,6 +932,8 @@ if ($HELP) {
     print "  -f                Only show/open real files, i.e. annotations matching '$FILE_REGEX'\n";
     print "  -F                Show all but real files; inverse of -f\n";
     print "  -B                Show only files that don't exist (combine with -f)\n";
+    print "  -t                Only show/open text annotations, i.e. annotations matching '$TEXT_REGEX'\n";
+    print "  -T                Show all but text annotations; inverse of -t\n";
     print "  -a                Query all active tasks; clears the DEFAULT_FILTER\n";
     print "  -A                Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
     print "  -D                Delete the annotation rather than opening it\n";

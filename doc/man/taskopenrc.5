@@ -103,6 +103,11 @@ The regular expression which identifies annotations openable by BROWSER.
 The regular expression that identifies file paths in annotations which will be opened by EDITOR or xdg-open.
 
 .TP
+.BR TEXT_REGEX
+This regular expression identifies annotations that can be edited in raw mode (see '-r'). If set and no
+other regular expression matches the annotation, the EDITOR will be invoked to edit the annotation.
+
+.TP
 .BR CUSTOM1_REGEX
 The regular expression that identifies annotations openable by CUSTOM1_CMD.
 
@@ -121,6 +126,7 @@ see CUSTOM1_REGEX
 .TP
 .BR CUSTOM[0-9]+_CMD
 see CUSTOM1_CMD
+
 
 .TP
 .BR NO_ANNOTATION_HOOK
