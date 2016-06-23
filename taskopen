@@ -414,6 +414,189 @@ sub diag {
     print "\n";
 }
 
+sub set_action
+{
+    my $force = $_[0];
+    my $arg   = $_[1];
+    my $action= $_[2];
+
+    if ($force->{"action"}) {
+        print STDERR qq/Cannot use $arg in conjunction with $force->{"arg"}\n/;
+        exit 1;
+    }
+    else {
+        $force->{"action"} = $action;
+        $force->{"arg"}    = $arg;
+    }
+}
+
+sub set_mode
+{
+    my $mode = $_[0];
+    my $val  = $_[1];
+
+    if ($$mode && $$mode ne $val) {
+        print STDERR qq/Cannot use combine arguments -b with -l or -L\n/;
+        exit 1;
+    }
+    else {
+        $$mode = $val;
+    }
+}
+
+# argument parsing
+my $FILTER = "";
+my $ID_CMD = "ids";
+my $LABEL;
+my $HELP;
+my $LIST_ANN;
+my $LIST_EXEC;
+my %FORCE;
+my $MATCH;
+my $TYPE;
+my $BROKEN = 0;
+my $MODE;
+my $SHOW;
+for (my $i = 0; $i <= $#ARGV; ++$i) {
+    my $arg = $ARGV[$i];
+    if ($arg eq "-h") {
+        $HELP = 1;
+    }
+    elsif ($arg eq "-v") {
+        print_version;
+        exit 0;
+    }
+    elsif ($arg eq "-V") {
+        diag;
+        exit 0;
+    }
+    elsif ($arg eq "-l") {
+        set_mode(\$MODE, "list");
+        $LIST_ANN = 1;
+    }
+    elsif ($arg eq "-L") {
+        set_mode(\$MODE, "list");
+        $LIST_EXEC = 1;
+    }
+    elsif ($arg eq "-n") {
+        if ($REGEX_CODE =~ m/N/) {
+            print STDERR "Cannot combine argument -n with -N\n";
+            exit 1;
+        }
+        if (length($REGEX_CODE) == 1) {
+            print STDERR "Cannot combine argument -n with -f\n";
+            exit 1;
+        }
+        $REGEX_CODE = "n";
+    }
+    elsif ($arg eq "-N") {
+        if ($REGEX_CODE eq "n") {
+            print STDERR "Cannot combine argument -N with -n\n";
+            exit 1;
+        }
+        $REGEX_CODE =~ s/n/N/;
+    }
+    elsif ($arg eq "-f") {
+        if ($REGEX_CODE =~ m/F/) {
+            print STDERR "Cannot combine argument -f with -F\n";
+            exit 1;
+        }
+        if (length($REGEX_CODE) == 1) {
+            print STDERR "Cannot combine argument -f with -n\n";
+            exit 1;
+        }
+        $REGEX_CODE = "f";
+    }
+    elsif ($arg eq "-F") {
+        if ($REGEX_CODE eq "f") {
+            print STDERR "Cannot combine argument -F with -f\n";
+            exit 1;
+        }
+        $REGEX_CODE =~ s/f/F/;
+    }
+    elsif ($arg eq "-a") {
+        $EXCLUDE = "";
+    }
+    elsif ($arg eq "-A") {
+        $EXCLUDE = "";
+        $ID_CMD  = "uuids";
+    }
+    elsif ($arg eq "-b") {
+        set_mode(\$MODE, "batch");
+    }
+    elsif ($arg eq "-B") {
+        $BROKEN = 1;
+    }
+    elsif ($arg eq "-D") {
+        set_action(\%FORCE, "-D", "\\del");
+    }
+    elsif ($arg eq "-r") {
+        set_action(\%FORCE, "-r", "\\raw");
+    }
+    elsif ($arg eq "-s") {
+        $SORT = $ARGV[++$i];
+        if (!$SORT || $SORT =~ m/^-/) {
+            print STDERR "Missing argument after $arg\n";
+            exit 1;
+        }
+    }
+    elsif ($arg eq "-m") {
+        $MATCH = $ARGV[++$i];
+        if (!$MATCH || $MATCH =~ m/^-/) {
+            print STDERR "Missing expression after -m\n";
+            exit 1;
+        }
+    }
+    elsif ($arg eq "-t") {
+        $TYPE = $ARGV[++$i];
+        if (!$TYPE || $TYPE =~ m/^-/) {
+            printf STDERR "Missing expression after -t\n";
+            exit 1;
+        }
+    }
+    elsif ($arg eq "-e") {
+        set_action(\%FORCE, "-e", $EDITOR);
+    }
+    elsif ($arg eq "-x") {
+        my $action;
+        if ($i >= $#ARGV || $ARGV[$i+1] =~ m/^-/) {
+            $action = $DEFAULT_x;
+        }
+        else {
+            $action = $ARGV[++$i];
+        }
+        set_action(\%FORCE, "-x", $action);
+    }
+    elsif ($arg eq "-i") {
+        if ($i < $#ARGV && $ARGV[$i+1] !~ m/^-/) {
+            $SHOW_CMD = $ARGV[++$i];
+        }
+        $SHOW = 1;
+    }
+    elsif ($arg =~ m/\\+(.+)/) {
+        $LABEL = $1;
+    }
+    elsif ($arg eq "-c") {
+        # just skip (handled above)
+        $i++;
+    }
+    elsif ($arg eq "-p") {
+        if ($i < $#ARGV && $ARGV[$i+1] !~ m/^-/) {
+            my $cmd = $ARGV[++$i];
+            open(PIPE, "|-", $cmd) or die "Cannot execute '$cmd'!\n";
+            select(PIPE);
+            $|++;
+        }
+        else {
+            print STDERR "Missing argument after $arg\n";
+            exit 1;
+        }
+    }
+    else {
+        $FILTER = "$FILTER $arg";
+    }
+}
+
 sub execute {
     _execute(0, $_[0])
 }
@@ -659,189 +842,6 @@ sub sort_hasharr
         }
         return 0;
     } @{$arr};
-}
-
-sub set_action
-{
-    my $force = $_[0];
-    my $arg   = $_[1];
-    my $action= $_[2];
-
-    if ($force->{"action"}) {
-        print STDERR qq/Cannot use $arg in conjunction with $force->{"arg"}\n/;
-        exit 1;
-    }
-    else {
-        $force->{"action"} = $action;
-        $force->{"arg"}    = $arg;
-    }
-}
-
-sub set_mode
-{
-    my $mode = $_[0];
-    my $val  = $_[1];
-
-    if ($$mode && $$mode ne $val) {
-        print STDERR qq/Cannot use combine arguments -b with -l or -L\n/;
-        exit 1;
-    }
-    else {
-        $$mode = $val;
-    }
-}
-
-# argument parsing
-my $FILTER = "";
-my $ID_CMD = "ids";
-my $LABEL;
-my $HELP;
-my $LIST_ANN;
-my $LIST_EXEC;
-my %FORCE;
-my $MATCH;
-my $TYPE;
-my $BROKEN = 0;
-my $MODE;
-my $SHOW;
-for (my $i = 0; $i <= $#ARGV; ++$i) {
-    my $arg = $ARGV[$i];
-    if ($arg eq "-h") {
-        $HELP = 1;
-    }
-    elsif ($arg eq "-v") {
-        print_version;
-        exit 0;
-    }
-    elsif ($arg eq "-V") {
-        diag;
-        exit 0;
-    }
-    elsif ($arg eq "-l") {
-        set_mode(\$MODE, "list");
-        $LIST_ANN = 1;
-    }
-    elsif ($arg eq "-L") {
-        set_mode(\$MODE, "list");
-        $LIST_EXEC = 1;
-    }
-    elsif ($arg eq "-n") {
-        if ($REGEX_CODE =~ m/N/) {
-            print STDERR "Cannot combine argument -n with -N\n";
-            exit 1;
-        }
-        if (length($REGEX_CODE) == 1) {
-            print STDERR "Cannot combine argument -n with -f\n";
-            exit 1;
-        }
-        $REGEX_CODE = "n";
-    }
-    elsif ($arg eq "-N") {
-        if ($REGEX_CODE eq "n") {
-            print STDERR "Cannot combine argument -N with -n\n";
-            exit 1;
-        }
-        $REGEX_CODE =~ s/n/N/;
-    }
-    elsif ($arg eq "-f") {
-        if ($REGEX_CODE =~ m/F/) {
-            print STDERR "Cannot combine argument -f with -F\n";
-            exit 1;
-        }
-        if (length($REGEX_CODE) == 1) {
-            print STDERR "Cannot combine argument -f with -n\n";
-            exit 1;
-        }
-        $REGEX_CODE = "f";
-    }
-    elsif ($arg eq "-F") {
-        if ($REGEX_CODE eq "f") {
-            print STDERR "Cannot combine argument -F with -f\n";
-            exit 1;
-        }
-        $REGEX_CODE =~ s/f/F/;
-    }
-    elsif ($arg eq "-a") {
-        $EXCLUDE = "";
-    }
-    elsif ($arg eq "-A") {
-        $EXCLUDE = "";
-        $ID_CMD  = "uuids";
-    }
-    elsif ($arg eq "-b") {
-        set_mode(\$MODE, "batch");
-    }
-    elsif ($arg eq "-B") {
-        $BROKEN = 1;
-    }
-    elsif ($arg eq "-D") {
-        set_action(\%FORCE, "-D", "\\del");
-    }
-    elsif ($arg eq "-r") {
-        set_action(\%FORCE, "-r", "\\raw");
-    }
-    elsif ($arg eq "-s") {
-        $SORT = $ARGV[++$i];
-        if (!$SORT || $SORT =~ m/^-/) {
-            print STDERR "Missing argument after $arg\n";
-            exit 1;
-        }
-    }
-    elsif ($arg eq "-m") {
-        $MATCH = $ARGV[++$i];
-        if (!$MATCH || $MATCH =~ m/^-/) {
-            print STDERR "Missing expression after -m\n";
-            exit 1;
-        }
-    }
-    elsif ($arg eq "-t") {
-        $TYPE = $ARGV[++$i];
-        if (!$TYPE || $TYPE =~ m/^-/) {
-            printf STDERR "Missing expression after -t\n";
-            exit 1;
-        }
-    }
-    elsif ($arg eq "-e") {
-        set_action(\%FORCE, "-e", $EDITOR);
-    }
-    elsif ($arg eq "-x") {
-        my $action;
-        if ($i >= $#ARGV || $ARGV[$i+1] =~ m/^-/) {
-            $action = $DEFAULT_x;
-        }
-        else {
-            $action = $ARGV[++$i];
-        }
-        set_action(\%FORCE, "-x", $action);
-    }
-    elsif ($arg eq "-i") {
-        if ($i < $#ARGV && $ARGV[$i+1] !~ m/^-/) {
-            $SHOW_CMD = $ARGV[++$i];
-        }
-        $SHOW = 1;
-    }
-    elsif ($arg =~ m/\\+(.+)/) {
-        $LABEL = $1;
-    }
-    elsif ($arg eq "-c") {
-        # just skip (handled above)
-        $i++;
-    }
-    elsif ($arg eq "-p") {
-        if ($i < $#ARGV && $ARGV[$i+1] !~ m/^-/) {
-            my $cmd = $ARGV[++$i];
-            open(PIPE, "|-", $cmd) or die "Cannot execute '$cmd'!\n";
-            select(PIPE);
-            $|++;
-        }
-        else {
-            print STDERR "Missing argument after $arg\n";
-            exit 1;
-        }
-    }
-    else {
-        $FILTER = "$FILTER $arg";
-    }
 }
 
 my $tmpregex="";
