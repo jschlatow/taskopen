@@ -1,11 +1,11 @@
 New features in taskopen 1.1
 
-  t.b.a.
+  - Implement TEXT_REGEX (#21) and command line switches -t/-T (#37).
 
 Bugfixes and minor improvements in taskopen 1.1
 
-  - Allow arbitrary numbers of CUSTOM commands (#91)
-  - Fix quoting of command line arguments (#89)
+  - Allow arbitrary numbers of CUSTOM commands (#91).
+  - Fix quoting of command line arguments (#89).
 
 New features in taskopen 1.0.1
 
