@@ -28,7 +28,7 @@
 ###############################################################################
 
 use JSON qw( decode_json );     # From CPAN
-use POSIX;
+use File::Temp;
 use strict;
 use warnings;
 
@@ -684,7 +684,7 @@ sub get_filepath {
 sub raw_edit {
     my $old = $_[0];
 
-    my $filename = tmpnam();
+    my $filename = File::Temp::tmpnam();
     open(my $fh, '>', $filename) or die "can't open $filename: $!";
     print($fh $old);
     close($fh); 
@@ -692,7 +692,7 @@ sub raw_edit {
     system(qq/$EDITOR "$filename"/);
 
     open($fh, '<', $filename) or die "can't open $filename: $!'";
-    my @lines = <my $fh>;
+    my @lines = <$fh>;
     close($fh);
     unlink($filename);
 
