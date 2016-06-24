@@ -1,5 +1,10 @@
+<<<<<<< HEAD
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Fri Feb 14 14:42:34 2014 -->
+=======
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Fri Jun 24 20:48:33 2016 -->
+<!-- CreationDate: Fri Jun 24 15:17:56 2016 -->
+>>>>>>> devel
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -291,7 +296,11 @@ sort keys.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright (C)
+<<<<<<< HEAD
+2010 &minus; 2014, J. Schlatow</p>
+=======
 2010 &minus; 2016, J. Schlatow</p>
+>>>>>>> devel
 
 <p style="margin-left:11%; margin-top: 1em">Taskopen is
 distributed under the GNU General Public License. See

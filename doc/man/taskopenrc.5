@@ -1,4 +1,4 @@
-.TH taskopenrc 5 2014-02-14 "taskopen v1.0.2" "User Manuals"
+.TH taskopenrc 5 2016-06-24 "taskopen v1.1" "User Manuals"
 
 .SH NAME
 taskopenrc \- Configuration file for the
@@ -33,12 +33,16 @@ Valid variable names and their default values are:
 
 .SS General configuration
 .TP
-.BR BROWSER=xdg-open
+.BR BROWSER=xdg-open $FILE &>/dev/null
 The executable which will be used to open URIs.
 
 .TP
 .BR EDITOR=vim
 Your preferred editor.
+
+.TP
+.BR FILE_CMD=xdg-open
+Command to be used for opening non-text files.
 
 .TP
 .BR TASKBIN=task
@@ -103,6 +107,11 @@ The regular expression which identifies annotations openable by BROWSER.
 The regular expression that identifies file paths in annotations which will be opened by EDITOR or xdg-open.
 
 .TP
+.BR TEXT_REGEX
+This regular expression identifies annotations that can be edited in raw mode (see '-r'). If set and no
+other regular expression matches the annotation, the EDITOR will be invoked to edit the annotation.
+
+.TP
 .BR CUSTOM1_REGEX
 The regular expression that identifies annotations openable by CUSTOM1_CMD.
 
@@ -115,12 +124,13 @@ will be appended to the command. See
 for further details.
 
 .TP
-.BR CUSTOM2_REGEX
+.BR CUSTOM[0-9]+_REGEX
 see CUSTOM1_REGEX
 
 .TP
-.BR CUSTOM2_CMD
+.BR CUSTOM[0-9]+_CMD
 see CUSTOM1_CMD
+
 
 .TP
 .BR NO_ANNOTATION_HOOK
@@ -175,7 +185,7 @@ This enables the use of these attributes within user commands (see taskopen (1))
 sort keys.
 
 .SH "CREDITS & COPYRIGHTS"
-Copyright (C) 2010 \- 2014, J. Schlatow
+Copyright (C) 2010 \- 2016, J. Schlatow
 
 Taskopen is distributed under the GNU General Public License. See
 .I http://www.opensource.org/licenses/gpl-2.0.php

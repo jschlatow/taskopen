@@ -3,7 +3,7 @@
 ###############################################################################
 # taskopen - file based notes with taskwarrior
 #
-# Copyright 2010-2014, Johannes Schlatow.
+# Copyright 2010-2016, Johannes Schlatow.
 # All rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify it under
@@ -28,14 +28,14 @@
 ###############################################################################
 
 use JSON qw( decode_json );     # From CPAN
-use POSIX;
+use File::Temp;
 use strict;
 use warnings;
 
 # DON'T TOUCH THE FOLLOWING LINES
-my $VERSION="v1.0.2";
-my $REVNUM="213";
-my $REVHASH="7e391ea";
+my $VERSION="v1.1";
+my $REVNUM="234";
+my $REVHASH="4d712d0";
 # END-DON'T-TOUCH
 
 my $HOME = $ENV{"HOME"};
@@ -84,8 +84,9 @@ unless (-e $cfgfile) {
         open(my $fh, '>', $cfgfile) or die "can't open $cfgfile: $!";
         # write default config
         print $fh q<
-#BROWSER='xdg-open'
+#BROWSER='xdg-open $FILE &\>/dev/null'
 #EDITOR='vim'
+#FILE_CMD='xdg-open'
 TASKBIN='task'
 
 # If you sync tasks NOTES_FOLDER should be a location that syncs and is available to
@@ -133,6 +134,9 @@ NOTES_EXT=".txt"
 # xdg-open.
 # Default is: \.|\/|~
 #FILE_REGEX="\.|\/|~"
+
+# Regular expression that identifies a text annotation. Automatically triggers raw edit mode like '-r'.
+#TEXT_REGEX=".*"
 
 # Custom regular expression that specifies annotations passed to CUSTOM1_CMD, e.g:
 #CUSTOM1_REGEX="Message-[Ii][Dd]:|message:"
@@ -309,36 +313,26 @@ else {
     $FILE_REGEX = "\\\.|\\\/|~";
 }
 
-my $CUSTOM1_REGEX;
-if (exists $config{"CUSTOM1_REGEX"}) {
-    $CUSTOM1_REGEX = $config{"CUSTOM1_REGEX"};
+my $FILE_CMD;
+if (exists $config{"FILE_CMD"}) {
+    $FILE_CMD = $config{"FILE_CMD"};
 }
 else {
-    $CUSTOM1_REGEX = "";
+    $FILE_CMD = $XDG;
 }
 
-my $CUSTOM2_REGEX;
-if (exists $config{"CUSTOM2_REGEX"}) {
-    $CUSTOM2_REGEX = $config{"CUSTOM2_REGEX"};
-}
-else {
-    $CUSTOM2_REGEX = "";
-}
-
-my $CUSTOM1_CMD;
-if (exists $config{"CUSTOM1_CMD"}) {
-    $CUSTOM1_CMD = $config{"CUSTOM1_CMD"};
-}
-else {
-    $CUSTOM1_CMD = "";
-}
-
-my $CUSTOM2_CMD;
-if (exists $config{"CUSTOM2_CMD"}) {
-    $CUSTOM2_CMD = $config{"CUSTOM2_CMD"};
-}
-else {
-    $CUSTOM2_CMD = "";
+my %custom_regex = ();
+for my $key (keys %config) {
+	if ($key =~ m/CUSTOM(\d+)_REGEX/) {
+		my $regexkey = "CUSTOM" . $1 . "_REGEX";
+		my $cmdkey   = "CUSTOM" . $1 . "_CMD";
+		if (exists $config{$cmdkey}) {
+			$custom_regex{$config{$regexkey}} = $config{$cmdkey}
+		}
+		else {
+			$custom_regex{$config{$regexkey}} = ""
+		}
+	}
 }
 
 my @TASK_ATTRIBUTES;
@@ -352,11 +346,17 @@ if (exists $config{"NO_ANNOTATION_HOOK"}) {
 }
 
 my $REGEX_CODE = "fbn";
-if ($CUSTOM1_REGEX) {
-    $REGEX_CODE = "${REGEX_CODE}1";
+if (keys(%custom_regex)) {
+	$REGEX_CODE = "${REGEX_CODE}c";
 }
-if ($CUSTOM2_REGEX) {
-    $REGEX_CODE = "${REGEX_CODE}2";
+
+my $TEXT_REGEX;
+if (exists $config{"TEXT_REGEX"}) {
+    $TEXT_REGEX = $config{"TEXT_REGEX"};
+    $REGEX_CODE = "${REGEX_CODE}t";
+}
+else {
+    $REGEX_CODE = "${REGEX_CODE}T";
 }
 
 sub print_version {
@@ -366,7 +366,7 @@ sub print_version {
 sub print_version_long {
     print "\n";
     print "Taskopen, release $VERSION, revision $REVNUM ($REVHASH)\n";
-    print "Copyright 2010-2014, Johannes Schlatow.\n";
+    print "Copyright 2010-2016, Johannes Schlatow.\n";
     print "\n";
 }
 
@@ -405,7 +405,7 @@ sub diag {
     print "    BROWSER            = $BROWSER\n";
     print "    TASKBIN            = $TASKBIN\n";
     print "    EDITOR             = $EDITOR\n";
-    print "    XDG                = $XDG\n";
+    print "    FILE_CMD           = $FILE_CMD\n";
     print "    PATH               = $ENV{'PATH'}\n";
     print "\n";
     print "  Others:\n";
@@ -423,14 +423,218 @@ sub diag {
     print "    NOTES_REGEX        = $NOTES_REGEX\n";
     print "    BROWSER_REGEX      = $BROWSER_REGEX\n";
     print "    FILE_REGEX         = $FILE_REGEX\n";
-    print "    CUSTOM1_REGEX      = $CUSTOM1_REGEX\n";
-    print "    CUSTOM1_CMD        = $CUSTOM1_CMD\n";
-    print "    CUSTOM2_REGEX      = $CUSTOM2_REGEX\n";
-    print "    CUSTOM2_CMD        = $CUSTOM2_CMD\n";
+    print "    TEXT_REGEX         = $TEXT_REGEX\n";
     print "    NO_ANNOTATION_HOOK = $NO_ANNOTATION_HOOK\n";
     print "    TASK_ATTRIBUTES    = @TASK_ATTRIBUTES\n";
+    print "  Custom regex commands:\n";
+    for my $key (keys %custom_regex) {
+	    my $cmd = $custom_regex{$key};
+	    print ("    $key\n");
+	    print ("        $cmd\n");
+    }
 
     print "\n";
+}
+
+sub set_action
+{
+    my $force = $_[0];
+    my $arg   = $_[1];
+    my $action= $_[2];
+
+    if ($force->{"action"}) {
+        print STDERR qq/Cannot use $arg in conjunction with $force->{"arg"}\n/;
+        exit 1;
+    }
+    else {
+        $force->{"action"} = $action;
+        $force->{"arg"}    = $arg;
+    }
+}
+
+sub set_mode
+{
+    my $mode = $_[0];
+    my $val  = $_[1];
+
+    if ($$mode && $$mode ne $val) {
+        print STDERR qq/Cannot use combine arguments -b with -l or -L\n/;
+        exit 1;
+    }
+    else {
+        $$mode = $val;
+    }
+}
+
+# argument parsing
+my $FILTER = "";
+my $ID_CMD = "ids";
+my $LABEL;
+my $HELP;
+my $LIST_ANN;
+my $LIST_EXEC;
+my %FORCE;
+my $MATCH;
+my $TYPE;
+my $BROKEN = 0;
+my $MODE;
+my $SHOW;
+for (my $i = 0; $i <= $#ARGV; ++$i) {
+    my $arg = $ARGV[$i];
+    if ($arg eq "-h") {
+        $HELP = 1;
+    }
+    elsif ($arg eq "-v") {
+        print_version;
+        exit 0;
+    }
+    elsif ($arg eq "-V") {
+        diag;
+        exit 0;
+    }
+    elsif ($arg eq "-l") {
+        set_mode(\$MODE, "list");
+        $LIST_ANN = 1;
+    }
+    elsif ($arg eq "-L") {
+        set_mode(\$MODE, "list");
+        $LIST_EXEC = 1;
+    }
+    elsif ($arg eq "-n") {
+        if ($REGEX_CODE =~ m/N/) {
+            print STDERR "Cannot combine argument -n with -N\n";
+            exit 1;
+        }
+        if (length($REGEX_CODE) == 1) {
+            print STDERR "Cannot combine argument -n with -f/-t\n";
+            exit 1;
+        }
+        $REGEX_CODE = "n";
+    }
+    elsif ($arg eq "-N") {
+        if ($REGEX_CODE eq "n") {
+            print STDERR "Cannot combine argument -N with -n\n";
+            exit 1;
+        }
+        $REGEX_CODE =~ s/n/N/;
+    }
+    elsif ($arg eq "-f") {
+        if ($REGEX_CODE =~ m/F/) {
+            print STDERR "Cannot combine argument -f with -F\n";
+            exit 1;
+        }
+        if (length($REGEX_CODE) == 1) {
+            print STDERR "Cannot combine argument -f with -n/-t\n";
+            exit 1;
+        }
+        $REGEX_CODE = "f";
+    }
+    elsif ($arg eq "-F") {
+        if ($REGEX_CODE eq "f") {
+            print STDERR "Cannot combine argument -F with -f\n";
+            exit 1;
+        }
+        $REGEX_CODE =~ s/f/F/;
+    }
+    elsif ($arg eq "-t") {
+	     if ($REGEX_CODE =~ m/T/) {
+            print STDERR "Cannot combine argument -t with -T\n";
+            exit 1;
+	     }
+        if (length($REGEX_CODE) == 1) {
+            print STDERR "Cannot combine argument -t with -n/-f\n";
+            exit 1;
+        }
+        $REGEX_CODE = "t";
+    }
+    elsif ($arg eq "-T") {
+        if ($REGEX_CODE eq "t") {
+            print STDERR "Cannot combine argument -T with -t\n";
+            exit 1;
+        }
+        $REGEX_CODE =~ s/t/T/;
+    }
+    elsif ($arg eq "-a") {
+        $EXCLUDE = "";
+    }
+    elsif ($arg eq "-A") {
+        $EXCLUDE = "";
+        $ID_CMD  = "uuids";
+    }
+    elsif ($arg eq "-b") {
+        set_mode(\$MODE, "batch");
+    }
+    elsif ($arg eq "-B") {
+        $BROKEN = 1;
+    }
+    elsif ($arg eq "-D") {
+        set_action(\%FORCE, "-D", "\\del");
+    }
+    elsif ($arg eq "-r") {
+        set_action(\%FORCE, "-r", "\\raw");
+    }
+    elsif ($arg eq "-s") {
+        $SORT = $ARGV[++$i];
+        if (!$SORT || $SORT =~ m/^-/) {
+            print STDERR "Missing argument after $arg\n";
+            exit 1;
+        }
+    }
+    elsif ($arg eq "-m") {
+        $MATCH = $ARGV[++$i];
+        if (!$MATCH || $MATCH =~ m/^-/) {
+            print STDERR "Missing expression after -m\n";
+            exit 1;
+        }
+    }
+    elsif ($arg eq "-t") {
+        $TYPE = $ARGV[++$i];
+        if (!$TYPE || $TYPE =~ m/^-/) {
+            printf STDERR "Missing expression after -t\n";
+            exit 1;
+        }
+    }
+    elsif ($arg eq "-e") {
+        set_action(\%FORCE, "-e", $EDITOR);
+    }
+    elsif ($arg eq "-x") {
+        my $action;
+        if ($i >= $#ARGV || $ARGV[$i+1] =~ m/^-/) {
+            $action = $DEFAULT_x;
+        }
+        else {
+            $action = $ARGV[++$i];
+        }
+        set_action(\%FORCE, "-x", $action);
+    }
+    elsif ($arg eq "-i") {
+        if ($i < $#ARGV && $ARGV[$i+1] !~ m/^-/) {
+            $SHOW_CMD = $ARGV[++$i];
+        }
+        $SHOW = 1;
+    }
+    elsif ($arg =~ m/\\+(.+)/) {
+        $LABEL = $1;
+    }
+    elsif ($arg eq "-c") {
+        # just skip (handled above)
+        $i++;
+    }
+    elsif ($arg eq "-p") {
+        if ($i < $#ARGV && $ARGV[$i+1] !~ m/^-/) {
+            my $cmd = $ARGV[++$i];
+            open(PIPE, "|-", $cmd) or die "Cannot execute '$cmd'!\n";
+            select(PIPE);
+            $|++;
+        }
+        else {
+            print STDERR "Missing argument after $arg\n";
+            exit 1;
+        }
+    }
+    else {
+        $FILTER = "$FILTER $arg";
+    }
 }
 
 sub execute {
@@ -520,7 +724,7 @@ sub get_filepath {
 sub raw_edit {
     my $old = $_[0];
 
-    my $filename = tmpnam();
+    my $filename = File::Temp::tmpnam();
     open(my $fh, '>', $filename) or die "can't open $filename: $!";
     print($fh $old);
     close($fh); 
@@ -528,7 +732,7 @@ sub raw_edit {
     system(qq/$EDITOR "$filename"/);
 
     open($fh, '<', $filename) or die "can't open $filename: $!'";
-    my @lines = <my $fh>;
+    my @lines = <$fh>;
     close($fh);
     unlink($filename);
 
@@ -559,7 +763,7 @@ sub prepare_cmd {
     my $file = $_[2];
 
     if ($cmd !~ m/\$/) {
-        $cmd = qq/$cmd "$file"/;
+        $cmd = qq/$cmd '$file'/;
     }
     else {
         $ENV{"FILE"}       = $file;
@@ -579,6 +783,23 @@ sub prepare_cmd {
     return $cmd;
 }
 
+sub modify_annotation {
+	my $ann = $_[0];
+	my $raw = $_[1];
+
+   if ($raw ne $ann->{"raw"}) {
+       # TODO remove as soon as tw bug TW-1821 has been fixed ('/'s must still be escaped)
+       if ($ann->{'raw'} =~ m/\// || $raw =~ m/\//) {
+           return qq{echo "Cannot replace annotations which contain '/'s (see #1174)."}
+       }
+       # END REMOVE
+       return qq%$TASKBIN $ann->{"uuid"} mod /$ann->{"raw"}/$raw/%;
+   }
+   else {
+       return qq/echo "No changes detected"/;
+   }
+}
+
 sub create_cmd {
     my $ann = $_[0];
     my $FORCE = $_[1];
@@ -593,17 +814,7 @@ sub create_cmd {
         }
         elsif ($FORCE->{"action"} eq "\\raw") {
             my $raw = raw_edit($ann->{"raw"});
-            if ($raw ne $ann->{"raw"}) {
-                # TODO remove as soon as tw bug #1174 has been fixed
-                if ($ann->{'raw'} =~ m/\// || $raw =~ m/\//) {
-                    return qq{echo "Cannot replace annotations which contain '/'s (see #1174)."}
-                }
-                # END REMOVE
-                return qq%$TASKBIN $ann->{"uuid"} mod /$ann->{"raw"}/$raw/%;
-            }
-            else {
-                return qq/echo "No changes detected"/;
-            }
+            return modify_annotation($ann, $raw);
         }
         else {
             $file = get_filepath($ann);
@@ -611,7 +822,7 @@ sub create_cmd {
         }
     }
     else {
-        if ($file =~ m/^$NOTES_REGEX/ || $ann->{"raw"} =~ m/^$NOTES_REGEX/) {
+        if ($REGEX_CODE !~ m/N/ and ($file =~ m/^$NOTES_REGEX/ || $ann->{"raw"} =~ m/^$NOTES_REGEX/)) {
             # $file = get_filepath($ann);
             $cmd = $NOTES_CMD;
             $cmd =~ s/([^\$])UUID/$1\$UUID/g;
@@ -623,13 +834,7 @@ sub create_cmd {
             }
             $cmd = qq{$BROWSER};
         }
-        elsif ($CUSTOM1_REGEX && $file =~ m/^$CUSTOM1_REGEX/) {
-            $cmd = qq{$CUSTOM1_CMD};
-        }
-        elsif ($CUSTOM2_REGEX && $file =~ m/^$CUSTOM2_REGEX/) {
-            $cmd = qq{$CUSTOM2_CMD};
-        }
-        else {
+        elsif ($REGEX_CODE !~ m/F/ and $file =~ m/^$FILE_REGEX/) {
             $file = get_filepath($ann);
             my $filetype = qx{file "$file"};
             if ($filetype =~ m/text|empty/ ) {
@@ -637,8 +842,27 @@ sub create_cmd {
             }
             else {
                 # use XDG for unknown file types
-                $cmd = qq{$XDG};
+                $cmd = qq{$FILE_CMD};
             }
+        }
+        else {
+	         my $found = 0;
+	         for my $regex (keys %custom_regex) {
+		         if ($file =~ m/^$regex/) {
+			         $cmd = qq{$custom_regex{$regex}};
+			         $found = 1;
+			         last;
+			      }
+	         }
+	         if (not $found) {
+		         if ($REGEX_CODE !~ m/T/ and length $TEXT_REGEX and $file =~ m/^$TEXT_REGEX/ ) {
+            		my $raw = raw_edit($ann->{"raw"});
+            		return modify_annotation($ann, $raw);
+		         }
+		         else {
+			         die("no command to execute");
+		         }
+	         }
         }
     }
 
@@ -676,189 +900,6 @@ sub sort_hasharr
     } @{$arr};
 }
 
-sub set_action
-{
-    my $force = $_[0];
-    my $arg   = $_[1];
-    my $action= $_[2];
-
-    if ($force->{"action"}) {
-        print STDERR qq/Cannot use $arg in conjunction with $force->{"arg"}\n/;
-        exit 1;
-    }
-    else {
-        $force->{"action"} = $action;
-        $force->{"arg"}    = $arg;
-    }
-}
-
-sub set_mode
-{
-    my $mode = $_[0];
-    my $val  = $_[1];
-
-    if ($$mode && $$mode ne $val) {
-        print STDERR qq/Cannot use combine arguments -b with -l or -L\n/;
-        exit 1;
-    }
-    else {
-        $$mode = $val;
-    }
-}
-
-# argument parsing
-my $FILTER = "";
-my $ID_CMD = "ids";
-my $LABEL;
-my $HELP;
-my $LIST_ANN;
-my $LIST_EXEC;
-my %FORCE;
-my $MATCH;
-my $TYPE;
-my $BROKEN = 0;
-my $MODE;
-my $SHOW;
-for (my $i = 0; $i <= $#ARGV; ++$i) {
-    my $arg = $ARGV[$i];
-    if ($arg eq "-h") {
-        $HELP = 1;
-    }
-    elsif ($arg eq "-v") {
-        print_version;
-        exit 0;
-    }
-    elsif ($arg eq "-V") {
-        diag;
-        exit 0;
-    }
-    elsif ($arg eq "-l") {
-        set_mode(\$MODE, "list");
-        $LIST_ANN = 1;
-    }
-    elsif ($arg eq "-L") {
-        set_mode(\$MODE, "list");
-        $LIST_EXEC = 1;
-    }
-    elsif ($arg eq "-n") {
-        if ($REGEX_CODE =~ m/N/) {
-            print STDERR "Cannot combine argument -n with -N\n";
-            exit 1;
-        }
-        if (length($REGEX_CODE) == 1) {
-            print STDERR "Cannot combine argument -n with -f\n";
-            exit 1;
-        }
-        $REGEX_CODE = "n";
-    }
-    elsif ($arg eq "-N") {
-        if ($REGEX_CODE eq "n") {
-            print STDERR "Cannot combine argument -N with -n\n";
-            exit 1;
-        }
-        $REGEX_CODE =~ s/n/N/;
-    }
-    elsif ($arg eq "-f") {
-        if ($REGEX_CODE =~ m/F/) {
-            print STDERR "Cannot combine argument -f with -F\n";
-            exit 1;
-        }
-        if (length($REGEX_CODE) == 1) {
-            print STDERR "Cannot combine argument -f with -n\n";
-            exit 1;
-        }
-        $REGEX_CODE = "f";
-    }
-    elsif ($arg eq "-F") {
-        if ($REGEX_CODE eq "f") {
-            print STDERR "Cannot combine argument -F with -f\n";
-            exit 1;
-        }
-        $REGEX_CODE =~ s/f/F/;
-    }
-    elsif ($arg eq "-a") {
-        $EXCLUDE = "";
-    }
-    elsif ($arg eq "-A") {
-        $EXCLUDE = "";
-        $ID_CMD  = "uuids";
-    }
-    elsif ($arg eq "-b") {
-        set_mode(\$MODE, "batch");
-    }
-    elsif ($arg eq "-B") {
-        $BROKEN = 1;
-    }
-    elsif ($arg eq "-D") {
-        set_action(\%FORCE, "-D", "\\del");
-    }
-    elsif ($arg eq "-r") {
-        set_action(\%FORCE, "-r", "\\raw");
-    }
-    elsif ($arg eq "-s") {
-        $SORT = $ARGV[++$i];
-        if (!$SORT || $SORT =~ m/^-/) {
-            print STDERR "Missing argument after $arg\n";
-            exit 1;
-        }
-    }
-    elsif ($arg eq "-m") {
-        $MATCH = $ARGV[++$i];
-        if (!$MATCH || $MATCH =~ m/^-/) {
-            print STDERR "Missing expression after -m\n";
-            exit 1;
-        }
-    }
-    elsif ($arg eq "-t") {
-        $TYPE = $ARGV[++$i];
-        if (!$TYPE || $TYPE =~ m/^-/) {
-            printf STDERR "Missing expression after -t\n";
-            exit 1;
-        }
-    }
-    elsif ($arg eq "-e") {
-        set_action(\%FORCE, "-e", $EDITOR);
-    }
-    elsif ($arg eq "-x") {
-        my $action;
-        if ($i >= $#ARGV || $ARGV[$i+1] =~ m/^-/) {
-            $action = $DEFAULT_x;
-        }
-        else {
-            $action = $ARGV[++$i];
-        }
-        set_action(\%FORCE, "-x", $action);
-    }
-    elsif ($arg eq "-i") {
-        if ($i < $#ARGV && $ARGV[$i+1] !~ m/^-/) {
-            $SHOW_CMD = $ARGV[++$i];
-        }
-        $SHOW = 1;
-    }
-    elsif ($arg =~ m/\\+(.+)/) {
-        $LABEL = $1;
-    }
-    elsif ($arg eq "-c") {
-        # just skip (handled above)
-        $i++;
-    }
-    elsif ($arg eq "-p") {
-        if ($i < $#ARGV && $ARGV[$i+1] !~ m/^-/) {
-            my $cmd = $ARGV[++$i];
-            open(PIPE, "|-", $cmd) or die "Cannot execute '$cmd'!\n";
-            select(PIPE);
-            $|++;
-        }
-        else {
-            print STDERR "Missing argument after $arg\n";
-            exit 1;
-        }
-    }
-    else {
-        $FILTER = "$FILTER $arg";
-    }
-}
-
 my $tmpregex="";
 my $tmplabelregex="";
 foreach my $code (split("", $REGEX_CODE)) {
@@ -872,11 +913,13 @@ foreach my $code (split("", $REGEX_CODE)) {
     elsif ($code eq "b") {
         $tmpregex = "${tmpregex}${BROWSER_REGEX}|";
     }
-    elsif ($code eq "1") {
-        $tmpregex = "${tmpregex}${CUSTOM1_REGEX}|";
+    elsif ($code eq "c") {
+	     for my $regex (keys %custom_regex) {
+        	  $tmpregex = "${tmpregex}${regex}|";
+	     }
     }
-    elsif ($code eq "2") {
-        $tmpregex = "${tmpregex}${CUSTOM2_REGEX}|";
+    elsif ($code eq "t") {
+	    $tmpregex = "${tmpregex}${TEXT_REGEX}|"
     }
 }
 chop($tmpregex);
@@ -889,6 +932,7 @@ if ($HELP) {
     print "Available options:\n";
     print "  -h                Show this text\n";
     print "  -v                Print version information\n";
+    print "  -V                Print diagnostic information\n";
     print "  -l                List-only mode, does not open any file; shows annotations\n";
     print "  -L                List-only mode, does not open any file; shows command line\n";
     print "  -b                Batch mode, processes every file in the list\n";
@@ -897,6 +941,8 @@ if ($HELP) {
     print "  -f                Only show/open real files, i.e. annotations matching '$FILE_REGEX'\n";
     print "  -F                Show all but real files; inverse of -f\n";
     print "  -B                Show only files that don't exist (combine with -f)\n";
+    print "  -t                Only show/open text annotations, i.e. annotations matching '$TEXT_REGEX'\n";
+    print "  -T                Show all but text annotations; inverse of -t\n";
     print "  -a                Query all active tasks; clears the DEFAULT_FILTER\n";
     print "  -A                Query all tasks, i.e. completed and deleted tasks as well (very slow)\n";
     print "  -D                Delete the annotation rather than opening it\n";
@@ -1076,7 +1122,7 @@ sub parse_annotations {
 my @annotations = parse_annotations($ID);
 
 if ($#annotations < 0) {
-    print STDERR "No annotation found.";
+    print STDERR "No compatible annotation found.";
     if ($NO_ANNOTATION_HOOK) {
         print STDERR " Executing NO_ANNOTATION_HOOK:\n";
         execute_fork("$NO_ANNOTATION_HOOK $ID");
