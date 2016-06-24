@@ -1,5 +1,6 @@
 New features in taskopen 1.1
 
+  - Add FILE_CMD for better customisation (related to #92).
   - Implement TEXT_REGEX (#21) and command line switches -t/-T (#37).
 
 Bugfixes and minor improvements in taskopen 1.1

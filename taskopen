@@ -84,8 +84,9 @@ unless (-e $cfgfile) {
         open(my $fh, '>', $cfgfile) or die "can't open $cfgfile: $!";
         # write default config
         print $fh q<
-#BROWSER='xdg-open'
+#BROWSER='xdg-open $FILE &\>/dev/null'
 #EDITOR='vim'
+#FILE_CMD='xdg-open'
 TASKBIN='task'
 
 # If you sync tasks NOTES_FOLDER should be a location that syncs and is available to
@@ -312,6 +313,14 @@ else {
     $FILE_REGEX = "\\\.|\\\/|~";
 }
 
+my $FILE_CMD;
+if (exists $config{"FILE_CMD"}) {
+    $FILE_CMD = $config{"FILE_CMD"};
+}
+else {
+    $FILE_CMD = $XDG;
+}
+
 my %custom_regex = ();
 for my $key (keys %config) {
 	if ($key =~ m/CUSTOM(\d+)_REGEX/) {
@@ -396,7 +405,7 @@ sub diag {
     print "    BROWSER            = $BROWSER\n";
     print "    TASKBIN            = $TASKBIN\n";
     print "    EDITOR             = $EDITOR\n";
-    print "    XDG                = $XDG\n";
+    print "    FILE_CMD           = $FILE_CMD\n";
     print "    PATH               = $ENV{'PATH'}\n";
     print "\n";
     print "  Others:\n";
@@ -833,7 +842,7 @@ sub create_cmd {
             }
             else {
                 # use XDG for unknown file types
-                $cmd = qq{$XDG};
+                $cmd = qq{$FILE_CMD};
             }
         }
         else {

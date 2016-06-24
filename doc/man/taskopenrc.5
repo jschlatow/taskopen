@@ -33,12 +33,16 @@ Valid variable names and their default values are:
 
 .SS General configuration
 .TP
-.BR BROWSER=xdg-open
+.BR BROWSER=xdg-open $FILE &>/dev/null
 The executable which will be used to open URIs.
 
 .TP
 .BR EDITOR=vim
 Your preferred editor.
+
+.TP
+.BR FILE_CMD=xdg-open
+Command to be used for opening non-text files.
 
 .TP
 .BR TASKBIN=task
