@@ -340,7 +340,7 @@ if (exists $config{"TASK_ATTRIBUTES"}) {
     @TASK_ATTRIBUTES = split(",", $config{"TASK_ATTRIBUTES"});
 }
 
-my $NO_ANNOTATION_HOOK;
+my $NO_ANNOTATION_HOOK = "";
 if (exists $config{"NO_ANNOTATION_HOOK"}) {
     $NO_ANNOTATION_HOOK = $config{"NO_ANNOTATION_HOOK"};
 }
@@ -350,7 +350,7 @@ if (keys(%custom_regex)) {
 	$REGEX_CODE = "${REGEX_CODE}c";
 }
 
-my $TEXT_REGEX;
+my $TEXT_REGEX = "";
 if (exists $config{"TEXT_REGEX"}) {
     $TEXT_REGEX = $config{"TEXT_REGEX"};
     $REGEX_CODE = "${REGEX_CODE}t";
