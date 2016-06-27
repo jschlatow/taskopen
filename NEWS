@@ -1,3 +1,8 @@
+Bugfixes and minor improvements in taskopen 1.1.1
+
+  - Fix warnings when TEXT_REGEX or NO_ANNOTATION_HOOK are undefined (#93)
+  - Fix comment in default taskopenrc (#92)
+
 New features in taskopen 1.1
 
   - Add FILE_CMD for better customisation (related to #92).
