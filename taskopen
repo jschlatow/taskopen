@@ -33,7 +33,7 @@ use strict;
 use warnings;
 
 # DON'T TOUCH THE FOLLOWING LINES
-my $VERSION="v1.1-devel-75-g4d712d0";
+my $VERSION="v1.1";
 my $REVNUM="234";
 my $REVHASH="4d712d0";
 # END-DON'T-TOUCH
@@ -146,7 +146,7 @@ NOTES_EXT=".txt"
 #CUSTOM2_REGEX=""
 #CUSTOM2_CMD=""
 
-# Execute an arbitrary if there is no annotation available. The corresponding taskwarrior IDs will
+# Execute an arbitrary command if there is no annotation available. The corresponding taskwarrior IDs will
 # be passed as arguments, e.g. "attach.sh 21 42"
 #NO_ANNOTATION_HOOK=attach.sh
 

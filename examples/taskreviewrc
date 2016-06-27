@@ -26,4 +26,3 @@ NOTES_CMD="do_review.sh $FILE $UUID"
 NOTES_REGEX="Review"
 
 DEFAULT_SORT="priority-,atime-,mtime-"
-                                                                                                                                           77,0-1        Bot
