@@ -138,5 +138,6 @@ Thanks to the following:
  * John Hammond (for OSX 10.5+ support)
  * Alan Bowen (for writing tasknote)
  * David J Patrick (for great ideas)
+ * Scott Kostyshak (for usability improvements and testing)
 
 Feel free to contribute to this project.
