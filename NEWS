@@ -1,3 +1,7 @@
+Bugfixes and minor improvements in taskopen 1.1.2
+
+  - Fix file-type filtering, which was broken by introducing the -t/-T switches.
+
 Bugfixes and minor improvements in taskopen 1.1.1
 
   - Fix warnings when TEXT_REGEX or NO_ANNOTATION_HOOK are undefined (#93)

@@ -64,7 +64,7 @@ Show only files that don't exist; should be used with -f or -n.
 Only include annotations that match
 .I regex.
 .TP
-.BR "\-t 'regex'"
+.BR "\--type 'regex'"
 Only open files whose type (as returned by the
 .I file
 command) matches
@@ -264,7 +264,7 @@ $ taskopen 1 -m Doc
 or by file type:
 
 .RS
-$ taskopen 1 -t PDF
+$ taskopen 1 --type PDF
 .RE
 
 Filter options and taskwarrior attributes can be used in any combination.

@@ -587,7 +587,7 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
             exit 1;
         }
     }
-    elsif ($arg eq "-t") {
+    elsif ($arg eq "--type") {
         $TYPE = $ARGV[++$i];
         if (!$TYPE || $TYPE =~ m/^-/) {
             printf STDERR "Missing expression after -t\n";
@@ -948,7 +948,7 @@ if ($HELP) {
     print "  -D                Delete the annotation rather than opening it\n";
     print "  -r                Raw mode, opens the annotation text with your EDITOR\n";
     print "  -m 'regex'        Only include annotations that match 'regex'\n";
-    print "  -t 'regex'        Only open files whose type (as returned by 'file') matches 'regex'\n";
+    print "  --type 'regex'    Only open files whose type (as returned by 'file') matches 'regex'\n";
     print "  -s 'key1+,key2-'  Sort annotations by the given key which can be a taskwarrior field or\n";
     print "                    'annot', 'label', 'entry', 'size', 'type', 'time', 'mtime' or 'atime'\n";
     print "  -e                Force to open file with EDITOR\n";
@@ -1089,7 +1089,7 @@ sub parse_annotations {
                                     push(@annotations, \%entry);
                                 }
                                 elsif ($DEBUG > 0) {
-                                    print qq/[DEBUG] Skipping file "$entry{'file'}" whose type doesn't match '$TYPE'\n/;
+                                    print qq/[DEBUG] Skipping file "$entry{'annot'}" whose type doesn't match '$TYPE'\n/;
                                 }
                             }
                             else {
