@@ -158,6 +158,11 @@ Contains the LABEL text of the annotation; may be empty.
 Contains the undecoded annotation text.
 
 .TP
+.BR $LAST_MATCH
+Contains the last sub-pattern of the matched REGEX, see examples in
+.BR taskopenrc(5).
+
+.TP
 .BR $TASK_*
 Such as TASK_PROJECT, which contains the value of the taskwarrior attribute "project" as soon as you
 let taskopen know about this attribute by adding it to the TASK_ATTRIBUTES variable in your

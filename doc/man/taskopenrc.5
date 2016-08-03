@@ -82,7 +82,7 @@ The regular expression which identifies an annotation as a link to the Notes fil
 
 .TP
 .BR DEFAULT_FILTER=status.is:pending
-The default taskwarrior filter that will be applied to all queries. Can be deactivted by using the -a or -A switches.
+The default taskwarrior filter that will be applied to all queries. Can be deactivated by using the -a or -A switches.
 
 .TP
 .BR DEFAULT_SORT
@@ -118,7 +118,7 @@ The regular expression that identifies annotations openable by CUSTOM1_CMD.
 .TP
 .BR CUSTOM1_CMD
 The command with which annotations matching CUSTOM1_REGEX will be opened. You may use the following
-environment variables: $FILE, $UUID, $ID, $LABEL and $ANNOTATION. By Default, the value of $FILE
+environment variables: $FILE, $UUID, $ID, $LABEL, $ANNOTATION and $LAST_MATCH. By Default, the value of $FILE
 will be appended to the command. See
 .BR taskopen (1)
 for further details.
@@ -144,6 +144,16 @@ use within user commands. In order to prevent name conflicts, the corresponding 
 "task_project"). Environment variables are additionally in upper case (e.g. TASK_PROJECT).
 
 .SH EXAMPLES
+
+.SS "Using different file extensions for Notes files"
+
+.BR NOTES_REGEX="Notes\.(.*)"
+.br
+.BR "NOTES_CMD=\(dqeditnote /path/to/tasknotes/$UUID.$LAST_MATCH \(dq$TASK_DESCRIPTION\(dq $UUID\(dq"
+.br
+.BR "NO_ANNOTATION_HOOK=addnote"
+.br
+.BR "TASK_ATTRIBUTES=description"
 
 .SS "Using the notes.vim plugin for Notes files"
 

@@ -147,8 +147,8 @@ NOTES_EXT=".txt"
 #CUSTOM2_CMD=""
 
 # Execute an arbitrary command if there is no annotation available. The corresponding taskwarrior IDs will
-# be passed as arguments, e.g. "attach.sh 21 42"
-#NO_ANNOTATION_HOOK=attach.sh
+# be passed as arguments, e.g. "addnote 21 42"
+#NO_ANNOTATION_HOOK=addnote
 
 # Make additional taskwarrior attributes available as sort keys and environment variables.
 # E.g. TASK_ATTRIBUTES="project,tags" allows to sort by "task_project" or "task_tags" and to use 
@@ -750,6 +750,7 @@ sub reset_env {
     delete $ENV{"ID"};
     delete $ENV{"LABEL"};
     delete $ENV{"ANNOTATION"};
+    delete $ENV{"LAST_MATCH"};
 
     foreach my $att (@TASK_ATTRIBUTES) {
         my $uc_att = uc($att);
@@ -761,6 +762,7 @@ sub prepare_cmd {
     my $cmd  = $_[0];
     my $ann  = $_[1];
     my $file = $_[2];
+    my $match = $_[3];
 
     if ($cmd !~ m/\$/) {
         $cmd = qq/$cmd '$file'/;
@@ -771,6 +773,7 @@ sub prepare_cmd {
         $ENV{"ID"}         = $ann->{"id"};
         $ENV{"LABEL"}      = $ann->{"label"};
         $ENV{"ANNOTATION"} = $ann->{"raw"};
+        $ENV{"LAST_MATCH"} = $match;
 
         foreach my $att (@TASK_ATTRIBUTES) {
             if (exists $ann->{"task_$att"}) {
@@ -808,6 +811,7 @@ sub create_cmd {
     reset_env();
 
     my $cmd;
+    my $match = "";
     if ($FORCE->{"action"}) {
         if ($FORCE->{"action"} eq "\\del") {
             return qq/$TASKBIN $ann->{'uuid'} denotate -- "$ann->{'raw'}"/;
@@ -824,10 +828,12 @@ sub create_cmd {
     else {
         if ($REGEX_CODE !~ m/N/ and ($file =~ m/^$NOTES_REGEX/ || $ann->{"raw"} =~ m/^$NOTES_REGEX/)) {
             # $file = get_filepath($ann);
+            $match = $+;
             $cmd = $NOTES_CMD;
             $cmd =~ s/([^\$])UUID/$1\$UUID/g;
         }
         elsif ($file =~ m/^$BROWSER_REGEX/ ) {
+            $match = $+;
             if ($file =~ m/^www/) {
                 # prepend http://
                 $file = "http://$file";
@@ -835,6 +841,7 @@ sub create_cmd {
             $cmd = qq{$BROWSER};
         }
         elsif ($REGEX_CODE !~ m/F/ and $file =~ m/^$FILE_REGEX/) {
+            $match = $+;
             $file = get_filepath($ann);
             my $filetype = qx{file "$file"};
             if ($filetype =~ m/text|empty/ ) {
@@ -849,6 +856,7 @@ sub create_cmd {
 	         my $found = 0;
 	         for my $regex (keys %custom_regex) {
 		         if ($file =~ m/^$regex/) {
+			         $match = $+;
 			         $cmd = qq{$custom_regex{$regex}};
 			         $found = 1;
 			         last;
@@ -866,7 +874,7 @@ sub create_cmd {
         }
     }
 
-    return prepare_cmd($cmd, $ann, $file);
+    return prepare_cmd($cmd, $ann, $file, $match);
 }
 
 sub sort_hasharr

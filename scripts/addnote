@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# REQUIRES: awk
+
+# INSTALLATION
+# Add this to your ~/.taskrc:
+#  alias.addnote=execute /path/to/addnote
+
+# Only add an annotation if we are operating on a single ID
+if [ $# -eq 1 ]; then
+    desc=$(task $1 info | awk '$0 ~ /^Description/ {print substr($0, index($0,$2))}')
+    echo "Attaching to task $1 '$desc'."
+	 echo -n "Type a file extension (or none): "
+    read ext
+    ann=""
+    if [ "$ext" != "" ]; then
+        ann="Notes.$ext"
+	  else
+		  ann="Notes"
+    fi
+    task $1 annotate -- $ann
+fi

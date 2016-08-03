@@ -1,5 +1,7 @@
 Bugfixes and minor improvements in taskopen 1.1.2
 
+  - Add environment variable $LAST_MATCH to provide access to the last submatch of a successful REGEX match. (#95)
+  - Add helper script "addnote" that lets you select a file extension for your notes. (#95)
   - Fix file-type filtering, which was broken by introducing the -t/-T switches.
 
 Bugfixes and minor improvements in taskopen 1.1.1
