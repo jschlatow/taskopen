@@ -130,8 +130,7 @@ NOTES_EXT=".txt"
 # Default is: www|http
 #BROWSER_REGEX="www|http"
 
-# Regular expression that identifies file paths in annotations. Will be opened by EDITOR or
-# xdg-open.
+# Regular expression that identifies file paths in annotations. Will be opened by xdg-open.
 # Default is: \.|\/|~
 #FILE_REGEX="\.|\/|~"
 
@@ -835,15 +834,8 @@ sub create_cmd {
             $cmd = qq{$BROWSER};
         }
         elsif ($REGEX_CODE !~ m/F/ and $file =~ m/^$FILE_REGEX/) {
-            $file = get_filepath($ann);
-            my $filetype = qx{file "$file"};
-            if ($filetype =~ m/text|empty/ ) {
-                $cmd = qq/$EDITOR/;
-            }
-            else {
-                # use XDG for unknown file types
-                $cmd = qq{$FILE_CMD};
-            }
+            # use XDG for all file types
+            $cmd = qq{$FILE_CMD};
         }
         else {
 	         my $found = 0;
