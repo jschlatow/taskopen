@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Fri Jun 24 20:48:33 2016 -->
+<!-- CreationDate: Fri Aug  5 16:16:00 2016 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -157,7 +157,7 @@ arguments <br>
 DEFAULT_FILTER=status.is:pending</b></p>
 
 <p style="margin-left:22%;">The default taskwarrior filter
-that will be applied to all queries. Can be deactivted by
+that will be applied to all queries. Can be deactivated by
 using the -a or -A switches.</p>
 
 <p style="margin-left:11%;"><b>DEFAULT_SORT</b></p>
@@ -208,9 +208,9 @@ identifies annotations openable by CUSTOM1_CMD.</p>
 <p style="margin-left:22%;">The command with which
 annotations matching CUSTOM1_REGEX will be opened. You may
 use the following environment variables: $FILE, $UUID, $ID,
-$LABEL and $ANNOTATION. By Default, the value of $FILE will
-be appended to the command. See <b>taskopen</b>(1) for
-further details.</p>
+$LABEL, $ANNOTATION and $LAST_MATCH. By Default, the value
+of $FILE will be appended to the command. See
+<b>taskopen</b>(1) for further details.</p>
 
 <p style="margin-left:11%;"><b>CUSTOM[0-9]+_REGEX</b></p>
 
@@ -241,6 +241,15 @@ TASK_PROJECT).</p>
 <a name="EXAMPLES"></a>
 </h2>
 
+
+<p style="margin-left:11%; margin-top: 1em"><b>Using
+different file extensions for Notes files <br>
+NOTES_REGEX=&quot;Notes.(.*)&quot; <br>
+NOTES_CMD=&quot;editnote
+/path/to/tasknotes/$UUID.$LAST_MATCH
+&quot;$TASK_DESCRIPTION&quot; $UUID&quot; <br>
+NO_ANNOTATION_HOOK=addnote <br>
+TASK_ATTRIBUTES=description</b></p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>Using the
 notes.vim plugin for Notes files <br>
