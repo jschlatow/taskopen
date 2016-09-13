@@ -1,0 +1,17 @@
+#!/bin/bash
+# use this script to overwrite xdg-open defaults with cli-based applications
+
+if [ ! $# -eq 1 ]; then
+	echo "Usage: $0 <file-path>"
+	exit 1
+fi
+
+# get MIME type
+MIME=$(xdg-mime query filetype $1)
+
+# use $EDITOR for opening text files
+if [[ "$MIME" =~ ^text ]]; then
+	$EDITOR $1
+else
+	xdg-open $1
+fi
