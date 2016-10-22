@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# This script attaches file to taskwarrior's task,
+# that can be open with taskopen script.
+#
+# Also, script can create task before attaching file
+# to it.
+#
+# Requires: taskwarrior, taskopen, vifm, getopt
+#
+# For parameters run: attach_to_task --help
+#
+# Commands can be added to vifmrc:
+# command attachnew attach_to_task -f %d/%f
+# command attach attach_to_task -t %a -f %d/%f
+
+usage() {
+    echo "Usage: $(basename $0) [-t task_id] [-f filepath]"
+}
+
+SHORT=t:f:h
+LONG=task:,file:,help
+
+PARSED=$(getopt --options $SHORT --longoptions $LONG --name "$0" -- "$@")
+if [[ $? != 0 ]]; then
+    exit 2
+fi
+
+eval set -- "$PARSED"
+
+while true; do
+    case "$1" in
+        -t|--task)
+            task_id="$2"
+            number='^[0-9]+'
+            if ! [[ $task_id =~ $number ]]; then
+                echo "Wrong task id"
+                exit 1
+            fi
+            shift 2
+            ;;
+        -f|--file)
+            file_name=$(readlink -f "$2")
+            if ! [[ -f $file_name ]]; then
+                echo "Not a file"
+                exit 1
+            fi
+            shift 2
+            ;;
+        -h|--help)
+            usage
+            exit
+            ;;
+        --)
+            shift
+            break
+            ;;
+    esac
+done
+
+if [[ "$task_id" == "" ]]; then
+    echo -n "Create task (with options): "
+    read -r task_title
+    if [[ "$task_title" == "" ]]; then
+        echo "Cancel"
+        exit
+    fi
+    task_id=$(task add $task_title | grep 'Created' | sed 's/Created task \([0-9]\+\)/\1/g')
+    if [[ $? -ne 0 || "$task_id" == "" ]]; then
+        echo "Error creating task"
+        exit 1
+    fi
+fi
+
+if [[ "$file_name" == "" ]]; then
+    if [[ ! -x $(which vifm) ]]; then
+        echo "Please, install vifm"
+        exit 1
+    fi
+    file_name=$(vifm -c only --choose-files -)
+    if [[ "$file_name" == "" ]]; then
+        echo "Cancel"
+        exit
+    fi
+fi
+
+desc=$(task $task_id info | awk '$0 ~ /^Description/ {print substr($0, index($0,$2))}')
+echo "Attaching to task $task_id '$desc'."
+echo -n "Type a label: "
+read -r label
+annotation=""
+if [[ "$label" != "" ]]; then
+    annotation="$label: "
+fi
+
+task $task_id annotate -- "$annotation$file_name"
