@@ -825,13 +825,13 @@ sub create_cmd {
         }
     }
     else {
-        if ($REGEX_CODE !~ m/N/ and ($file =~ m/^$NOTES_REGEX/ || $ann->{"raw"} =~ m/^$NOTES_REGEX/)) {
+        if ($REGEX_CODE !~ m/N/ and ($file =~ m/^($NOTES_REGEX)/ || $ann->{"raw"} =~ m/^($NOTES_REGEX)/)) {
             # $file = get_filepath($ann);
             $match = $+;
             $cmd = $NOTES_CMD;
             $cmd =~ s/([^\$])UUID/$1\$UUID/g;
         }
-        elsif ($file =~ m/^$BROWSER_REGEX/ ) {
+        elsif ($file =~ m/^($BROWSER_REGEX)/ ) {
             $match = $+;
             if ($file =~ m/^www/) {
                 # prepend http://
@@ -839,7 +839,7 @@ sub create_cmd {
             }
             $cmd = qq{$BROWSER};
         }
-        elsif ($REGEX_CODE !~ m/F/ and $file =~ m/^$FILE_REGEX/) {
+        elsif ($REGEX_CODE !~ m/F/ and $file =~ m/^($FILE_REGEX)/) {
             $match = $+;
             # use XDG for all file types
             $cmd = qq{$FILE_CMD};
@@ -847,7 +847,7 @@ sub create_cmd {
         else {
 	         my $found = 0;
 	         for my $regex (keys %custom_regex) {
-		         if ($file =~ m/^$regex/) {
+		         if ($file =~ m/^($regex)/) {
 			         $match = $+;
 			         $cmd = qq{$custom_regex{$regex}};
 			         $found = 1;
@@ -855,7 +855,7 @@ sub create_cmd {
 			      }
 	         }
 	         if (not $found) {
-		         if ($REGEX_CODE !~ m/T/ and length $TEXT_REGEX and $file =~ m/^$TEXT_REGEX/ ) {
+		         if ($REGEX_CODE !~ m/T/ and length $TEXT_REGEX and $file =~ m/^($TEXT_REGEX)/ ) {
             		my $raw = raw_edit($ann->{"raw"});
             		return modify_annotation($ann, $raw);
 		         }
