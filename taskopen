@@ -131,8 +131,8 @@ NOTES_EXT=".txt"
 #BROWSER_REGEX="www|http"
 
 # Regular expression that identifies file paths in annotations. Will be opened by xdg-open.
-# Default is: \.|\/|~
-#FILE_REGEX="\.|\/|~"
+# Default is: ^\.|^\/|^~
+#FILE_REGEX="^\.|^\/|^~"
 
 # Regular expression that identifies a text annotation. Automatically triggers raw edit mode like '-r'.
 #TEXT_REGEX=".*"
@@ -309,7 +309,7 @@ if (exists $config{"FILE_REGEX"}) {
     $FILE_REGEX = $config{"FILE_REGEX"};
 }
 else {
-    $FILE_REGEX = "\\\.|\\\/|~";
+    $FILE_REGEX = "^\\\.|^\\\/|^~";
 }
 
 my $FILE_CMD;
