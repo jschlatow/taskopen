@@ -130,6 +130,27 @@ or even
 
     $ taskopen pro:taskwarrior +bug \\notes
 
+#Scripts
+
+##attach_vifm
+
+Script helps to attach file to taskwarrior's task from command line or with `vifm`. It can attach file to existed task. Or it can create task for existed file.
+
+Usage:
+
+```
+attach_vifm -f file_name -t task_id
+```
+
+If you omit `file_name`, `vifm` will be executed. If you omit `task_id`, you will be asked to enter title for new task.
+
+Commands can be added to vifmrc:
+
+```
+command attachnew attach_vifm -f %d/%f
+command attach attach_vifm -t %a -f %d/%f
+```
+
 #Contributions
 
 Thanks to the following:
