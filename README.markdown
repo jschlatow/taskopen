@@ -132,19 +132,26 @@ or even
 
 #Scripts
 
-##attach_vifm
+##attach_vifm (by artur-shaik)
 
-Script helps to attach file to taskwarrior's task from command line or with `vifm`. It can attach file to existed task. Or it can create task for existed file.
+This script helps to attach a file to an existing task or to create a task for an existing file.
+The file path can be either given as a command line argument or is interactively selected using `vifm`.
 
-Usage:
+Basic usage:
 
 ```
 attach_vifm -f file_name -t task_id
 ```
 
-If you omit `file_name`, `vifm` will be executed. If you omit `task_id`, you will be asked to enter title for new task.
+If you omit `file_name`, `vifm` will be executed. If you omit `task_id`, you will be asked to enter a title for the new task.
 
-Commands can be added to vifmrc:
+Installation with taskwarrior:
+
+```
+task config alias.attach "exec '/path/to/attach_vifm' -t"
+```
+
+The following commands can be added to vifmrc:
 
 ```
 command attachnew attach_vifm -f %d/%f
