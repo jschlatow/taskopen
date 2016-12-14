@@ -2,7 +2,7 @@ PREFIX ?= /usr/local/
 
 $(phony all): manfiles taskopen.pl
 
-taskopen.pl: clean manfiles
+taskopen.pl: manfiles
 	sed s',#PATH_EXT=.*,&\nPATH_EXT=$(PREFIX)/share/taskopen/scripts,' taskopen > taskopen.pl
 
 manfiles:
