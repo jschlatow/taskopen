@@ -1,14 +1,15 @@
+PREFIX ?= /usr/local/
 
 $(phony all): manfiles taskopen.pl
 
 taskopen.pl: manfiles
 	sed s',#PATH_EXT=.*,&\nPATH_EXT=$(PREFIX)/share/taskopen/scripts,' taskopen > taskopen.pl
 
-manfiles: 
+manfiles:
 	gzip -c doc/man/taskopen.1 > doc/man/taskopen.1.gz
 	gzip -c doc/man/taskopenrc.5 > doc/man/taskopenrc.5.gz
 
-install: taskopen.pl 
+install: taskopen.pl
 	mkdir -p $(DESTDIR)/$(PREFIX)/bin
 	install -m 0755 taskopen.pl $(DESTDIR)/$(PREFIX)/bin/taskopen
 	mkdir -p $(DESTDIR)/$(PREFIX)/share/man/{man1,man5}
