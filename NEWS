@@ -1,5 +1,7 @@
 Bugfixes and minor improvements in taskopen 1.1.3
 
+  - Add default PREFIX. (#108)
+  - Fix parallel make. (#106)
   - Fix regular expression matching. (#105)
   - Add script 'attach_vifm' that uses vifm for attaching files. (#104)
   - Add script 'xdg-open-cli'. (#102)
