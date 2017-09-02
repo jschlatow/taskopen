@@ -1,4 +1,4 @@
-#Dependencies
+# Dependencies
 
 This perl script is an enhancement to taskwarrior, i.e. it depends on the task binary. See http://www.taskwarrior.org
 
@@ -10,7 +10,8 @@ It also depends on the JSON module, i.e.
 
 The helper scripts are usually run by bash. Some of the scripts also depend on (g)awk.
 
-#What does it do?
+# What does it do?
+
 It allows you to link almost any file, webpage or command to a taskwarrior task by adding a filepath, web-link or uri as an annotation. Text notes, images, PDF files, web addresses, spreadsheets and many other types of links can then be filtered, listed and opened by using taskopen. Some actions are sane defaults, others can be custom-configured, and everything else will use your systems mime-types to open the link. 
 
 Arbitrary commands can be used with taskopen at the CLI, acting on the link targets, enhancing listings and even executing annotations as commands.
@@ -18,7 +19,8 @@ Arbitrary commands can be used with taskopen at the CLI, acting on the link targ
 Run 'taskopen -h' or 'man taskopen' for further details.
 The following sections show some (very) basic usage examples. 
 
-##Basic usage
+## Basic usage
+
 Add a task:
 
 	$ task add Example
@@ -56,7 +58,7 @@ As soon as you annotate a task with 'Notes':
 
 ##More complex example
 You can also add weblinks to a task and even mix all kinds of annotations:
-	
+
 	$ task 1 annotate www.taskwarrior.org
 	$ task 1 annotate I want to consider this
 	$ task 1 annotate -- ~/Documents/manual.pdf
@@ -65,9 +67,9 @@ You can also add weblinks to a task and even mix all kinds of annotations:
 	Please select an annotation:
        1) www.taskwarrior.org
        2) ~/Documents/manual.pdf
-    Type number: 
+    Type number:
 
-#Installation
+# Installation
 
 Installation is as easy as:
 
@@ -78,7 +80,7 @@ Taskopen also creates a configuration file at '~/.taskopenrc' if it does not alr
 
 You can also add 'DESTDIR=/path/to/dir/' to the install command.
 
-#Perl version, migration guide
+## Perl version, migration guide
 Replace your taskopen binary in /usr/bin or ~/bin with 'taskopen.pl'. Be sure to install all
 dependencies.
 
@@ -86,7 +88,7 @@ The perl version is basically backwards compatible with the bash-style taskopenr
 bash magic must not be used within those files, i.e. only simple 'NAME=VALUE' notations can be
 parsed.
 
-#Configuration
+## Configuration
 
 Taskopen can be customised by editing your ~/.taskopenrc file, where you can set your favourite text editor
 and web browser for instance. Every file that is not considered a text file or URI is going to be opened with
@@ -94,7 +96,7 @@ and web browser for instance. Every file that is not considered a text file or U
 
 Please take a look at the manpage taskopenrc(5) for further details.
 
-#Features
+## Features
 
   * Arbitrary filters
   * Optional labelling for easier access
@@ -105,7 +107,7 @@ Please take a look at the manpage taskopenrc(5) for further details.
   * Various customisation options (e.g. sorting)
   * Extensibility
 
-##Arbitrary filters
+## Arbitrary filters
 Instead of providing taskopen with an ID you can also pass arbitrary filters in taskwarrior
 notation, like:
 
@@ -115,7 +117,7 @@ or
 
     $ taskopen +bug pro:taskwarrior
 
-##Labels
+## Labels
 You can label your annotations by using the following syntax:
 
     $ task 1 annotate tw: www.taskwarrior.org
@@ -130,9 +132,9 @@ or even
 
     $ taskopen pro:taskwarrior +bug \\notes
 
-#Scripts
+# Scripts
 
-##attach_vifm (by artur-shaik)
+## attach_vifm (by artur-shaik)
 
 This script helps to attach a file to an existing task or to create a task for an existing file.
 The file path can be either given as a command line argument or is interactively selected using `vifm`.
@@ -158,7 +160,7 @@ command attachnew attach_vifm -f %d/%f
 command attach attach_vifm -t %a -f %d/%f
 ```
 
-#Contributions
+## Contributions
 
 Thanks to the following:
 
