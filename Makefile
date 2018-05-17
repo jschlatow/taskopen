@@ -12,7 +12,8 @@ manfiles:
 install: taskopen.pl
 	mkdir -p $(DESTDIR)/$(PREFIX)/bin
 	install -m 0755 taskopen.pl $(DESTDIR)/$(PREFIX)/bin/taskopen
-	mkdir -p $(DESTDIR)/$(PREFIX)/share/man/{man1,man5}
+	mkdir -p $(DESTDIR)/$(PREFIX)/share/man/man1
+	mkdir -p $(DESTDIR)/$(PREFIX)/share/man/man5
 	install -m 0644 doc/man/taskopen.1.gz $(DESTDIR)/$(PREFIX)/share/man/man1/
 	install -m 0644 doc/man/taskopenrc.5.gz $(DESTDIR)/$(PREFIX)/share/man/man5/
 	mkdir -p $(DESTDIR)/$(PREFIX)/share/taskopen/doc/html
