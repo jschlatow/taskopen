@@ -5,7 +5,7 @@ $(phony all): manfiles taskopen.pl
 
 taskopen.pl: manfiles
 	sed s',#PATH_EXT=.*,&\nPATH_EXT=$(PREFIX)/share/taskopen/scripts,' taskopen > taskopen.pl
-	sed -i s',/usr/bin/perl,$(PERLPATH),' taskopen.pl
+	sed -i'.bak' s',/usr/bin/perl,$(PERLPATH),' taskopen.pl
 
 manfiles:
 	gzip -c doc/man/taskopen.1 > doc/man/taskopen.1.gz
