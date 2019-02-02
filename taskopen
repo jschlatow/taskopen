@@ -33,8 +33,8 @@ use strict;
 use warnings;
 
 # DON'T TOUCH THE FOLLOWING LINES
-my $VERSION="v1.1.3";
-my $REVNUM="263";
+my $VERSION="v1.1.3-18-g3d3d08c";
+my $REVNUM="293";
 my $REVHASH="610c25e";
 # END-DON'T-TOUCH
 
@@ -372,7 +372,7 @@ sub print_version_long {
 sub diag {
     print_version_long;
 
-    my $task_version = qx{$TASKBIN _version};
+    my $task_version = qx{$TASKBIN _version 2>/dev/null};
     chomp($task_version);
 
     # FIXME no xdg --version on OSX
@@ -795,7 +795,7 @@ sub modify_annotation {
            return qq{echo "Cannot replace annotations which contain '/'s (see #1174)."}
        }
        # END REMOVE
-       return qq%$TASKBIN $ann->{"uuid"} mod /$ann->{"raw"}/$raw/%;
+       return qq%$TASKBIN $ann->{"uuid"} mod /$ann->{"raw"}/$raw/ 2>/dev/null%;
    }
    else {
        return qq/echo "No changes detected"/;
@@ -813,7 +813,7 @@ sub create_cmd {
     my $match = "";
     if ($FORCE->{"action"}) {
         if ($FORCE->{"action"} eq "\\del") {
-            return qq/$TASKBIN $ann->{'uuid'} denotate -- "$ann->{'raw'}"/;
+            return qq%$TASKBIN $ann->{'uuid'} denotate -- "$ann->{'raw'}" 2>/dev/null%;
         }
         elsif ($FORCE->{"action"} eq "\\raw") {
             my $raw = raw_edit($ann->{"raw"});
@@ -969,7 +969,7 @@ if ($SORT) {
 if ($DEBUG > 0) {
     print "[DEBUG] Applying filter: $EXCLUDE$FILTER\n";
 }
-my $ID = qx{$TASKBIN $ID_CMD $EXCLUDE$FILTER};
+my $ID = qx{$TASKBIN $ID_CMD $EXCLUDE$FILTER 2>/dev/null};
 chomp($ID);
 
 if ($ID eq "") {
@@ -981,7 +981,7 @@ sub parse_annotations {
     my $ID = $_[0];
 
     # query IDs and parse json
-    my $json = qx{$TASKBIN $ID export};
+    my $json = qx{$TASKBIN $ID export 2>/dev/null};
     my @decoded_json = @{decode_json("$json")};
 
     # Reorganize data
