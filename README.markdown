@@ -56,6 +56,8 @@ As soon as you annotate a task with 'Notes':
 
 ...which, by default, opens a file like "~/tasknotes/5727f1c7-2efe-fb6b-2bac-6ce073ba95ee.txt".
 
+**Note:** You have to create the folder "~/tasknotes" before this works with the default folder.
+
 ##More complex example
 You can also add weblinks to a task and even mix all kinds of annotations:
 
@@ -79,6 +81,8 @@ Installation is as easy as:
 Taskopen also creates a configuration file at '~/.taskopenrc' if it does not already exist.
 
 You can also add 'DESTDIR=/path/to/dir/' to the install command.
+
+You must create the folder '~/tasknotes' when using default notes (e.g. `task 1 annotate Notes`) with the default folder. This folder is not created automatically.
 
 ## Perl version, migration guide
 Replace your taskopen binary in /usr/bin or ~/bin with 'taskopen.pl'. Be sure to install all
