@@ -179,10 +179,10 @@ if (exists $config{"PATH_EXT"}) {
 
 my $TASKBIN;
 if (exists $config{"TASKBIN"}) {
-    $TASKBIN = qq/$config{"TASKBIN"} rc.verbose=off rc.json.array=on/;
+    $TASKBIN = qq/$config{"TASKBIN"} rc.verbose=blank,label,edit rc.json.array=on/;
 }
 else {
-    $TASKBIN = 'task rc.verbose=off rc.json.array=on';
+    $TASKBIN = 'task rc.verbose=blank,label,edit rc.json.array=on';
 }
 
 my $FOLDER;
@@ -365,14 +365,14 @@ sub print_version {
 sub print_version_long {
     print "\n";
     print "Taskopen, release $VERSION, revision $REVNUM ($REVHASH)\n";
-    print "Copyright 2010-2016, Johannes Schlatow.\n";
+    print "Copyright 2010-2019, Johannes Schlatow.\n";
     print "\n";
 }
 
 sub diag {
     print_version_long;
 
-    my $task_version = qx{$TASKBIN _version 2>/dev/null};
+    my $task_version = qx{$TASKBIN _version};
     chomp($task_version);
 
     # FIXME no xdg --version on OSX
@@ -795,7 +795,7 @@ sub modify_annotation {
            return qq{echo "Cannot replace annotations which contain '/'s (see #1174)."}
        }
        # END REMOVE
-       return qq%$TASKBIN $ann->{"uuid"} mod /$ann->{"raw"}/$raw/ 2>/dev/null%;
+       return qq%$TASKBIN $ann->{"uuid"} mod /$ann->{"raw"}/$raw/%;
    }
    else {
        return qq/echo "No changes detected"/;
@@ -813,7 +813,7 @@ sub create_cmd {
     my $match = "";
     if ($FORCE->{"action"}) {
         if ($FORCE->{"action"} eq "\\del") {
-            return qq%$TASKBIN $ann->{'uuid'} denotate -- "$ann->{'raw'}" 2>/dev/null%;
+            return qq%$TASKBIN $ann->{'uuid'} denotate -- "$ann->{'raw'}"%;
         }
         elsif ($FORCE->{"action"} eq "\\raw") {
             my $raw = raw_edit($ann->{"raw"});
@@ -969,7 +969,7 @@ if ($SORT) {
 if ($DEBUG > 0) {
     print "[DEBUG] Applying filter: $EXCLUDE$FILTER\n";
 }
-my $ID = qx{$TASKBIN $ID_CMD $EXCLUDE$FILTER 2>/dev/null};
+my $ID = qx{$TASKBIN $ID_CMD $EXCLUDE$FILTER};
 chomp($ID);
 
 if ($ID eq "") {
@@ -981,7 +981,7 @@ sub parse_annotations {
     my $ID = $_[0];
 
     # query IDs and parse json
-    my $json = qx{$TASKBIN $ID export 2>/dev/null};
+    my $json = qx{$TASKBIN $ID export};
     my @decoded_json = @{decode_json("$json")};
 
     # Reorganize data
