@@ -98,6 +98,8 @@ Taskopen can be customised by editing your ~/.taskopenrc file, where you can set
 and web browser for instance. Every file that is not considered a text file or URI is going to be opened with
 'xdg-open', which picks the corresponding application depending on the mime time (see 'xdg-mime').
 
+A different configuration file can be specified using the TASKOPENRC environment variable.
+
 Please take a look at the manpage taskopenrc(5) for further details.
 
 ## Features
