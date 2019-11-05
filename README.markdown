@@ -164,6 +164,14 @@ command attachnew attach_vifm -f %d/%f
 command attach attach_vifm -t %a -f %d/%f
 ```
 
+# Integration with the `task` command
+
+You can use taskwarrior aliases to create a `task open` command. For example, the below will allow you to open the annotation of a task by typing `task open 123` (where `123` is the id of the task you want to open):
+
+```
+alias.open=execute bash -l -x -c "q=($BASH_COMMAND); taskopen \\"\\\\${q[-1]}\\""
+```
+
 ## Contributions
 
 Thanks to the following:
