@@ -58,7 +58,7 @@ As soon as you annotate a task with 'Notes':
 
 **Note:** You have to create the folder "~/tasknotes" before this works with the default folder.
 
-##More complex example
+## More complex example
 You can also add weblinks to a task and even mix all kinds of annotations:
 
 	$ task 1 annotate www.taskwarrior.org
@@ -72,7 +72,6 @@ You can also add weblinks to a task and even mix all kinds of annotations:
     Type number:
 
 # Installation
-
 Installation is as easy as:
 
     $ make PREFIX=/usr
@@ -84,7 +83,7 @@ You can also add 'DESTDIR=/path/to/dir/' to the install command.
 
 You must create the folder '~/tasknotes' when using default notes (e.g. `task 1 annotate Notes`) with the default folder. This folder is not created automatically.
 
-## Perl version, migration guide
+## Perl version - migration guide
 Replace your taskopen binary in /usr/bin or ~/bin with 'taskopen.pl'. Be sure to install all
 dependencies.
 
@@ -93,15 +92,13 @@ bash magic must not be used within those files, i.e. only simple 'NAME=VALUE' no
 parsed.
 
 ## Configuration
-
 Taskopen can be customised by editing your ~/.taskopenrc file, where you can set your favourite text editor
 and web browser for instance. Every file that is not considered a text file or URI is going to be opened with
 'xdg-open', which picks the corresponding application depending on the mime time (see 'xdg-mime').
 
 Please take a look at the manpage taskopenrc(5) for further details.
 
-## Features
-
+# Features
   * Arbitrary filters
   * Optional labelling for easier access
   * Execution of arbitrary commands (overriding the default command)
