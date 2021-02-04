@@ -1,3 +1,14 @@
+Bugfixes and minor improvements in taskopen 1.1.5
+
+  - Fix raw mode bug. (#132)
+  - Add TASKOPENRC environment variable. (#116, #120)
+  - Minor documentation improvements.
+
+Bugfixes and minor improvements in taskopen 1.1.4
+
+  - Suppress configuration override output from taskwarrior (#115)
+  - Fix installation errors (#114)
+
 Bugfixes and minor improvements in taskopen 1.1.3
 
   - Add default PREFIX. (#108)
