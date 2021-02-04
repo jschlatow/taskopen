@@ -796,12 +796,12 @@ sub modify_annotation {
 	my $raw = $_[1];
 
    if ($raw ne $ann->{"raw"}) {
-       # TODO remove as soon as tw bug TW-1821 has been fixed ('/'s must still be escaped)
+       # TODO remove as soon as tw bug TW-1821 (Github #1837) has been fixed ('/'s must still be escaped)
        if ($ann->{'raw'} =~ m/\// || $raw =~ m/\//) {
-           return qq{echo "Cannot replace annotations which contain '/'s (see #1174)."}
+           return qq{echo "Cannot replace annotations which contain '/'s (see #1837)."}
        }
        # END REMOVE
-       return qq%$TASKBIN $ann->{"uuid"} mod /$ann->{"raw"}/$raw/%;
+       return qq%$TASKBIN $ann->{"uuid"} mod '/$ann->{"raw"}/$raw/'%;
    }
    else {
        return qq/echo "No changes detected"/;
