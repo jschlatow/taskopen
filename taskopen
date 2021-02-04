@@ -3,7 +3,7 @@
 ###############################################################################
 # taskopen - file based notes with taskwarrior
 #
-# Copyright 2010-2016, Johannes Schlatow.
+# Copyright 2010-2020, Johannes Schlatow.
 # All rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify it under
@@ -33,7 +33,7 @@ use strict;
 use warnings;
 
 # DON'T TOUCH THE FOLLOWING LINES
-my $VERSION="v1.1.4-9-gb9721f5";
+my $VERSION="v1.1.5-0-gb9721f5";
 my $REVNUM="297";
 my $REVHASH="b9721f5";
 # END-DON'T-TOUCH
@@ -371,7 +371,7 @@ sub print_version {
 sub print_version_long {
     print "\n";
     print "Taskopen, release $VERSION, revision $REVNUM ($REVHASH)\n";
-    print "Copyright 2010-2019, Johannes Schlatow.\n";
+    print "Copyright 2010-2020, Johannes Schlatow.\n";
     print "\n";
 }
 
