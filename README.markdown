@@ -6,6 +6,7 @@ It also depends on the JSON module, i.e.
 
  * _libjson-perl_ on debian
  * _perl-json_ on archlinux
+ * _perl-JSON_ on openSUSE
  * to be continued...
 
 The helper scripts are usually run by bash. Some of the scripts also depend on (g)awk.
@@ -76,6 +77,8 @@ You can also add weblinks to a task and even mix all kinds of annotations:
 
 # Installation
 
+## Generic
+
 Installation is as easy as:
 
     $ make PREFIX=/usr
@@ -86,6 +89,48 @@ Taskopen also creates a configuration file at '~/.taskopenrc' if it does not alr
 You can also add 'DESTDIR=/path/to/dir/' to the install command.
 
 You must create the folder '~/tasknotes' when using default notes (e.g. `task 1 annotate Notes`) with the default folder. This folder is not created automatically.
+
+## Linux
+
+### Clone the Repository into your ~/.task directory
+
+```bash
+cd $HOME/.task
+git clone https://github.com/jschlatow/taskopen.git
+```
+
+### Build and Install Taskopen
+
+```bash
+make PREFIX=usr
+sudo make PREFIX=usr install
+```
+
+### Create a Link to the Compiled Taskopen Program
+
+```bash
+sudo rm /usr/bin/taskopen
+sudo ln -s $HOME/.task/taskopen/taskopen /usr/bin/taskopen
+```
+
+*NOTE* if the above steps are not done the below error is printed when trying to envoke taskopen
+
+```bash
+-bash: /usr/bin/taskopen: -w: bad interpreter: No such file or directory
+```
+
+### Create the tasknotes Directory
+
+```bash
+mkdir $HOME/tasknotes
+```
+
+*NOTE* that the above uses the default directory, adding NOTES_FOLDER="your_custom_notes_dir" to your ~/.taskopenrc file can change this default directory (you will have to then create that directory as taskopen doesn't by default.
+
+### Finish
+
+You are free to use taskopen (see above for creating notes/default notes/etc)
+
 
 ## Perl version, migration guide
 Replace your taskopen binary in /usr/bin or ~/bin with 'taskopen.pl'. Be sure to install all
