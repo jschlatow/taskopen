@@ -6,6 +6,7 @@ import distros
 import json
 import re
 import tables
+import strtabs
 
 # taskopen modules
 import ./output
@@ -13,6 +14,13 @@ import ./config
 import ./taskwarrior as tw
 
 # TODO write module for process execution
+
+type
+  Actionable = object
+    text: string
+    task: JsonNode
+    action: Action
+    env: StringTableRef
 
 proc version():string =
   result = "unknown"
@@ -59,12 +67,12 @@ proc writeDiag(settings: Settings) =
 proc writeHelp() =
   echo "Help not implemented"
 
-proc includeActions(valid: Table[string, Action], includes: string): seq[string] =
+proc includeActions(valid: OrderedTable[string, Action], includes: string): seq[string] =
   for a in includes.split(','):
     if valid.hasKey(a):
       result.add(a)
 
-proc excludeActions(valid: Table[string, Action], excludes: string): seq[string] =
+proc excludeActions(valid: OrderedTable[string, Action], excludes: string): seq[string] =
   var excluded = excludes.split(',')
   for a in valid.keys():
     if not (a in excluded):
@@ -76,26 +84,183 @@ template construct_filter(s: Settings, filters: untyped) =
   if not settings.all:
     filters &= @[s.basefilter]
 
-proc find_actionable_items(s: Settings, json: JsonNode) =
-  echo "Not implemented"
+proc build_env(s: Settings,
+               task: JsonNode): StringTableRef =
+  result = newStringTable()
+
+  if s.pathExt != "":
+    result["PATH"] = s.pathExt & ":" & getEnv("PATH")
+  else:
+    result["PATH"] = getEnv("PATH")
+
+  if s.editor != "":
+    result["EDITOR"] = s.editor
+
+  result["UUID"] = task["uuid"].getStr()
+
+  if task.hasKey("id"):
+    result["ID"] = $task["id"].getInt()
+  else:
+    result["ID"] = ""
+
+  for attr in s.taskAttributes.split(','):
+    if task.hasKey(attr):
+      result["TASK_" & attr.toUpperAscii()] = task[attr].getStr()
+
+iterator match_actions(
+  baseenv: StringTableRef,
+  text:    string,
+  actions: openArray[Action],
+  single: bool): (Action, StringTableRef) =
+
+  for act in actions:
+    if act.target == "annotations":
+      var env = deepCopy(baseenv)
+      # split in label and file part
+      let splitre = re"((\S+):\s+)?(.*)"
+      if text =~ splitre:
+        let label = matches[1]
+        let file  = matches[2]
+        debug.log("Label: ", label)
+        debug.log("File: ", file)
+
+        let labelregex = re(act.labelregex)
+        let fileregex  = re(act.regex)
+
+        # skip action if label does not match
+        if not label.match(labelregex):
+          continue
+
+        # skip action if file does not match
+        if file =~ fileregex:
+          for m in matches:
+            if len(m) == 0:
+              break
+            else:
+              env["LAST_MATCH"] = m
+        else:
+          continue
+
+        # skip action if filter-command fails
+        if act.filterCommand != "":
+          # TODO implement filter-command
+          error.log("filter-command not implemented")
+
+        yield (act, env)
+
+        if single:
+          break
+      else:
+        error.log("Malformed annotation: ", text)
+    else:
+      var env = deepCopy(baseenv)
+      let fileregex  = re(act.regex)
+      if text =~ fileregex:
+        for m in matches:
+          if len(m) == 0:
+            break
+          else:
+            env["LAST_MATCH"] = m
+      else:
+        continue
+
+      # add warning if user specified a labelregex
+      if act.labelregex != "":
+        warn.log("labelregex not supported for actions not targetting annotations")
+
+      # skip action if filter-command fails
+      if act.filterCommand != "":
+        # TODO implement filter-command
+        error.log("filter-command not implemented")
+
+      yield (act, env)
+      if single:
+        break
+
+proc find_actionable_items(
+  s:    Settings,
+  json: JsonNode,
+  mode   = "normal",
+  single = true): seq[Actionable] =
+
+  # map attributes to potential actions
+  var action_map: Table[string, seq[Action]]
+  for actname in s.actions:
+    var act = s.validActions[actname]
+
+    # apply overrides
+    if s.filterCommand != "":
+      act.filterCommand = s.filterCommand
+    if s.inlineCommand != "":
+      act.inlineCommand = s.inlineCommand
+    if s.forceCommand != "":
+      act.command = s.forceCommand
+
+    if not (mode in act.modes):
+      continue
+    if not action_map.hasKey(act.target):
+      action_map[act.target] = @[]
+    action_map[act.target].add(act)
+
+  # iterate task attributes
+  for task in json.items():
+    var baseenv = s.build_env(task)
+    for attr, val in task.pairs():
+      if not action_map.hasKey(attr):
+        continue
+
+      if attr == "annotations":
+        for ann in val.items():
+          let text = ann["description"].getStr()
+          for act, env in match_actions(baseenv,
+                                        text,
+                                        action_map[attr],
+                                        single=single):
+            result.add(Actionable(text: text,
+                                  task: task,
+                                  action: act,
+                                  env: env))
+      else:
+        let text = val.getStr()
+        for act, env in match_actions(baseenv,
+                                      text,
+                                      action_map[attr],
+                                      single=single):
+          result.add(Actionable(text: text,
+                                task: task,
+                                action: act,
+                                env: env))
 
 proc normal(settings: Settings) =
   let taskbin = settings.taskbin
   settings.construct_filter(filters)
   let json = taskbin.json(filters)
-  echo json
+
+  var actionables = settings.find_actionable_items(json)
+  for item in actionables:
+    debug.log(item.text, "  command: ", item.action.command)
 
   error.log("normal not implemented")
 
 proc any(settings: Settings) =
   let taskbin = settings.taskbin
   settings.construct_filter(filters)
+  let json = taskbin.json(filters)
+
+  var actionables = settings.find_actionable_items(json)
+  for item in actionables:
+    debug.log(item.text, "  command: ", item.action.command)
 
   error.log("any not implemented")
 
 proc batch(settings: Settings) =
   let taskbin = settings.taskbin
   settings.construct_filter(filters)
+  let json = taskbin.json(filters)
+
+  var actionables = settings.find_actionable_items(json)
+  for item in actionables:
+    debug.log(item.text)
 
   error.log("batch not implemented")
 

@@ -20,7 +20,7 @@ type
     all*: bool
     validSubcommands*: seq[string]
     defaultSubcommand*: string
-    validActions*: Table[string, Action]
+    validActions*: OrderedTable[string, Action]
     actions*: seq[string]
     restrictActions*: bool
     inlineCommand*: string
@@ -52,7 +52,7 @@ proc parseConfig*(filepath: string): Settings =
   result.validActions["notes"] = Action(
     target: "annotations",
     labelregex: ".*",
-    regex: ".*",
+    regex: "^[\\.\\/~]+.*\\.(.*)",
     modes: @["batch", "any", "normal"],
     command: "$EDITOR $FILE")
 
