@@ -8,8 +8,7 @@ MANFILES_HTML = doc/html/taskopen\(1\).html doc/html/taskopenrc\(5\).html
 all: taskopen
 
 taskopen: $(SRCFILES) Makefile
-	nim c src/taskopen.nim
-	mv src/taskopen taskopen
+	nim c -d:versionGit --outdir:./ src/taskopen.nim
 
 doc/html/taskopen\(1\).html: doc/man/taskopen.1 Makefile
 	groff -mandoc -T html $< > $@

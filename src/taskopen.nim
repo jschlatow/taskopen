@@ -2,20 +2,57 @@ import parseopt
 import os
 import system
 import strutils
+import distros
 
 # taskopen modules
 import output
 import config
+import taskwarrior as tw
+import re
 
 # TODO write module for process execution
+#
+proc version():string =
+  result = "unknown"
+  when defined(versionGit):
+    const gitver = staticExec("git describe --tags HEAD")
+    result = gitver
+  elif defined(versionNimble):
+    let regex = re(".*version\\s*=\\s*\"([^\n]+)\"", {reDotAll})
+    const nf = staticRead("../taskopen.nimble")
+    if nf =~ regex:
+      result = matches[0]
 
-# TODO write module for taskwarrior execution
+  when not defined(release):
+    result &= " (Debug)"
 
-proc writeDiag() =
-  echo "Diagnostics not implemented"
+proc writeDiag(settings: Settings) =
+  echo "Environment"
+  when defined(posix):
+    if detectOs(MacOSX):
+      echo "    Platform:      ", "Mac OSX"
+    elif detectOs(Linux):
+      echo "    Platform:      ", "Linux"
+  when defined(windows):
+    echo "    Platform:      ", "Windows"
 
-proc writeVersion() =
-  echo "Version not implemented"
+  echo "    Taskopen:      ", version()
+  echo "    Taskwarrior:   ", tw.version(settings.taskbin)
+  echo "    Configuration: ", settings.configfile
+
+  echo "Current configuration"
+  echo "  Binaries and paths:"
+  echo "    taskbin            = ", settings.taskbin
+  echo "    editor             = ", settings.editor
+  echo "    path_ext           = ", settings.pathExt
+  echo "  General:"
+  echo "    debug              = ", settings.debug
+  echo "    no_annotation_hook = ", settings.noAnnot
+  echo "    task_attributes    = ", settings.taskAttributes
+  echo "  Actions:"
+  echo "    TODO"
+  echo "  Subcommands:"
+  echo "    default            = ", settings.defaultSubcommand
 
 proc writeHelp() =
   echo "Help not implemented"
@@ -143,6 +180,6 @@ when isMainModule:
   of "any":
     any()
   of "diagnostics":
-    writeDiag()
+    writeDiag(settings)
   of "version":
-    writeVersion()
+    echo version()
