@@ -3,15 +3,16 @@ import os
 import system
 import strutils
 import distros
-
-# taskopen modules
-import output
-import config
-import taskwarrior as tw
+import json
 import re
 
+# taskopen modules
+import ./output
+import ./config
+import ./taskwarrior as tw
+
 # TODO write module for process execution
-#
+
 proc version():string =
   result = "unknown"
   when defined(versionGit):
@@ -68,13 +69,33 @@ proc excludeActions(valid: openArray[string], excludes: string): seq[string] =
     if not (a in excluded):
       result.add(a)
 
-proc normal() =
+template construct_filter(s: Settings, filters: untyped) =
+  let context = current_context(s.taskbin)
+  var filters = @[context] & s.filter
+  if not settings.all:
+    filters &= @[s.basefilter]
+
+proc find_actionable_items(s: Settings, json: JsonNode) =
+  echo "Not implemented"
+
+proc normal(settings: Settings) =
+  let taskbin = settings.taskbin
+  settings.construct_filter(filters)
+  let json = taskbin.json(filters)
+  echo json
+
   error.log("normal not implemented")
 
-proc any() =
+proc any(settings: Settings) =
+  let taskbin = settings.taskbin
+  settings.construct_filter(filters)
+
   error.log("any not implemented")
 
-proc batch() =
+proc batch(settings: Settings) =
+  let taskbin = settings.taskbin
+  settings.construct_filter(filters)
+
   error.log("batch not implemented")
 
 proc setup(configfile:string = ""): Settings =
@@ -172,14 +193,18 @@ when isMainModule:
   for key, val in settings.fieldPairs:
     debug.log("  ", key, ": ", $val)
 
-  case settings.command
-  of "normal":
-    normal()
-  of "batch":
-    batch()
-  of "any":
-    any()
-  of "diagnostics":
-    writeDiag(settings)
-  of "version":
-    echo version()
+  try:
+    case settings.command
+    of "normal":
+      normal(settings)
+    of "batch":
+      batch(settings)
+    of "any":
+      any(settings)
+    of "diagnostics":
+      writeDiag(settings)
+    of "version":
+      echo version()
+  except OSError as e:
+    error.log(e.msg)
+    quit(1)
