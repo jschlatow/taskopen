@@ -1,6 +1,16 @@
 import output
+import tables
 
 type
+  Action* = object
+    target*: string
+    regex*: string
+    labelregex*: string
+    command*: string
+    modes*: seq[string]
+    filtercommand*: string
+    inlinecommand*: string
+
   Settings* = object
     command*: string
     sort*: string
@@ -10,8 +20,9 @@ type
     all*: bool
     validSubcommands*: seq[string]
     defaultSubcommand*: string
-    validActions*: seq[string]
+    validActions*: Table[string, Action]
     actions*: seq[string]
+    restrictActions*: bool
     inlineCommand*: string
     filterCommand*: string
     forceCommand*: string
@@ -34,10 +45,16 @@ proc parseConfig*(filepath: string): Settings =
   result.sort = "urgency-,label,annot"
   result.validSubcommands = @["batch", "any", "normal", "version", "diagnostics"]
   result.defaultSubcommand = "normal"
-  result.basefilter = "status.is:pending"
+  result.basefilter = "+PENDING"
   result.taskAttributes = "priority,project,tags,description"
   result.noAnnot = "addnote"
   result.configfile = filepath
+  result.validActions["notes"] = Action(
+    target: "annotations",
+    labelregex: ".*",
+    regex: ".*",
+    modes: @["batch", "any", "normal"],
+    command: "$EDITOR $FILE")
 
   # TODO set these at compile time depending on target system
   result.editor = "vim"
@@ -46,6 +63,9 @@ proc parseConfig*(filepath: string): Settings =
 
   #if filepath != "":
     # TODO read config from file
+
+  for a in result.validActions.keys():
+    result.actions.add(a)
 
 proc createConfig*(filepath: string, defaults = Settings()) =
   error.log("createConfig() not implemented")

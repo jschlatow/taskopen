@@ -5,6 +5,7 @@ import strutils
 import distros
 import json
 import re
+import tables
 
 # taskopen modules
 import ./output
@@ -58,14 +59,14 @@ proc writeDiag(settings: Settings) =
 proc writeHelp() =
   echo "Help not implemented"
 
-proc includeActions(valid: openArray[string], includes: string): seq[string] =
+proc includeActions(valid: Table[string, Action], includes: string): seq[string] =
   for a in includes.split(','):
-    if a in valid:
+    if valid.hasKey(a):
       result.add(a)
 
-proc excludeActions(valid: openArray[string], excludes: string): seq[string] =
+proc excludeActions(valid: Table[string, Action], excludes: string): seq[string] =
   var excluded = excludes.split(',')
-  for a in valid:
+  for a in valid.keys():
     if not (a in excluded):
       result.add(a)
 
@@ -161,16 +162,18 @@ proc setup(configfile:string = ""): Settings =
         result.args = p.val
 
       of "include":
-        if len(result.actions) > 0:
+        if result.restrictActions:
           warn.log("Ignoring --include option because --exclude was already specified.")
         else:
           result.actions = includeActions(result.validActions, p.val)
+          result.restrictActions = true
 
       of "exclude":
-        if len(result.actions) > 0:
+        if result.restrictActions:
           warn.log("Ignoring --exclude option because --include was already specified.")
         else:
           result.actions = excludeActions(result.validActions, p.val)
+          result.restrictActions = true
 
       of "A", "All":
         result.all = true
