@@ -27,20 +27,28 @@ levelcolors[warn]  = (fgBlue,    true,  bgDefault, false)
 levelcolors[error] = (fgRed,     true,  bgDefault, false)
 
 var level* = warn
-let colored = isatty(stdout)
+
+let coloredout = isatty(stdout)
+let colorederr = isatty(stderr)
 
 template log*(lvl: LogLevel = info, v: varargs[string, `$`]) =
+  var f = stdout
+  var colored = coloredout
+  if lvl >= error:
+    f = stderr
+    colored = colorederr
+
   if lvl >= level:
     if colored:
-      stdout.setForegroundColor(levelcolors[lvl].fg, levelcolors[lvl].brightfg)
-      stdout.setBackgroundColor(levelcolors[lvl].bg, levelcolors[lvl].brightbg)
+      f.setForegroundColor(levelcolors[lvl].fg, levelcolors[lvl].brightfg)
+      f.setBackgroundColor(levelcolors[lvl].bg, levelcolors[lvl].brightbg)
       for s in v:
-        stdout.write(s)
-      terminal.styledWriteLine(stdout, resetStyle)
+        f.write(s)
+      terminal.styledWriteLine(f, resetStyle)
     else:
       for s in v:
-        stdout.write(s)
-      stdout.write("\n")
+        f.write(s)
+      f.write("\n")
 
 when isMainModule:
   warn.log("Warning: ", "This is ", "shown.")
