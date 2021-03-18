@@ -1,3 +1,5 @@
+**Please note, that this is a stale branch of taskopen as a major rewrite is currently on the way. If you are interested in more details, please have a look into the [wiki](https://github.com/jschlatow/taskopen/wiki/2.0). Development takes place on the [nim branch](https://github.com/jschlatow/taskopen/tree/nim/src). Contributions are very welcome.**
+
 # Dependencies
 
 This perl script is an enhancement to taskwarrior, i.e. it depends on the task binary. See http://www.taskwarrior.org
