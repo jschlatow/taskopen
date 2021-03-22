@@ -7,20 +7,15 @@ import json
 import re
 import tables
 import strtabs
+import ./types
 
 # taskopen modules
 import ./output
 import ./config
+import ./types
 import ./taskwarrior as tw
 
 # TODO write module for process execution
-
-type
-  Actionable = object
-    text: string
-    task: JsonNode
-    action: Action
-    env: StringTableRef
 
 proc version():string =
   result = "unknown"
@@ -240,6 +235,8 @@ proc normal(settings: Settings) =
   for item in actionables:
     debug.log(item.text, "  command: ", item.action.command)
 
+  # TODO generate menu and perform selected action
+
   error.log("normal not implemented")
 
 proc any(settings: Settings) =
@@ -251,6 +248,8 @@ proc any(settings: Settings) =
   for item in actionables:
     debug.log(item.text, "  command: ", item.action.command)
 
+  # TODO generate menu and perform selected action
+
   error.log("any not implemented")
 
 proc batch(settings: Settings) =
@@ -261,6 +260,8 @@ proc batch(settings: Settings) =
   var actionables = settings.find_actionable_items(json)
   for item in actionables:
     debug.log(item.text)
+
+  # TODO perform all actions
 
   error.log("batch not implemented")
 

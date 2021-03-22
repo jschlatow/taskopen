@@ -1,16 +1,8 @@
 import output
 import tables
+import ./types
 
 type
-  Action* = object
-    target*: string
-    regex*: string
-    labelregex*: string
-    command*: string
-    modes*: seq[string]
-    filtercommand*: string
-    inlinecommand*: string
-
   Settings* = object
     command*: string
     sort*: string

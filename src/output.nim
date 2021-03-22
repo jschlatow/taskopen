@@ -1,4 +1,5 @@
 import terminal
+import ./types
 
 type
   LogLevel* = enum
