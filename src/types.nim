@@ -3,6 +3,7 @@ import json
 
 type
   Action* = object
+    name*: string
     target*: string
     regex*: string
     labelregex*: string

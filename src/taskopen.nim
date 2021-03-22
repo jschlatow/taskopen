@@ -7,13 +7,15 @@ import json
 import re
 import tables
 import strtabs
-import ./types
+import sugar
 
 # taskopen modules
 import ./output
 import ./config
 import ./types
 import ./taskwarrior as tw
+import ./types
+import ./exec
 
 # TODO write module for process execution
 
@@ -83,10 +85,12 @@ proc build_env(s: Settings,
                task: JsonNode): StringTableRef =
   result = newStringTable()
 
+  # copy env from parent process
+  for k, v in os.envPairs():
+    result[k] = v
+
   if s.pathExt != "":
     result["PATH"] = s.pathExt & ":" & getEnv("PATH")
-  else:
-    result["PATH"] = getEnv("PATH")
 
   if s.editor != "":
     result["EDITOR"] = s.editor
@@ -136,10 +140,15 @@ iterator match_actions(
         else:
           continue
 
+        env["LABEL"] = label
+        env["FILE"] = file
+        env["ANNOTATION"] = text
+
         # skip action if filter-command fails
-        if act.filterCommand != "":
-          # TODO implement filter-command
-          error.log("filter-command not implemented")
+        if act.filtercommand != "":
+          if not exec_filter(act.filtercommand, env):
+            info.log("Filter command filtered out action ", act.name, " on ", text)
+            continue
 
         yield (act, env)
 
@@ -159,14 +168,18 @@ iterator match_actions(
       else:
         continue
 
+      env["FILE"] = text
+      env["ANNOTATION"] = text
+
       # add warning if user specified a labelregex
       if act.labelregex != "":
         warn.log("labelregex not supported for actions not targetting annotations")
 
       # skip action if filter-command fails
-      if act.filterCommand != "":
-        # TODO implement filter-command
-        error.log("filter-command not implemented")
+      if act.filtercommand != "":
+        if not exec_filter(act.filtercommand, env):
+          info.log("Filter command filtered out action ", act.name, " on ", text)
+          continue
 
       yield (act, env)
       if single:
@@ -185,9 +198,9 @@ proc find_actionable_items(
 
     # apply overrides
     if s.filterCommand != "":
-      act.filterCommand = s.filterCommand
+      act.filtercommand = s.filterCommand
     if s.inlineCommand != "":
-      act.inlineCommand = s.inlineCommand
+      act.inlinecommand = s.inlineCommand
     if s.forceCommand != "":
       act.command = s.forceCommand
 
@@ -232,12 +245,20 @@ proc normal(settings: Settings) =
   let json = taskbin.json(filters)
 
   var actionables = settings.find_actionable_items(json)
-  for item in actionables:
-    debug.log(item.text, "  command: ", item.action.command)
 
-  # TODO generate menu and perform selected action
+  # TODO run no annotation hook if len(actionables) == 0
 
-  error.log("normal not implemented")
+  # TODO sort actionables
+
+  # generate menu
+  let selected = collect(newSeq):
+    for i in menu(actionables):
+      (cmd: actionables[i].action.command, env: actionables[i].env)
+
+  # perform selected action(s)
+  let res = exec_all(selected)
+  if res.exitCode != 0:
+    error.log("Command \"", selected[res.num], "\" failed with exit code: ", res.exitCode)
 
 proc any(settings: Settings) =
   let taskbin = settings.taskbin
@@ -245,10 +266,15 @@ proc any(settings: Settings) =
   let json = taskbin.json(filters)
 
   var actionables = settings.find_actionable_items(json)
-  for item in actionables:
-    debug.log(item.text, "  command: ", item.action.command)
 
-  # TODO generate menu and perform selected action
+  # TODO run no annotation hook if len(actionables) == 0
+
+  # TODO sort actionables
+
+  # generate menu
+  let selected = menu(actionables)
+
+  # TODO perform selected action(s)
 
   error.log("any not implemented")
 
@@ -258,8 +284,8 @@ proc batch(settings: Settings) =
   let json = taskbin.json(filters)
 
   var actionables = settings.find_actionable_items(json)
-  for item in actionables:
-    debug.log(item.text)
+
+  # TODO sort actionables
 
   # TODO perform all actions
 

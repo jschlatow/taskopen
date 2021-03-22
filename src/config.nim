@@ -42,10 +42,13 @@ proc parseConfig*(filepath: string): Settings =
   result.noAnnot = "addnote"
   result.configfile = filepath
   result.validActions["notes"] = Action(
+    name: "notes",
     target: "annotations",
     labelregex: ".*",
     regex: "^[\\.\\/~]+.*\\.(.*)",
     modes: @["batch", "any", "normal"],
+    inlinecommand: "echo \"$EDITOR $FILE\"",
+    filtercommand: "file $FILE | egrep text",
     command: "$EDITOR $FILE")
 
   # TODO set these at compile time depending on target system
