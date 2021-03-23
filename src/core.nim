@@ -5,6 +5,7 @@ import tables
 import strtabs
 import json
 import sugar
+import algorithm
 
 import ./types
 import ./config
@@ -180,6 +181,14 @@ proc find_actionable_items(
                                 env: env))
 
 
+proc sortkeys(sortstr: string): seq[tuple[key: string, desc: bool]] =
+  for field in sortstr.split(','):
+    if field =~ re"(.*?)(\+|-)?$":
+      let key  = matches[0]
+      let desc = matches[1] == "-"
+      result.add((key: key, desc: desc))
+
+
 proc run*(settings: Settings, single = true, interactive = true) =
   # construct taskwarrior filter
   let context = current_context(settings.taskbin)
@@ -193,7 +202,40 @@ proc run*(settings: Settings, single = true, interactive = true) =
   # find matching actions
   var actionables = settings.find_actionable_items(json, single=single)
 
-  # TODO sort actionables
+  # sort actionables
+  let sortkeys = sortkeys(settings.sort)
+  actionables.sort do (x, y: Actionable) -> int:
+    for field in sortkeys:
+      let xhas = x.task.hasKey(field.key)
+      let yhas = y.task.hasKey(field.key)
+
+      var res: int
+      if field.key == "annot":
+        res = cmp(x.text, y.text)
+      elif not xhas and not yhas:
+        continue
+      elif not xhas or not yhas:
+        if not xhas:
+          res = 1
+        else:
+          res = -1
+      elif field.key in ["id", "urgency"]:
+        let xval = x.task[field.key].getInt()
+        let yval = y.task[field.key].getInt()
+        res = cmp(xval, yval)
+      else:
+        let xval = x.task[field.key].getStr()
+        let yval = y.task[field.key].getStr()
+        res = cmp(xval, yval)
+
+      if res == 0:
+        continue
+      elif field.desc:
+        return -1*res
+      else:
+        return res
+
+    return 0
 
   if len(actionables) == 0:
     warn.log("No actions applicable.")

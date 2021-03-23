@@ -34,7 +34,7 @@ proc findConfig*(): string =
 
 proc parseConfig*(filepath: string): Settings =
   # set hardcoded defaults
-  result.sort = "urgency-,label,annot"
+  result.sort = "urgency-,annot"
   result.validSubcommands = @["batch", "any", "normal", "version", "diagnostics"]
   result.defaultSubcommand = "normal"
   result.basefilter = "+PENDING"
