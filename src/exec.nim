@@ -11,7 +11,9 @@ iterator exec_inline*(cmd: string, env: StringTableRef = nil): string =
   p.close()
 
 proc exec_cmd*(cmd: string, env: StringTableRef = nil): int {.inline.} =
-  return execCmdEx(cmd, env=env).exitCode
+  let p = startProcess(cmd, env=env, options={poEvalCommand, poParentStreams})
+  result= p.waitForExit()
+  p.close()
 
 proc exec_all*(cmds: openArray[tuple[cmd: string, env: StringTableRef]]): tuple[num: int, exitCode: int] =
   ## execute all commands and return the number of successfully executed commands

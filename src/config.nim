@@ -39,7 +39,7 @@ proc parseConfig*(filepath: string): Settings =
   result.defaultSubcommand = "normal"
   result.basefilter = "+PENDING"
   result.taskAttributes = "priority,project,tags,description"
-  result.noAnnot = "addnote"
+  result.noAnnot = "addnote $ID"
   result.configfile = filepath
   result.validActions["notes"] = Action(
     name: "notes",
