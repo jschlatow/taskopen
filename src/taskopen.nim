@@ -72,20 +72,10 @@ proc excludeActions(valid: OrderedTable[string, Action], excludes: string): seq[
     if not (a in excluded):
       result.add(a)
 
-
-proc setup(configfile:string = ""): Settings =
-  output.level = debug
-
-  # first, read the config to get aliases and default options
-  if configfile != "":
-    result = parseConfig(configfile)
-  else:
-    result = parseConfig(findConfig())
-
-  # now, parse the command line
+proc parseOpts(opts: seq[string], settings: var Settings, configprovided: bool): string =
   const shortNoVal = { 'v', 'h', 'A' }
   const longNoVal  = @["verbose", "help", "All", ""]
-  var p = initOptParser(commandLineParams(),
+  var p = initOptParser(opts,
     shortNoVal=shortNoVal,
     longNoVal=longNoVal)
 
@@ -95,7 +85,7 @@ proc setup(configfile:string = ""): Settings =
     of cmdEnd: break
     of cmdShortOption, cmdLongOption:
       if p.key == "":
-        result.filter.add(p.remainingArgs)
+        settings.filter.add(p.remainingArgs)
         break
 
       case p.key
@@ -107,57 +97,83 @@ proc setup(configfile:string = ""): Settings =
         output.level = LogLevel(min(int(info), int(output.level)))
 
       of "s", "sort":
-        result.sort = p.val
+        settings.sort = p.val
 
       of "c", "config":
-        if configfile == "" and os.fileExists(p.val):
+        if not configprovided and os.fileExists(p.val):
           warn.log("Using alternate config file ", p.val)
-          return setup(p.val)
+          return p.val
         else:
           # ask user whether to create the config file
           stdout.write("Config file '", p.val, "' does not exist, create it? [y/N]: ")
           let answer = readLine(stdin)
           if answer == "y" or answer == "Y":
-            createConfig(p.val, result)
+            createConfig(p.val, settings)
 
       of "a", "active-tasks":
-        result.basefilter = p.val
+        settings.basefilter = p.val
 
       of "x", "execute":
-        result.forceCommand = p.val
+        settings.forceCommand = p.val
 
       of "f", "filter-command":
-        result.filterCommand = p.val
+        settings.filterCommand = p.val
 
       of "i", "inline-command":
-        result.inlineCommand = p.val
+        settings.inlineCommand = p.val
 
       of "args":
-        result.args = p.val
+        settings.args = p.val
 
       of "include":
-        if result.restrictActions:
+        if settings.restrictActions:
           warn.log("Ignoring --include option because --exclude was already specified.")
         else:
-          result.actions = includeActions(result.validActions, p.val)
-          result.restrictActions = true
+          settings.actions = includeActions(settings.validActions, p.val)
+          settings.restrictActions = true
 
       of "exclude":
-        if result.restrictActions:
+        if settings.restrictActions:
           warn.log("Ignoring --exclude option because --include was already specified.")
         else:
-          result.actions = excludeActions(result.validActions, p.val)
-          result.restrictActions = true
+          settings.actions = excludeActions(settings.validActions, p.val)
+          settings.restrictActions = true
 
       of "A", "All":
-        result.all = true
+        settings.all = true
 
     of cmdArgument:
-      if result.command == "" and p.key in result.validSubcommands:
-        result.command = p.key
-      else:
-        result.filter.add(p.key)
+      if settings.command == "" and settings.validSubcommands.hasKey(p.key):
+        let alias = settings.validSubcommands[p.key]
 
+        if alias != "":
+          let cfg = parseOpts(alias.splitWhitespace(), settings, configprovided)
+
+          if cfg != "":
+            return cfg
+        else:
+          settings.command = p.key
+
+      else:
+        settings.filter.add(p.key)
+
+  result = ""
+
+
+proc setup(): Settings =
+  output.level = debug
+
+  # first, read the config to get aliases and default options
+  result = parseConfig(findConfig())
+
+  # second, parse command line options
+  let configfile = parseOpts(commandLineParams(), result, false)
+  if configfile != "":
+    # if --config options was found, redo everything
+    result = parseConfig(configfile)
+    discard parseOpts(commandLineParams(), result, true)
+
+  # apply default command
   if result.command == "":
     result.command = result.defaultSubcommand
 

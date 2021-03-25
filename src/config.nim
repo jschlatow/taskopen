@@ -10,7 +10,7 @@ type
     filter*: seq[string]
     args*: string
     all*: bool
-    validSubcommands*: seq[string]
+    validSubcommands*: Table[string, string]
     defaultSubcommand*: string
     validActions*: OrderedTable[string, Action]
     actions*: seq[string]
@@ -35,7 +35,11 @@ proc findConfig*(): string =
 proc parseConfig*(filepath: string): Settings =
   # set hardcoded defaults
   result.sort = "urgency-,annot"
-  result.validSubcommands = @["batch", "any", "normal", "version", "diagnostics"]
+  result.validSubcommands["batch"] = ""
+  result.validSubcommands["any"] = ""
+  result.validSubcommands["normal"] = ""
+  result.validSubcommands["version"] = ""
+  result.validSubcommands["diagnostics"] = ""
   result.defaultSubcommand = "normal"
   result.basefilter = "+PENDING"
   result.taskAttributes = "priority,project,tags,description"
