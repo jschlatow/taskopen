@@ -71,7 +71,10 @@ iterator match_actions_label(
         continue
 
       env["LABEL"] = label
-      env["FILE"] = file
+      if file.startsWith("~"):
+        env["FILE"] = file.expandTilde()
+      else:
+        env["FILE"] = file
       env["ANNOTATION"] = text
 
       # skip action if filter-command fails
@@ -239,7 +242,7 @@ proc run*(settings: Settings, single = true, interactive = true) =
     warn.log("No actions applicable.")
 
   var selected: seq[tuple[cmd: string, env: StringTableRef]]
-  if interactive:
+  if interactive and len(actionables) != 1:
     # run no annotation hook if len(actionables) == 0
     if len(actionables) == 0 and settings.noAnnot != "" and len(json) == 1:
       info.log("Executing no_annotation_hook.")
