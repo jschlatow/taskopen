@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Open given file(s) in a remote vim server (or start a new one)
+#   depending on user input.
+
+SERVERS=($(vim --serverlist))
+
+echo "Exising servers:"
+for i in ${!SERVERS[@]}; do
+	printf "  %s) %s\n" "$(($i+1))" "${SERVERS[$i]}"
+done
+echo -ne "\nPlease type a number or a new name: "
+
+read choice
+
+if [ -z "$choice" ]; then
+	vim $*
+elif [ -z "${choice##[0-9]}" ]; then
+	i=$(($choice-1))
+	vim --servername "${SERVERS[$i]}" --remote-tab $*
+else
+	vim --servername "$choice" $*
+fi
