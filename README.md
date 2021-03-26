@@ -1,4 +1,4 @@
-**Please note, that this is a stale branch of taskopen as a major rewrite is currently on the way. If you are interested in more details, please have a look into the [wiki](https://github.com/jschlatow/taskopen/wiki/2.0). Development takes place on the [nim branch](https://github.com/jschlatow/taskopen/tree/nim/src). Contributions are very welcome.**
+**Please note, that taskopen 1.x is unmaintained as a major rewrite is currently on the way. If you are interested in more details, please have a look into the [wiki](https://github.com/jschlatow/taskopen/wiki/2.0). Development takes place on the [staging branch](https://github.com/jschlatow/taskopen/tree/staging/src). Contributions are very welcome.**
 
 # Dependencies
 
