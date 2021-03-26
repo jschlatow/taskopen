@@ -52,8 +52,6 @@ iterator match_actions_label(
     if text =~ splitre:
       let label = matches[1]
       let file  = matches[2]
-      debug.log("Label: ", label)
-      debug.log("File: ", file)
 
       let labelregex = re(act.labelregex)
       let fileregex  = re(act.regex)

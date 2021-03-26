@@ -237,10 +237,6 @@ when isMainModule:
 
   var settings = setup()
 
-  debug.log("Settings: ")
-  for key, val in settings.fieldPairs:
-    debug.log("  ", key, ": ", $val)
-
   try:
     case settings.command
     of "normal":
