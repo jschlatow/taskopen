@@ -131,8 +131,7 @@ proc menu*(items: openArray[Actionable]): seq[int] =
 
     if item.action.inlinecommand != "":
       for line in exec_inline(item.action.inlinecommand, item.env):
-        stdout.write(indent, "   ", line)
-      stdout.write("\n")
+        stdout.writeline(indent, "   ", line)
 
   stdout.write("Type number(s): ")
   let answer = readLine(stdin)

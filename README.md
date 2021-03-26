@@ -1,26 +1,30 @@
-**Please note, that taskopen 1.x is unmaintained as a major rewrite is currently on the way. If you are interested in more details, please have a look into the [wiki](https://github.com/jschlatow/taskopen/wiki/2.0). Development takes place on the [staging branch](https://github.com/jschlatow/taskopen/tree/staging/src). Contributions are very welcome.**
+Taskopen was original developed as a simple wrapper script for taskwarrior that enables interaction with annotations (e.g. open, edit, execute files).
+The current version is a pretty powerful customisable tool that supports a variety of use cases.
+This README serves as a basic getting-started guide including install instructions.
+If your are interested in more details, please have a look at the [wiki] or the man page.
+
+**Note, the man pages have not been updated to taskopen 2.0 yet.**
+
+[wiki]: https://github.com/jschlatow/taskopen/wiki/2.0
 
 # Dependencies
 
-This perl script is an enhancement to taskwarrior, i.e. it depends on the task binary. See http://www.taskwarrior.org
+This tool is an enhancement to taskwarrior, i.e. it depends on the task binary. See http://www.taskwarrior.org
 
-It also depends on the JSON module, i.e.
-
- * _libjson-perl_ on debian
- * _perl-json_ on archlinux
- * _perl-JSON_ on openSUSE
- * to be continued...
+Taskopen is implemented in nim and does not require any additional modules for compilation.
 
 The helper scripts are usually run by bash. Some of the scripts also depend on (g)awk.
 
 # What does it do?
 
-It allows you to link almost any file, webpage or command to a taskwarrior task by adding a filepath, web-link or uri as an annotation. Text notes, images, PDF files, web addresses, spreadsheets and many other types of links can then be filtered, listed and opened by using taskopen. Some actions are sane defaults, others can be custom-configured, and everything else will use your systems mime-types to open the link. 
+It allows you to link almost any file, webpage or command to a taskwarrior task by adding a filepath, web-link or uri as an annotation. Text notes, images, PDF files, web addresses, spreadsheets and many other types of links can then be filtered, listed and opened by using taskopen.
 
-Arbitrary commands can be used with taskopen at the CLI, acting on the link targets, enhancing listings and even executing annotations as commands.
+Arbitrary actions can be configured with taskopen to filter and act on the annotations or other task attributes.
 
-Run 'taskopen -h' or 'man taskopen' for further details.
-The following sections show some (very) basic usage examples. 
+Run `taskopen -h`, `man taskopen` or the [wiki CLI page] for further details.
+The following sections show some (very) basic usage examples.
+
+[wiki CLI page]: https://github.com/jschlatow/taskopen/wiki/CLI
 
 ## Basic usage
 
@@ -33,21 +37,20 @@ Add an annotation which links to a file:
 	$ task 1 annotate -- ~/checklist.txt
 
 (Note that the "--" instructs taskwarrior to take the following arguments as the description part
-without doing any parser magic. This is particularly useful to circumvent bug #819.)
+without doing any parser magic.)
 
 Open the linked file by using the task's ID:
 
 	$ taskopen 1
 
-Or by a filter expression (requires > taskwarrior 2.0):
+Or by a filter expression:
 
 	$ taskopen Example
 
 ## Add default notes
 
 Inspired by Alan Bowens 'tasknote' you can add a default notes file to a task. These files will be
-automatically created by the task's UUID and don't require to annotate the task with a specific file
-path. The folder in which these files will be stored can be configured in ~/.taskopenrc.
+automatically created by the task's UUID and don't require to annotate the task with a specific file path.
 
 As soon as you annotate a task with 'Notes':
 
@@ -64,7 +67,7 @@ As soon as you annotate a task with 'Notes':
 Automatically annotating tasks with 'Notes' can be achieved with 'NO_ANNOTATION_HOOK' as described in
 the manpage taskopenrc(5).
 
-## More complex example
+## Multiple annotations
 You can also add weblinks to a task and even mix all kinds of annotations:
 
 	$ task 1 annotate www.taskwarrior.org
@@ -72,93 +75,85 @@ You can also add weblinks to a task and even mix all kinds of annotations:
 	$ task 1 annotate -- ~/Documents/manual.pdf
 	$ taskopen 1
 
+Taskopen will determine the actionable annotations and will show a menu to let the user choose what to do:
+
 	Please select an annotation:
        1) www.taskwarrior.org
        2) ~/Documents/manual.pdf
     Type number:
 
+Note, that the default (`normal`) mode of taskopen is to only show the first applicable action for every annotation.
+There is also an `any` mode, which presents a menu with _every_ possible action for each annotation.
+In `batch` mode, it executes the first applicable action for all annotations.
+
 # Installation
 
-## Generic
+## With Makefile
 Installation is as easy as:
 
-    $ make PREFIX=/usr
-    $ make PREFIX=/usr install
-
-Taskopen also creates a configuration file at '~/.taskopenrc' if it does not already exist.
-
-You can also add 'DESTDIR=/path/to/dir/' to the install command.
-
-You must create the folder '~/tasknotes' when using default notes (e.g. `task 1 annotate Notes`) with the default folder. This folder is not created automatically.
-
-## Linux
-
-### Clone the Repository into your ~/.task directory
-
 ```bash
-cd $HOME/.task
 git clone https://github.com/jschlatow/taskopen.git
+cd taskopen
+make PREFIX=/usr
+sudo make PREFIX=/usr install
 ```
 
-### Build and Install Taskopen
+This will install the taskopen binary at `/usr/bin/taskopen`.
+For packaging, you can add `DESTDIR=/path/to/dir/` to the install command.
 
-```bash
-make PREFIX=usr
-sudo make PREFIX=usr install
-```
+By default, taskopen will recognise any filenames in annotations and open them with `xdg-open` or `open` (on OS X).
+Further actions must be specified in a configuration file at `~/.config/taskopen/taskopenrc` or `~/.taskopenrc`.
 
-### Create a Link to the Compiled Taskopen Program
+A default configuration file can be created with `taskopen --config ~/.config/taskopen/taskopenrc`.
 
-```bash
-sudo rm /usr/bin/taskopen
-sudo ln -s $HOME/.task/taskopen/taskopen /usr/bin/taskopen
-```
+## With nimble
 
-*NOTE* if the above steps are not done the below error is printed when trying to envoke taskopen
-
-```bash
--bash: /usr/bin/taskopen: -w: bad interpreter: No such file or directory
-```
-
-### Create the tasknotes Directory
-
-```bash
-mkdir $HOME/tasknotes
-```
-
-*NOTE* that the above uses the default directory, adding NOTES_FOLDER="your_custom_notes_dir" to your ~/.taskopenrc file can change this default directory (you will have to then create that directory as taskopen doesn't by default.
-
-### Finish
-
-You are free to use taskopen (see above for creating notes/default notes/etc)
+t.b.d.
 
 
-## Perl version, migration guide
-Replace your taskopen binary in /usr/bin or ~/bin with 'taskopen.pl'. Be sure to install all
-dependencies.
+## Migration from taskopen < 2.0 to taskopen >= 2.0
+Due to changes in the command line interface and the configuration file, manual intervention is required.
+Please have a look at [CLI migration] and [Config migration].
 
-The perl version is basically backwards compatible with the bash-style taskopenrc files. However,
-bash magic must not be used within those files, i.e. only simple 'NAME=VALUE' notations can be
-parsed.
+[CLI migration]: https://github.com/jschlatow/taskopen/wiki/CLI#migration
+[Config migration]: https://github.com/jschlatow/taskopen/wiki/Configuration#migration
 
-## Configuration
-Taskopen can be customised by editing your ~/.taskopenrc file, where you can set your favourite text editor
-and web browser for instance. Every file that is not considered a text file or URI is going to be opened with
-'xdg-open', which picks the corresponding application depending on the mime time (see 'xdg-mime').
+## Configuration basics
 
-A different configuration file can be specified using the TASKOPENRC environment variable.
+In order to customise taskopen to your needs, you may need to adapt its configuration file.
 
-Please take a look at the manpage taskopenrc(5) for further details.
+Taskopen tries to find a configuration file at the following locations:
 
-# Features
-  * Arbitrary filters
-  * Optional labelling for easier access
-  * Execution of arbitrary commands (overriding the default command)
-  * Filtering by file type
-  * Batch processing and selecting multiple files from a list
-  * Deleting and editing of annotations
-  * Various customisation options (e.g. sorting)
-  * Extensibility
+* the path specified in `$TASKOPENRC` environment variable
+* `$XDG_CONFIG_HOME/taskopen/taskopenrc` if `$XDG_CONFIG_HOME` is set
+* `~/.config/taskopen/taskopenrc`
+* `~/.taskopenrc`.
+
+The config file syntax and the available options are documented in the [wiki configuration page].
+Please also take a look at the manpage taskopenrc(5) for further details.
+
+[wiki configuration page]: https://github.com/jschlatow/taskopen/wiki/Configuration
+
+# Feature highlights
+  * Selecting multiple actions from a list
+  * Arbitrary task filters
+  * Customised annotation filtering
+  * Label-based filtering
+  * Filter command hook
+  * Inline commands
+  * Scripts
+
+## Selecting multiple actions from a list
+When presented with a menu of actionable annotations, you can select multiple entries (separated by space) or even ranges, e.g.
+
+
+	Please select one or multiple actions:
+       1) www.taskwarrior.org
+       2) ~/Documents/manual.pdf
+       3) Notes
+       3) ~/Documents/foobar.txt
+       3) https://www.github.com
+    Type number(s): 1 3-5
 
 ## Arbitrary filters
 Instead of providing taskopen with an ID you can also pass arbitrary filters in taskwarrior
@@ -170,65 +165,69 @@ or
 
     $ taskopen +bug pro:taskwarrior
 
-## Labels
+## Customised annotation filtering
+Taskopen determines the applicability of an action by matching the annotation against the action's regex.
+For instance, multiple file extensions for default notes may be supported by the following action:
+
+```
+[Actions]
+notes.regex = "^Notes\\.(.*)"
+notes.command = "$EDITOR ~/Notes/tasknotes/$UUID.$LAST_MATCH"
+```
+
+Note, that taskopen fills the environment variable `$LAST_MATCH` with the part that matches `(.*)`.
+
+
+## Label-based filtering
 You can label your annotations by using the following syntax:
 
-    $ task 1 annotate tw: www.taskwarrior.org
-    $ task 1 annotate notes: Notes
+    $ task 1 annotate view: /path/to/file.html
+    $ task 1 annotate edit: /path/to/file.html
 
-In this way, the annotations will be accessible by providing the label name as the last argument,
-escaped with double backslashes:
+When specifying an action, a label regex can be distinguish/filter annotations by their label.
+A configuration example is found in [examples/label_regex].
 
-    $ taskopen 1 \\notes
+[examples/label_regex]: ./examples/label_regex
 
-or even
-
-    $ taskopen pro:taskwarrior +bug \\notes
-
-# Scripts
-
-## attach_vifm (by artur-shaik)
-
-This script helps to attach a file to an existing task or to create a task for an existing file.
-The file path can be either given as a command line argument or is interactively selected using `vifm`.
-
-Basic usage:
+##Filter command hook
+You can specify a filter command that will be executed after the regex matching to determine whether the action really applies to the annotion.
+A simple example is to check for file existence:
 
 ```
-attach_vifm -f file_name -t task_id
+[Actions]
+files.regex = "^[\\.\\/~]+.*\\.(.*)"
+files.command = "$EDITOR $FILE"
+files.filtercommand = "test -e $FILE"
 ```
 
-If you omit `file_name`, `vifm` will be executed. If you omit `task_id`, you will be asked to enter a title for the new task.
+An override for all actions can also be provided at the command line.
 
-Installation with taskwarrior:
-
-```
-task config alias.attach "exec '/path/to/attach_vifm' -t"
-```
-
-The following commands can be added to vifmrc:
+##Inline commands
+Similar to the filter command, the inline command can be used for adding information to the menu.
+For instance, to peek show the first five lines of each file with each menu entry, you can add the following to your config file:
 
 ```
-command attachnew attach_vifm -f %d/%f
-command attach attach_vifm -t %a -f %d/%f
+files.inlinecommand = "headindent -n5 $FILE"
 ```
 
-# Integration with the `task` command
+Note, that [headindent] is a script provided by taskopen.
 
-You can use taskwarrior aliases to create a `task open` command. For example, the below will allow you to open the annotation of a task by typing `task open 123` (where `123` is the id of the task you want to open):
+[headindent]: ./script/headindent
 
-```
-alias.open=execute bash -l -x -c "q=($BASH_COMMAND); taskopen \\"\\\\${q[-1]}\\""
-```
+An override for all actions can also be provided at the command line.
+
+## Scripts
+Taskopen comes with a bunch of [scripts] that serve as examples to perform more advanced actions, inline commands or filter commands.
+Most notably are [addnote] and [editnote].
+The former is used by default as the NO_ANNOTATION_HOOK and annotates the task with the given ID with 'Notes'.
+The latter can be used to automatically add a header to new notes files.
+Please have a look at the scripts or `man taskopen` to find more documentation.
+
+[scripts]: ./scripts
+[addnote]: ./scripts/addnote
+[editnote]: ./scripts/editnote
 
 ## Contributions
 
-Thanks to the following:
-
- * Jostein Bernsten (for adding mutt support)
- * John Hammond (for OSX 10.5+ support)
- * Alan Bowen (for writing tasknote)
- * David J Patrick (for great ideas)
- * Scott Kostyshak (for usability improvements and testing)
-
-Feel free to contribute to this project.
+Feel free to contribute to this project by opening issues or creating pull requests.
+If you are keen to fix any open issues, please have a look at ones labelled with _help wanted_.

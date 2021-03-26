@@ -1,3 +1,9 @@
+New features in taskopen 2.0.0 (alpha)
+
+  - Moved from perl to nim.
+  - New command line interface.
+  - New config file syntax.
+
 Bugfixes and minor improvements in taskopen 1.1.5
 
   - Fix raw mode bug. (#132)
