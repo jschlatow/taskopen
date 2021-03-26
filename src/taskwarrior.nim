@@ -2,6 +2,7 @@ import osproc
 import strutils
 import re
 import json
+import ./output
 
 const default_args = ["rc.verbose=blank,label,edit", "rc.json.array=on"]
 
@@ -10,6 +11,7 @@ proc concat[I1, I2: static[int]; T](a: array[I1, T], b: array[I2, T]): array[I1 
   result[a.len..result.high] = b
 
 template exec(taskbin: string, args: openArray[string], res: untyped) =
+  debug.log("Executing: ", taskbin, " ", args.join(" "))
   res = execProcess(taskbin, args=args, options = {poUsePath})
   res.stripLineEnd()
 
@@ -21,7 +23,7 @@ proc current_context*(taskbin: string): string =
   let args = concat(default_args, ["context", "show"])
   exec(taskbin, args, result)
   if result =~ re".*with filter '(.*)' is currently applied.$":
-    result = "'(" & matches[0] & ")'"
+    result = "\\(" & matches[0] & "\\)"
   else:
     result = ""
 

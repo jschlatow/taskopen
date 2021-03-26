@@ -126,6 +126,9 @@ proc menu*(items: openArray[Actionable]): seq[int] =
       colorout("id", item.task["id"].getInt())
     stdout.write("\n")
 
+    # output command to be executed
+    info.log(indent, "   ", "command: ", item.action.command)
+
     if item.action.inlinecommand != "":
       for line in exec_inline(item.action.inlinecommand, item.env):
         stdout.write(indent, "   ", line)

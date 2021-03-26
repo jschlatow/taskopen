@@ -50,31 +50,63 @@ proc writeDiag(settings: Settings) =
   echo "    debug              = ", settings.debug
   echo "    no_annotation_hook = ", settings.noAnnot
   echo "    task_attributes    = ", settings.taskAttributes
-  echo "  Actions:"
-  echo "    TODO"
+  echo "  Action groups:"
+  for group, actions in settings.actionGroups.pairs():
+    echo "    ", alignLeft(group, 19), "= ", actions
   echo "  Subcommands:"
   echo "    default            = ", settings.defaultSubcommand
+  for sub, alias in settings.validSubcommands.pairs():
+    if alias != "":
+      echo "    ", alignLeft(sub, 19), "= ", alias
+
+  echo "  Actions:"
+  for action in settings.validActions.values():
+    echo "    ", action.name
+    echo "      ", alignLeft(".target", 17), "= ", action.target
+    echo "      ", alignLeft(".regex", 17),  "= ", action.regex
+    echo "      ", alignLeft(".labelregex", 17),  "= ", action.labelregex
+    echo "      ", alignLeft(".command", 17),  "= ", action.command
+    echo "      ", alignLeft(".modes", 17),  "= ", action.modes.join(",")
+    if action.inlinecommand != "":
+      echo "      ", alignLeft(".inlinecommand", 17),  "= ", action.inlinecommand
+    if action.filtercommand != "":
+      echo "      ", alignLeft(".filtercommand", 17),  "= ", action.filtercommand
 
 
 proc writeHelp() =
   echo "Help not implemented"
 
 
-proc includeActions(valid: OrderedTable[string, Action], includes: string): seq[string] =
+proc includeActions(valid: OrderedTable[string, Action], groups: Table[string, string], includes: string): seq[string] =
   for a in includes.split(','):
     if valid.hasKey(a):
       result.add(a)
+    elif groups.hasKey(a):
+      # expand action group
+      for a2 in groups[a].split(','):
+        if valid.hasKey(a2):
+          result.add(a2)
 
 
-proc excludeActions(valid: OrderedTable[string, Action], excludes: string): seq[string] =
+proc excludeActions(valid: OrderedTable[string, Action], groups: Table[string, string], excludes: string): seq[string] =
   var excluded = excludes.split(',')
+
+  # expand action groups
+  var expanded = excluded
+  for a in excluded:
+    if not valid.hasKey(a) and groups.hasKey(a):
+      for a2 in groups[a].split(','):
+        if valid.hasKey(a2):
+          expanded.add(a2)
+
   for a in valid.keys():
-    if not (a in excluded):
+    if not (a in expanded):
       result.add(a)
 
-proc parseOpts(opts: seq[string], settings: var Settings, configprovided: bool): string =
-  const shortNoVal = { 'v', 'h', 'A' }
-  const longNoVal  = @["verbose", "help", "All", ""]
+
+proc parseOpts(opts: seq[string], settings: var Settings, ignoreconfig: bool): string =
+  const shortNoVal = { 'v', 'h', 'A'}
+  const longNoVal  = @["verbose", "help", "All", "debug"]
   var p = initOptParser(opts,
     shortNoVal=shortNoVal,
     longNoVal=longNoVal)
@@ -96,14 +128,18 @@ proc parseOpts(opts: seq[string], settings: var Settings, configprovided: bool):
       of "v", "verbose":
         output.level = LogLevel(min(int(info), int(output.level)))
 
+      of "debug":
+        output.level = debug
+        settings.debug = true
+
       of "s", "sort":
         settings.sort = p.val
 
       of "c", "config":
-        if not configprovided and os.fileExists(p.val):
+        if not ignoreconfig and os.fileExists(p.val):
           warn.log("Using alternate config file ", p.val)
           return p.val
-        else:
+        elif not ignoreconfig:
           # ask user whether to create the config file
           stdout.write("Config file '", p.val, "' does not exist, create it? [y/N]: ")
           let answer = readLine(stdin)
@@ -129,25 +165,31 @@ proc parseOpts(opts: seq[string], settings: var Settings, configprovided: bool):
         if settings.restrictActions:
           warn.log("Ignoring --include option because --exclude was already specified.")
         else:
-          settings.actions = includeActions(settings.validActions, p.val)
+          settings.actions = includeActions(settings.validActions,
+                                            settings.actionGroups,
+                                            p.val)
           settings.restrictActions = true
 
       of "exclude":
         if settings.restrictActions:
           warn.log("Ignoring --exclude option because --include was already specified.")
         else:
-          settings.actions = excludeActions(settings.validActions, p.val)
+          settings.actions = excludeActions(settings.validActions,
+                                            settings.actionGroups,
+                                            p.val)
           settings.restrictActions = true
 
       of "A", "All":
         settings.all = true
+      else:
+        warn.log("Invalid command line option: ", p.key, "=", p.val)
 
     of cmdArgument:
       if settings.command == "" and settings.validSubcommands.hasKey(p.key):
         let alias = settings.validSubcommands[p.key]
 
         if alias != "":
-          let cfg = parseOpts(alias.splitWhitespace(), settings, configprovided)
+          let cfg = parseOpts(alias.splitWhitespace(), settings, ignoreconfig)
 
           if cfg != "":
             return cfg
@@ -161,21 +203,34 @@ proc parseOpts(opts: seq[string], settings: var Settings, configprovided: bool):
 
 
 proc setup(): Settings =
-  output.level = debug
+  output.level = warn
 
   # first, read the config to get aliases and default options
   result = parseConfig(findConfig())
 
   # second, parse command line options
-  let configfile = parseOpts(commandLineParams(), result, false)
+  let configfile = parseOpts(result.unparsedOptions & commandLineParams(),
+                             result,
+                             false)
   if configfile != "":
     # if --config options was found, redo everything
     result = parseConfig(configfile)
-    discard parseOpts(commandLineParams(), result, true)
+    discard parseOpts(result.unparsedOptions & commandLineParams(),
+                      result,
+                      true)
 
   # apply default command
   if result.command == "":
-    result.command = result.defaultSubcommand
+    if not result.validSubcommands.hasKey(result.defaultSubcommand):
+      warn.log("Ignoring non-existing default subcommand '", result.defaultSubcommand, "'.")
+      result.command = "normal"
+    else:
+      let alias = result.validSubcommands[result.defaultSubcommand]
+      if alias != "":
+        # note, if an alias is used as default subcommand --config is ignored
+        discard parseOpts(alias.splitWhitespace(), result, true)
+      else:
+        result.command = result.defaultSubcommand
 
 
 when isMainModule:
