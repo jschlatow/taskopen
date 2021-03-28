@@ -29,48 +29,93 @@ proc version():string =
 
 proc writeDiag(settings: Settings) =
   echo "Environment"
+
+  var indent = 2
+  var colwidth = 20
+
+  let platformPrefix = indent(alignLeft("Platform: ", colwidth), indent)
   when defined(posix):
     if detectOs(MacOSX):
-      echo "    Platform:      ", "Mac OSX"
+      echo(platformPrefix, "Mac OSX", indent)
     elif detectOs(Linux):
-      echo "    Platform:      ", "Linux"
+      echo(platformPrefix, "Linux", indent)
   when defined(windows):
-    echo "    Platform:      ", "Windows"
+    echo(platformPrefix, "Windows", indent)
 
-  echo "    Taskopen:      ", version()
-  echo "    Taskwarrior:   ", tw.version(settings.taskbin)
-  echo "    Configuration: ", settings.configfile
+  echo(indent(alignLeft("Taskopen: ", colwidth), indent),
+       version())
+  echo(indent(alignLeft("Taskwarrior: ", colwidth), indent),
+       tw.version(settings.taskbin))
+  echo(indent(alignLeft("Configuration: ", colwidth), indent),
+       settings.configfile)
 
   echo "Current configuration"
-  echo "  Binaries and paths:"
-  echo "    taskbin            = ", settings.taskbin
-  echo "    editor             = ", settings.editor
-  echo "    path_ext           = ", settings.pathExt
-  echo "  General:"
-  echo "    debug              = ", settings.debug
-  echo "    no_annotation_hook = ", settings.noAnnot
-  echo "    task_attributes    = ", settings.taskAttributes
-  echo "  Action groups:"
+  echo(indent("Binaries and paths:", indent))
+  indent += 2
+  colwidth -= 2
+  echo(indent(alignLeft("taskbin", colwidth), indent),
+       " = ",
+       settings.taskbin)
+  echo(indent(alignLeft("editor", colwidth), indent),
+       " = ",
+       settings.editor)
+  echo(indent(alignLeft("path_ext", colwidth), indent),
+       " = ",
+       settings.pathExt)
+
+  echo(indent("General:", indent-2))
+  echo(indent(alignLeft("debug", colwidth), indent),
+       " = ",
+       settings.debug)
+  echo(indent(alignLeft("no_annotation_hook", colwidth), indent),
+       " = ",
+       settings.noAnnot)
+  echo(indent(alignLeft("task_attributes", colwidth), indent),
+       " = ",
+       settings.taskAttributes)
+
+  echo(indent("Action groups:", indent-2))
   for group, actions in settings.actionGroups.pairs():
-    echo "    ", alignLeft(group, 19), "= ", actions
-  echo "  Subcommands:"
-  echo "    default            = ", settings.defaultSubcommand
+    echo(indent(alignLeft(group, colwidth), indent),
+         " = ",
+         actions)
+
+  echo(indent("Subcommands:", indent-2))
+  echo(indent(alignLeft("default", colwidth), indent),
+       " = ",
+       settings.defaultSubcommand)
   for sub, alias in settings.validSubcommands.pairs():
     if alias != "":
-      echo "    ", alignLeft(sub, 19), "= ", alias
+      echo(indent(alignLeft(sub, colwidth), indent),
+           " = ",
+           alias)
 
-  echo "  Actions:"
+  echo(indent("Actions:", indent-2))
   for action in settings.validActions.values():
-    echo "    ", action.name
-    echo "      ", alignLeft(".target", 17), "= ", action.target
-    echo "      ", alignLeft(".regex", 17),  "= ", action.regex
-    echo "      ", alignLeft(".labelregex", 17),  "= ", action.labelregex
-    echo "      ", alignLeft(".command", 17),  "= ", action.command
-    echo "      ", alignLeft(".modes", 17),  "= ", action.modes.join(",")
+    echo(indent(action.name, indent))
+    echo(indent(alignLeft(".target", colwidth-2), indent+2),
+         " = ",
+         action.target)
+    echo(indent(alignLeft(".regex", colwidth-2), indent+2),
+         " = ",
+         action.regex)
+    echo(indent(alignLeft(".labelregex", colwidth-2), indent+2),
+         " = ",
+         action.labelregex)
+    echo(indent(alignLeft(".command", colwidth-2), indent+2),
+         " = ",
+         action.command)
+    echo(indent(alignLeft(".modes", colwidth-2), indent+2),
+         " = ",
+         action.modes)
     if action.inlinecommand != "":
-      echo "      ", alignLeft(".inlinecommand", 17),  "= ", action.inlinecommand
+      echo(indent(alignLeft(".inlinecommand", colwidth-2), indent+2),
+           " = ",
+           action.inlinecommand)
     if action.filtercommand != "":
-      echo "      ", alignLeft(".filtercommand", 17),  "= ", action.filtercommand
+      echo(indent(alignLeft(".filtercommand", colwidth-2), indent+2),
+           " = ",
+           action.filtercommand)
 
 
 proc writeHelp() =

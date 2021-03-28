@@ -207,12 +207,8 @@ Similar to the filter command, the inline command can be used for adding informa
 For instance, to peek show the first five lines of each file with each menu entry, you can add the following to your config file:
 
 ```
-files.inlinecommand = "headindent -n5 $FILE"
+files.inlinecommand = "head -n5 $FILE"
 ```
-
-Note, that [headindent] is a script provided by taskopen.
-
-[headindent]: ./script/headindent
 
 An override for all actions can also be provided at the command line.
 
