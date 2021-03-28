@@ -91,8 +91,42 @@ proc writeDiag(settings: Settings) =
 
 
 proc writeHelp() =
-  echo "Help not implemented"
+  echo("Usage: ", getAppFilename(), " [subcommand] [options] [filter1 filter2 .. filterN]")
 
+  let indent  = 2
+  var columns = [Column(align: Left, width: 28),
+                 Column(align: Left, width: 49)]
+
+  echo("")
+  echo("Available options:")
+  columns.columnise(indent, "-h, --help",    "Show this text.")
+  columns.columnise(indent, "-v, --verbose", "Print additional info messages.")
+  columns.columnise(indent, "--debug",       "Print debug messages (includes -v).")
+
+  columns.columnise(indent, "-s, --sort 'key1+,key2-'",  "Defines the sort order of actionable items.")
+  columns.columnise(indent, "-c, --config \"filepath\"",   "Use a different config file.")
+  columns.columnise(indent, "-a, --active-tasks 'filter'", "Changes the filter to determine active tasks.")
+  columns.columnise(indent, "-A, --All",                   "Query all tasks (ignores taskwarrior context and active task filter).")
+
+  columns.columnise(indent, "-x, --execute 'cmd'", "Overrides the command executed for every action.")
+  columns.columnise(indent, "-f, --filter-command 'cmd'", "Overrides filter command for every action.")
+  columns.columnise(indent, "-i, --inline-command 'cmd'", "Overrides inline command for every action.")
+  columns.columnise(indent, "--args 'arguments'", "Defines arguments that will be available as $ARGS in any command.")
+
+  columns.columnise(indent, "--include action1,action2", "Only consider the listed actions. Also determines their priority.")
+  columns.columnise(indent, "--exclude action1,action2", "Consider all but the listed actions.")
+
+
+  columns[0].width -= 12
+  columns[1].width += 12
+
+  echo("")
+  echo("Available subcommands:")
+  columns.columnise(indent, "normal",      "Shows a menu of the first applicable action for each annotation. Default subcommand.")
+  columns.columnise(indent, "any",         "Shows a menu for every applicable action for each annotation.")
+  columns.columnise(indent, "batch",       "Executes the first applicable action for each annotation without showing an interactive menu before.")
+  columns.columnise(indent, "diagnostics", "Print diagnostic output.")
+  columns.columnise(indent, "version",     "Print version information.")
 
 proc includeActions(valid: OrderedTable[string, Action], groups: Table[string, string], includes: string): seq[string] =
   for a in includes.split(','):
