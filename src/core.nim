@@ -27,6 +27,8 @@ proc build_env(s: Settings,
   if s.editor != "":
     result["EDITOR"] = s.editor
 
+  result["ARGS"] = s.args
+
   result["UUID"] = task["uuid"].getStr()
 
   if task.hasKey("id"):
