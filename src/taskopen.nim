@@ -1,7 +1,7 @@
 import parseopt
 import os
 import system
-import strutils
+from strutils import indent, split, splitWhitespace, join
 import distros
 import tables
 
@@ -31,91 +31,63 @@ proc writeDiag(settings: Settings) =
   echo "Environment"
 
   var indent = 2
-  var colwidth = 20
 
-  let platformPrefix = indent(alignLeft("Platform: ", colwidth), indent)
+  let env = [Column(align: Left, width: 16),
+             Column(align: Left, width: 0)]
+
   when defined(posix):
     if detectOs(MacOSX):
-      echo(platformPrefix, "Mac OSX", indent)
+      env.columnise(indent, "Platform: ", "Mac OSX")
     elif detectOs(Linux):
-      echo(platformPrefix, "Linux", indent)
+      env.columnise(indent, "Platform: ", "Linux")
   when defined(windows):
-    echo(platformPrefix, "Windows", indent)
+    env.columnise(indent, "Platform: ", "Windows")
 
-  echo(indent(alignLeft("Taskopen: ", colwidth), indent),
-       version())
-  echo(indent(alignLeft("Taskwarrior: ", colwidth), indent),
-       tw.version(settings.taskbin))
-  echo(indent(alignLeft("Configuration: ", colwidth), indent),
-       settings.configfile)
+  env.columnise(indent, "Taskopen: ",      version())
+  env.columnise(indent, "Taskwarrior: ",   tw.version(settings.taskbin))
+  env.columnise(indent, "Configuration: ", settings.configfile)
 
   echo "Current configuration"
   echo(indent("Binaries and paths:", indent))
   indent += 2
-  colwidth -= 2
-  echo(indent(alignLeft("taskbin", colwidth), indent),
-       " = ",
-       settings.taskbin)
-  echo(indent(alignLeft("editor", colwidth), indent),
-       " = ",
-       settings.editor)
-  echo(indent(alignLeft("path_ext", colwidth), indent),
-       " = ",
-       settings.pathExt)
+
+  var cfg = [Column(align: Left, width: 18),
+             Column(align: Left, width: 3),
+             Column(align: Left, width: 54)]
+
+  cfg.columnise(indent, "taskbin",   " = ", settings.taskbin)
+  cfg.columnise(indent, "editor",    " = ", settings.editor)
+  cfg.columnise(indent, "path_ext",  " = ", settings.pathExt)
 
   echo(indent("General:", indent-2))
-  echo(indent(alignLeft("debug", colwidth), indent),
-       " = ",
-       settings.debug)
-  echo(indent(alignLeft("no_annotation_hook", colwidth), indent),
-       " = ",
-       settings.noAnnot)
-  echo(indent(alignLeft("task_attributes", colwidth), indent),
-       " = ",
-       settings.taskAttributes)
+  cfg.columnise(indent, "debug",              " = ", settings.debug)
+  cfg.columnise(indent, "no_annotation_hook", " = ", settings.noAnnot)
+  cfg.columnise(indent, "task_attributes",    " = ", settings.taskAttributes)
 
   echo(indent("Action groups:", indent-2))
   for group, actions in settings.actionGroups.pairs():
-    echo(indent(alignLeft(group, colwidth), indent),
-         " = ",
-         actions)
+    cfg.columnise(indent, group, " = ", actions)
 
   echo(indent("Subcommands:", indent-2))
-  echo(indent(alignLeft("default", colwidth), indent),
-       " = ",
-       settings.defaultSubcommand)
+  cfg.columnise(indent, "default", " = ", settings.defaultSubcommand)
   for sub, alias in settings.validSubcommands.pairs():
     if alias != "":
-      echo(indent(alignLeft(sub, colwidth), indent),
-           " = ",
-           alias)
+      cfg.columnise(indent, sub, " = ", alias)
 
+  cfg[0].width -= 2
   echo(indent("Actions:", indent-2))
   for action in settings.validActions.values():
     echo(indent(action.name, indent))
-    echo(indent(alignLeft(".target", colwidth-2), indent+2),
-         " = ",
-         action.target)
-    echo(indent(alignLeft(".regex", colwidth-2), indent+2),
-         " = ",
-         action.regex)
-    echo(indent(alignLeft(".labelregex", colwidth-2), indent+2),
-         " = ",
-         action.labelregex)
-    echo(indent(alignLeft(".command", colwidth-2), indent+2),
-         " = ",
-         action.command)
-    echo(indent(alignLeft(".modes", colwidth-2), indent+2),
-         " = ",
-         action.modes)
+    cfg.columnise(indent+2, ".target",     " = ", action.target)
+    cfg.columnise(indent+2, ".regex",      " = ", action.regex)
+    cfg.columnise(indent+2, ".labelregex", " = ", action.labelregex)
+    cfg.columnise(indent+2, ".command",    " = ", action.command)
+    cfg.columnise(indent+2, ".modes",      " = ", action.modes.join(","))
+
     if action.inlinecommand != "":
-      echo(indent(alignLeft(".inlinecommand", colwidth-2), indent+2),
-           " = ",
-           action.inlinecommand)
+      cfg.columnise(indent+2, ".inlinecommand", " = ", action.inlinecommand)
     if action.filtercommand != "":
-      echo(indent(alignLeft(".filtercommand", colwidth-2), indent+2),
-           " = ",
-           action.filtercommand)
+      cfg.columnise(indent+2, ".filtercommand", " = ", action.filtercommand)
 
 
 proc writeHelp() =

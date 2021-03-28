@@ -2,7 +2,8 @@ import terminal
 import tables
 import json
 import re
-import strutils
+from strutils import split, parseInt, spaces, center, strip
+from unicode import runeLen, runeSubStr, alignLeft, align
 import ./types
 import ./exec
 
@@ -13,7 +14,6 @@ type
     warn
     error
 
-type
   ColorSetting = tuple
     fg: ForegroundColor
     brightfg: bool
@@ -21,8 +21,17 @@ type
     brightbg: bool
     style: set[terminal.Style]
 
-type
   LevelColors* = array[debug..error, ColorSetting]
+
+  Align* = enum
+    Left
+    Center
+    Right
+
+  Column* = object
+    align*: Align
+    width*: Natural
+
 
 # TODO add true color support
 
@@ -160,6 +169,80 @@ proc menu*(items: openArray[Actionable]): seq[int] =
     else:
       error.log(ids, " is not a number or a range")
 
+proc splitColumn(s: string, w: Positive): seq[string] =
+  let length = runeLen(s)
+
+  var i = 0
+  while i < length:
+    # TODO preferably split at whitespaces
+    #      e.g. find whitespace in reverse from i to i-w/2
+    #           if none found, cut at i
+    var substr = s.runeSubStr(i, w)
+    if i > 0:
+      substr = substr.strip()
+    result.add(substr)
+    i += w
+
+
+proc columnise*(coldef: openArray[Column], indent: Natural, values: varargs[string, `$`]) =
+
+  # first, split input into multiple rows
+  var multicols: seq[seq[string]]
+  var rowNum = 0
+
+  var col = 0
+  for s in values:
+    var width = 0
+    if len(coldef) > col:
+      width = coldef[col].width
+
+    if width == 0:
+      width = runeLen(s)
+
+    multicols.add(splitColumn(s, width))
+    rowNum = max(len(multicols[^1]), rowNum)
+    col += 1
+
+  # flip dimensions of multicols
+  var rows: seq[seq[string]]
+  for i in 0..rowNum-1:
+    var row: seq[string]
+    for c in multicols:
+      if len(c) > i:
+        row.add(c[i])
+      else:
+        row.add("")
+
+    rows.add(row)
+
+  for row in rows:
+    stdout.write(spaces(indent))
+
+    col = 0
+    for field in row:
+      var style = Column(align: Left, width: 0)
+      if len(coldef) > col:
+        style = coldef[col]
+
+      if style.width == 0:
+        style.width = runeLen(field)
+
+      case style.align
+      of Left:
+        if col < len(multicols)-1:
+          stdout.write(alignLeft(field, style.width))
+        else:
+          stdout.write(field)
+      of Center:
+        # FIXME center() is missing in unicode module
+        stdout.write(center(field, style.width))
+      of Right:
+        stdout.write(align(field, style.width))
+
+      col += 1
+    stdout.writeline("")
+
+
 when isMainModule:
   warn.log("Warning: ", "This is ", "shown.")
   debug.log("Debug: ", "This ", "is ", "not ", "shown.")
@@ -167,3 +250,7 @@ when isMainModule:
   error.log("Int ", 1)
   var s = @[1,2,3]
   error.log("Seq ", s)
+  let columns = @[Column(align: Left, width: 10), Column(align: Left, width: 3), Column(align: Right, width: 12)]
+  columns.columnise(2, "Test", " = " ,"Asdf")
+  columns.columnise(2, "Test1234 asdf asdf asdf", " = ", "Asdf")
+  columns.columnise(2, "Test1234", " = ", "Asdf foobar foobar foobar foobar")
