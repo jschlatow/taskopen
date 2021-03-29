@@ -40,6 +40,10 @@ proc build_env(s: Settings,
     if task.hasKey(attr):
       result["TASK_" & attr.toUpperAscii()] = task[attr].getStr()
 
+proc copyEnv(baseenv: StringTableRef): StringTableRef =
+  result = newStringTable()
+  for k, v in baseenv.pairs():
+    result[k] = v
 
 iterator match_actions_label(
   baseenv: StringTableRef,
@@ -47,8 +51,8 @@ iterator match_actions_label(
   actions: openArray[Action],
   single: bool): (Action, StringTableRef) =
 
+  var env = copyEnv(baseenv)
   for act in actions:
-    var env = deepCopy(baseenv)
     # split in label and file part
     let splitre = re"((\S+):\s+)?(.*)"
     if text =~ splitre:
@@ -63,6 +67,7 @@ iterator match_actions_label(
         continue
 
       # skip action if file does not match
+      env["LAST_MATCH"] = ""
       if file =~ fileregex:
         for m in matches:
           if len(m) == 0:
@@ -89,6 +94,8 @@ iterator match_actions_label(
 
       if single:
         break
+
+      env = copyEnv(env)
     else:
       error.log("Malformed annotation: ", text)
 
@@ -99,10 +106,11 @@ iterator match_actions_pure(
   actions: openArray[Action],
   single: bool): (Action, StringTableRef) =
 
+  var env = copyEnv(baseenv)
   for act in actions:
-    var env = deepCopy(baseenv)
     let fileregex  = re(act.regex)
     if text =~ fileregex:
+      env["LAST_MATCH"] = ""
       for m in matches:
         if len(m) == 0:
           break
@@ -127,6 +135,7 @@ iterator match_actions_pure(
     yield (act, env)
     if single:
       break
+    env = copyEnv(baseenv)
 
 
 proc find_actionable_items(
