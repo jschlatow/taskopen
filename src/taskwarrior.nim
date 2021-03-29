@@ -29,6 +29,9 @@ proc current_context*(taskbin: string): string =
 
 proc json*(taskbin: string, filter: openArray[string]): JsonNode =
   let args = @default_args & @filter & @["export"]
-  var output: string
-  exec(taskbin, args, output)
-  result = parseJson(output)
+
+  debug.log("Executing: ", taskbin, " ", args.join(" "))
+  var p = startProcess(taskbin, args=args, options = {poUsePath})
+  result = parseJson(outputStream(p))
+  p.close()
+
