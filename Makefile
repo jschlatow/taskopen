@@ -28,9 +28,11 @@ taskopen: $(SRCFILES) Makefile
 	nim c -d:versionGit -d:release -d:pathext:${PREFIX}/share/taskopen/scripts -d:editor:${EDITOR} -d:open:${OPEN} --outdir:./ src/taskopen.nim
 
 doc/html/taskopen\(1\).html: doc/man/taskopen.1 Makefile
+	mkdir -p doc/html
 	groff -mandoc -T html $< > $@
 
 doc/html/taskopenrc\(5\).html: doc/man/taskopenrc.5 Makefile
+	mkdir -p doc/html
 	groff -mandoc -T html $< > $@
 
 $(MANFILES_GZ): %.gz: % Makefile
