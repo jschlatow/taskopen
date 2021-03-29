@@ -7,6 +7,11 @@ import strutils
 import ./types
 import ./output
 
+# compile time defaults depending on target system
+const EDITOR   {.strdefine.}: string = "vim"
+const OPEN     {.strdefine.}: string = "xdg-open"
+const PATH_EXT {.strdefine.}: string = ""
+
 type
   Settings* = object
     command*: string
@@ -145,17 +150,16 @@ proc parseConfig*(filepath: string): Settings =
   result.taskAttributes = "priority,project,tags,description"
   result.noAnnot = "addnote $ID"
   result.configfile = filepath
-  result.validActions["notes"] = Action(
-    name: "notes",
+  result.validActions["files"] = Action(
+    name: "files",
     target: "annotations",
     labelregex: ".*",
     regex: "^[\\.\\/~]+.*\\.(.*)",
     modes: @["batch", "any", "normal"],
-    command: "$EDITOR $FILE")
+    command: OPEN & " $FILE")
 
-  # TODO set these at compile time depending on target system
-  result.editor = ""
-  result.pathExt = "/usr/share/taskopen/scripts"
+  result.editor = EDITOR
+  result.pathExt = PATH_EXT
   result.taskbin = "task"
 
   # read config from file
