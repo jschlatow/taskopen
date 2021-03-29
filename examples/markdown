@@ -1,0 +1,17 @@
+[Actions]
+
+# compile action: compile markdown file to pdf with pandoc
+mdcompile.regex = "^[\\.\\/~]+.*\\.(md|pandoc|mdwn|markdown)"
+mdcompile.command = "cd `dirname $FILE`; pandoc -o `basename ${FILE%.*}.pdf` $FILE"
+
+# edit action: open markdown file
+mdedit.regex = "^[\\.\\/~]+.*\\.(md|pandoc|mdwn|markdown)"
+mdedit.command = "$EDITOR $FILE"
+
+# view action: open compiled pdf
+mdview.regex = "^[\\.\\/~]+.*\\.(md|pandoc|mdwn|markdown)"
+mdview.command = "xdg-open ${FILE%.*}.pdf 2>/dev/null &"
+mdview.filtercommand = "test -e ${FILE%.*}.pdf"
+
+[CLI]
+alias.md = "any --include=mdcompile,mdedit,mdview"

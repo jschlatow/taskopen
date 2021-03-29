@@ -1,0 +1,30 @@
+[General]
+no_annotation_hook="addnote $ID"
+# TODO adapt path_ext to your installation path
+#path_ext=/usr/share/taskopen/scripts
+
+[Actions]
+notes.regex = "^Notes\\.(.*)"
+notes.command = "editnote ~/Notes/tasknotes/$UUID.$LAST_MATCH \"$TASK_DESCRIPTION\" $UUID"
+
+files.regex = "^[\\.\\/~]+.*\\.(.*)"
+files.command = "$EDITOR $FILE"
+files.filtercommand = "test -e $FILE"
+
+url.regex = "((?:www|http).*)"
+url.command = "xdg-open $LAST_MATCH 2>/dev/null"
+
+edit.regex = ".*"
+edit.command = "rawedit $UUID \"$ANNOTATION\""
+delete.regex = ".*"
+delete.command = "task $UUID denotate -- \"$ANNOTATION\" 2>/dev/null"
+
+[CLI]
+default = default
+alias.default = "normal --exclude=edit,delete"
+
+alias.files  = "normal --include=files"
+alias.notes  = "normal --include=notes"
+alias.edit   = "normal --include=edit"
+alias.delete = "normal --include=delete"
+alias.raw    = "any --include=delete,edit"

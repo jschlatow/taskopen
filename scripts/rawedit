@@ -1,0 +1,70 @@
+#!/usr/bin/perl -w -CLASo
+
+
+# Edit the raw annotation text.
+# Usage: rawedit <id|uuid> "annotation text"
+
+# Use with the following lines in taskopen's config file:
+#   [Actions]
+#   edit.regex = ".*"
+#   edit.command = "rawedit $UUID \"$ANNOTATION\""
+#
+#   [CLI]
+#   alias.edit = "normal --include=edit"
+
+use File::Temp;
+
+if ($#ARGV != 1) {
+    print("Usage: rawedit <id|uuid> \"annotation text\"");
+    exit 1
+}
+
+my $EDITOR = $ENV{"EDITOR"};
+
+my $id   = $ARGV[0];
+my $text = $ARGV[1];
+
+my $new = raw_edit($text);
+modify_annotation($id, $text, $new);
+
+sub raw_edit {
+    my $old = $_[0];
+
+    my $filename = File::Temp::tmpnam();
+    open(my $fh, '>', $filename) or die "can't open $filename: $!";
+    print($fh $old);
+    close($fh);
+
+    system(qq/$EDITOR "$filename"/);
+
+    open($fh, '<', $filename) or die "can't open $filename: $!'";
+    my @lines = <$fh>;
+    close($fh);
+    unlink($filename);
+
+    # taskwarrior does not support multi-line annotations
+    # TODO fix if #1172 has been solved
+
+    my $result = $lines[0];
+    chomp($result);
+    return $result;
+}
+
+sub modify_annotation {
+   my $id  = $_[0];
+   my $old = $_[1];
+   my $new = $_[2];
+
+   if ($old ne $new) {
+       # TODO remove as soon as tw bug TW-1821 has been fixed ('/'s must still be escaped)
+       if ($old =~ m/\// || $new =~ m/\//) {
+           print("Cannot replace annotations which contain '/'s (see #1174).");
+           exit 1
+       }
+       # END REMOVE
+       `task $id mod /$old/$new/ > /dev/null`;
+   }
+   else {
+       print("No changes detected");
+   }
+}
