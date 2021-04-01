@@ -8,7 +8,7 @@ notes.regex = "^Notes\\.(.*)"
 notes.command = "editnote ~/Notes/tasknotes/$UUID.$LAST_MATCH \"$TASK_DESCRIPTION\" $UUID"
 
 files.regex = "^[\\.\\/~]+.*\\.(.*)"
-files.command = "$EDITOR $FILE"
+files.command = "xdg-open $FILE"
 files.filtercommand = "test -e $FILE"
 
 url.regex = "((?:www|http).*)"
