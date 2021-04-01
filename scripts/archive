@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# This script is supposed to be used with an archive action such as the following:
+#   archfiles.regex = "/home/user/((?:Documents|Notes)/.*)"
+#   archfiles.command = "archive $FILE ~/archive/$LAST_MATCH"
+#   archfiles.filtercommand = "archive $FILE"
+
+if [ $# -lt 1 ]; then
+	echo "Usage: $0 <srcpath> <dstpath>"
+	exit 1
+fi
+
+if [ $# -eq 1 ]; then
+	# only test if path is ready to be archived
+	SRCFILE=$1
+
+	# FIXME taskwarrior does not support search patterns with '/'s
+	#       as a workaround, we only search for the basename
+	res=$(task _ids $(basename ${SRCFILE}) | wc -l)
+	if [ $res -eq 1 ]; then
+		echo "okay"
+		exit 0
+	else
+		echo "Not archivable"
+		exit 1
+	fi
+else
+	SRCFILE=$1
+	DSTFILE=$2
+	DSTPATH=$(dirname $2)
+	mkdir -p ${DSTPATH}
+	mv -i ${SRCFILE} ${DSTFILE}
+
+	# FIXME taskwarrior does not support search patterns with '/'s
+	#       as a workaround, we only search for the basename
+	ids=$(task uuids $(basename ${SRCFILE}))
+
+	task $ids denotate -- ${SRCFILE} && task $ids annotate -- ${DSTFILE}
+fi

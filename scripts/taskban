@@ -1,0 +1,80 @@
+#!/bin/bash
+
+# This is a wrapper script for taskwarrior and taskopen for kanban-style actions.
+
+# Taskwarrior prerequisites/UDA config:
+#   uda.state.type=string
+#   uda.state.label=State
+#   uda.state.values=wip,rdy,blg,done
+#   uda.state.default=rdy
+
+# Taskopen prerequiites:
+#   - define a delete action (see examples/default)
+#   - define an archive action (see scripts/archive)
+
+DEFAULT_ADD=()
+DEFAULT_REPORT=()
+SUPPRESS_OUT="rc.verbose=nothing"
+
+if [ $# -lt 1 ]; then
+	echo "Usage: $0 (add|backlog|delete|archive|proceed|retreat|open|yield|unlink) [<id>|<filter>]"
+	echo "   or: $0 (sched|link) <id> (<date>|<annotation>)"
+	task ${DEFAULT_REPORT[@]}
+	exit 1
+fi
+
+case "$1" in
+	ad|add)
+		task add ${DEFAULT_ADD[@]} ${@:2}
+		task ${DEFAULT_REPORT[@]}
+		;;
+	ar|arc|arch|archi|archiv|archive)
+		taskopen archive ${@:2}
+		task done ${@:2}
+		task ${DEFAULT_REPORT[@]}
+		;;
+	b|ba|bac|back|backl|backlo|backlog)
+		task add ${DEFAULT_ADD[@]} state:blg ${@:2}
+		task ${DEFAULT_REPORT[@]}
+		;;
+	d|de|del|dele|delet|delete)
+		task del ${@:2}
+		task ${DEFAULT_REPORT[@]}
+		;;
+	p|pr|pro|proc|proce|procee|proceed)
+		task ${SUPPRESS_OUT} ${@:2} state:wip mod state:done
+		task ${SUPPRESS_OUT} ${@:2} state:rdy mod state:wip
+		task ${SUPPRESS_OUT} ${@:2} state:blg mod state:rdy
+		task ${DEFAULT_REPORT[@]}
+		;;
+	r|re|ret|retr|retre|retrea|retreat)
+		task ${SUPPRESS_OUT} ${@:2} state:rdy mod state:blg
+		task ${SUPPRESS_OUT} ${@:2} state:wip mod state:rdy
+		task ${SUPPRESS_OUT} ${@:2} state:done mod state:wip
+		task ${DEFAULT_REPORT[@]}
+		;;
+	s|sc|sch|sche|sched)
+		# schedule to value of last argument
+		task ${@:2:$(($#-2))} mod sched:${@:$#}
+		task ${DEFAULT_REPORT[@]}
+		;;
+	y|yi|yie|yiel|yield)
+		# unschedule
+		task ${@:2} mod sched:
+		task ${DEFAULT_REPORT[@]}
+		;;
+	o|op|ope|open)
+		taskopen ${@:2}
+		;;
+	l|li|lin|link)
+		# annotate with value of last argument
+		taskopen ${@:2:$(($#-2))} annotate -- ${@:$#}
+		;;
+	u|un|unl|unli|unlin|unlink)
+		taskopen delete ${@:2}
+		;;
+	*)
+		# default: pass everything to taskopen
+		taskopen $*
+		;;
+esac
