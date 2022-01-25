@@ -12,7 +12,6 @@
 #   - define a delete action (see examples/default)
 #   - define an archive action (see scripts/archive)
 
-DEFAULT_ADD=()
 DEFAULT_REPORT=()
 SUPPRESS_OUT="rc.verbose=nothing"
 
@@ -25,7 +24,7 @@ fi
 
 case "$1" in
 	ad|add)
-		task add ${DEFAULT_ADD[@]} ${@:2}
+		task add ${@:2}
 		task ${DEFAULT_REPORT[@]}
 		;;
 	ar|arc|arch|archi|archiv|archive)
@@ -34,7 +33,7 @@ case "$1" in
 		task ${DEFAULT_REPORT[@]}
 		;;
 	b|ba|bac|back|backl|backlo|backlog)
-		task add ${DEFAULT_ADD[@]} state:blg ${@:2}
+		task add state:blg ${@:2}
 		task ${DEFAULT_REPORT[@]}
 		;;
 	d|de|del|dele|delet|delete)
