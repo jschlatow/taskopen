@@ -68,7 +68,7 @@ case "$1" in
 		;;
 	l|li|lin|link)
 		# annotate with value of last argument
-		taskopen ${@:2:$(($#-2))} annotate -- ${@:$#}
+		task ${@:2:$(($#-2))} annotate -- ${@:$#}
 		;;
 	u|un|unl|unli|unlin|unlink)
 		taskopen delete ${@:2}
