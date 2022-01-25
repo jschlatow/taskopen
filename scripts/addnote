@@ -1,4 +1,5 @@
 #!/bin/bash
+# Annotates a task with 'Notes' or 'Notes.*'.
 
 # REQUIRES: awk
 

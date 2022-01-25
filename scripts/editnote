@@ -1,4 +1,5 @@
 #!/bin/bash
+# Opens a Notes file and creates a header if file does not exist.
 
 # Usage
 if [ $# -eq 3 ]; then

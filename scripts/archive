@@ -28,6 +28,7 @@ else
 	SRCFILE=$1
 	DSTFILE=$2
 	DSTPATH=$(dirname $2)
+
 	mkdir -p ${DSTPATH}
 	mv -i ${SRCFILE} ${DSTFILE}
 

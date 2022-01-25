@@ -1,4 +1,5 @@
 #!/bin/bash
+# Attaches a file to a task by using ranger as file picker.
 
 # REQUIRES: ranger, awk
 
