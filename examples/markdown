@@ -1,3 +1,16 @@
+# This example requires pandoc installed. It defines three actions for
+# editing, compiling to PDF and viewing a compiled PDF file.
+# You can test this configuration with a temporary data base, by calling
+#   export TASKOPENRC=/path/to/examples/markdown
+#   taskopen ...
+# In order to operate on the temporary data base with taskwarrior, you may
+# define an alias like:
+#   alias tx="task rc.data.location=/tmp"
+
+[General]
+# remove if used productively
+taskargs = rc.data.location=/tmp
+
 [Actions]
 
 # compile action: compile markdown file to pdf with pandoc
