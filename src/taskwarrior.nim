@@ -19,8 +19,8 @@ proc version*(taskbin: string): string =
   let args = concat(default_args, ["_version"])
   exec(taskbin, args, result)
 
-proc current_context*(taskbin: string): string =
-  let args = concat(default_args, ["context", "show"])
+proc current_context*(taskbin: string, taskargs: openArray[string]): string =
+  let args = @default_args & @taskargs & @["context", "show"]
   exec(taskbin, args, result)
   for line in splitLines(result):
     if line =~ re".*with filter '(.*)' is currently applied.$":
@@ -29,8 +29,8 @@ proc current_context*(taskbin: string): string =
       return "\\(" & matches[0] & "\\)"
   return ""
 
-proc json*(taskbin: string, filter: openArray[string]): JsonNode =
-  let args = @default_args & @filter & @["export"]
+proc json*(taskbin: string, taskargs: openArray[string], filter: openArray[string]): JsonNode =
+  let args = @default_args & @taskargs & @filter & @["export"]
 
   debug.log("Executing: ", taskbin, " ", args.join(" "))
   var p = startProcess(taskbin, args=args, options = {poUsePath})

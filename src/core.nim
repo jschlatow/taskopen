@@ -203,13 +203,13 @@ proc sortkeys(sortstr: string): seq[tuple[key: string, desc: bool]] =
 
 proc run*(settings: Settings, single = true, interactive = true) =
   # construct taskwarrior filter
-  let context = current_context(settings.taskbin)
+  let context = current_context(settings.taskbin, settings.taskargs)
   var filters = @[context] & settings.filter
   if not settings.all:
     filters &= @[settings.basefilter]
 
   # get json result from taskwarrior
-  let json = settings.taskbin.json(filters)
+  let json = settings.taskbin.json(settings.taskargs, filters)
 
   # find matching actions
   var actionables = settings.find_actionable_items(json, single=single)

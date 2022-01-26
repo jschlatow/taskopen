@@ -56,6 +56,7 @@ proc writeDiag(settings: Settings) =
              Column(align: Left, width: 54)]
 
   cfg.columnise(indent, "taskbin",   " = ", settings.taskbin)
+  cfg.columnise(indent, "taskargs",  " = ", settings.taskargs.join(" "))
   cfg.columnise(indent, "editor",    " = ", settings.editor)
   cfg.columnise(indent, "path_ext",  " = ", settings.pathExt)
 

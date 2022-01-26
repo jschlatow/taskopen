@@ -32,6 +32,7 @@ type
     editor*: string
     pathExt*: string
     taskbin*: string
+    taskargs*: seq[string]
     noAnnot*: string
     taskAttributes*: string
     debug*: bool
@@ -87,6 +88,8 @@ proc parseFile(filepath: string, settings: var Settings) =
             settings.editor = e.value
           of "taskbin":
             settings.taskbin = e.value
+          of "taskargs":
+            settings.taskargs = e.value.split(' ')
           of "path_ext":
             settings.pathExt = e.value
           of "task_attributes":
@@ -161,6 +164,7 @@ proc parseConfig*(filepath: string): Settings =
   result.editor = EDITOR
   result.pathExt = PATH_EXT
   result.taskbin = "task"
+  result.taskargs = @[]
 
   # read config from file
   if filepath != "" and fileExists(filepath):
@@ -173,6 +177,7 @@ proc createConfig*(filepath: string, defaults = Settings()) =
   var dict=newConfig()
 
   dict.setSectionKey("General", "taskbin",            defaults.taskbin)
+  dict.setSectionKey("General", "taskargs",           defaults.taskargs.join(""))
   dict.setSectionKey("General", "no_annotation_hook", defaults.noAnnot)
   dict.setSectionKey("General", "task_attributes",    defaults.taskAttributes)
   dict.setSectionKey("General", "--sort",             defaults.sort)
