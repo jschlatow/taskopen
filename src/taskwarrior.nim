@@ -22,10 +22,12 @@ proc version*(taskbin: string): string =
 proc current_context*(taskbin: string): string =
   let args = concat(default_args, ["context", "show"])
   exec(taskbin, args, result)
-  if result =~ re".*with filter '(.*)' is currently applied.$":
-    result = "\\(" & matches[0] & "\\)"
-  else:
-    result = ""
+  for line in splitLines(result):
+    if line =~ re".*with filter '(.*)' is currently applied.$":
+      return "\\(" & matches[0] & "\\)"
+    elif line =~ re".*read filter: '(.*)'$":
+      return "\\(" & matches[0] & "\\)"
+  return ""
 
 proc json*(taskbin: string, filter: openArray[string]): JsonNode =
   let args = @default_args & @filter & @["export"]
