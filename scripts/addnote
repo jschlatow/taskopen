@@ -11,13 +11,13 @@
 if [ $# -eq 1 ]; then
     desc=$(task $1 info | awk '$0 ~ /^Description/ {print substr($0, index($0,$2))}')
     echo "Attaching to task $1 '$desc'."
-	 echo -n "Type a file extension (or none): "
+    echo -n "Type a file extension (or none): "
     read ext
     ann=""
     if [ "$ext" != "" ]; then
         ann="Notes.$ext"
-	  else
-		  ann="Notes"
+    else
+        ann="Notes"
     fi
     task $1 annotate -- $ann
 fi
