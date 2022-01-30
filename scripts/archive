@@ -10,13 +10,15 @@ if [ $# -lt 1 ]; then
 	exit 1
 fi
 
-if [ $# -eq 1 ]; then
-	# only test if path is ready to be archived
-	SRCFILE=$1
+# only test if path is ready to be archived
+SRCFILE=$1
 
-	# FIXME taskwarrior does not support search patterns with '/'s
-	#       as a workaround, we only search for the basename
-	res=$(task _ids $(basename ${SRCFILE}) | wc -l)
+# taskwarrior does not support search patterns with '/'s
+# as a workaround, we replace the '/'s by a regex '.'
+SEARCH=${SRCFILE//\//.}
+
+if [ $# -eq 1 ]; then
+	res=$(task _ids ${SEARCH} | wc -l)
 	if [ $res -eq 1 ]; then
 		echo "okay"
 		exit 0
@@ -25,16 +27,13 @@ if [ $# -eq 1 ]; then
 		exit 1
 	fi
 else
-	SRCFILE=$1
 	DSTFILE=$2
 	DSTPATH=$(dirname $2)
 
 	mkdir -p ${DSTPATH}
 	mv -i ${SRCFILE} ${DSTFILE}
 
-	# FIXME taskwarrior does not support search patterns with '/'s
-	#       as a workaround, we only search for the basename
-	ids=$(task uuids $(basename ${SRCFILE}))
+	ids=$(task uuids ${SEARCH})
 
 	task $ids denotate -- ${SRCFILE} && task $ids annotate -- ${DSTFILE}
 fi
