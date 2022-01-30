@@ -1,24 +1,44 @@
 # EXAMPLE: utility tasks
 #
 # DESCRIPTION
-# Taskopen can be used to execute arbitrary commands that exist as annotations to taskwarrior tasks.
-# A utility task is one that carries a "payload" of one or more commands, and is intended for a specific function
-# (this is an alternative approach to ../examples/templates)
-
+# Taskopen can be used to execute arbitrary commands that exist as annotations
+# to taskwarrior tasks. A utility task is one that carries a "payload" of one
+# or more commands, and is intended for a specific function.
+# (This is an alternative approach to the 'templates' example.)
+#
 # SETUP
-
-# Add a new task
-# task add backup files due:eow
-# Created task 102
+# Copy all bu the General section to your config file.
+# Alternatively, you can test this configuration with a temporary data base,
+# by calling
+#   export TASKOPENRC=/path/to/examples/markdown
+#   taskopen ...
+# In order to operate on the temporary data base with taskwarrior, you may
+# define an alias like:
+#   alias tx="task rc.data.location=/tmp"
 #
-# task 102 annotate -- backup_home_directory: ~/bin/mybackup_app -f home
-# task 102 annot -- backup_etc_directory: /usr/bin/unison -opts /etc
-# task 102 ann -- backup_var_directory: /usr/bin/rsync -opts /var
+# USAGE
+# Add a new task and annotate with labeled commands:
+#   task add backup files due:eow
+#   task 102 annotate -- backup_home_directory: ~/bin/mybackup_app -f home
+#   task 102 annot -- backup_etc_directory: /usr/bin/unison -opts /etc
+#   task 102 ann -- backup_var_directory: /usr/bin/rsync -opts /var
 #
-# then, when you want to back up your files, run taskopen
+# Then, when you want to back up your files, run taskopen
 #
 # $ taskopen backup -x
 #
 # choose the desired actions(s) from the list and voila!
 # (just don't use the made-up commands used as examples)
 ~                                                          
+
+[General]
+# remove if used productively
+taskargs = "rc.data.location=/tmp"
+
+[Actions]
+
+run.regex = ".*"
+run.command = "sh $FILE"
+
+[CLI]
+alias.run = "normal --include=run"

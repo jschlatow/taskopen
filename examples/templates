@@ -1,16 +1,22 @@
 # EXAMPLE: templates
-# 
+#
 # DESCRIPTION
-# Taskopen can be used to implement template-like tasks for taskwarrior. A template task can be seen
-# as a neat way to manage a whole set of tasks. The idea is that a template task may be a recurring
-# task like a montly "backup" task which can be expanded into a chain of sub-tasks as soon as it pops up.
+# Taskopen can be used to implement template-like tasks for taskwarrior. A
+# template task can be seen as a neat way to manage a whole set of tasks. The
+# idea is that a template task may be a recurring task like a montly "backup"
+# task which can be expanded into a chain of sub-tasks as soon as it pops up.
 #
 # SETUP
-
-# Add something like this to your ~/.taskopenrc:
-#     CUSTOM2_REGEX=".*\.tmpl"
-#     CUSTOM2_CMD="$FILE $UUID"
-# 
+# Copy all bu the General section to your config file.
+# Alternatively, you can test this configuration with a temporary data base,
+# by calling
+#   export TASKOPENRC=/path/to/examples/markdown
+#   taskopen ...
+# In order to operate on the temporary data base with taskwarrior, you may
+# define an alias like:
+#   alias tx="task rc.data.location=/tmp"
+#
+# USAGE
 # Create a .tmpl file and make it executable, e.g. ~/taskopen/backup.tmpl:
 #     #!/bin/bash
 #     task del $1               # delete the "parent" task
@@ -18,9 +24,20 @@
 #     task add backup laptop    # add sub-task 2
 #     task add backup dropbox   # add sub-task 3
 #
-# USAGE
 # Add an annotation like this:
 #     $ task 1 annotate -- ~/taskopen/backup.tmpl
 #
 # Use taskopen to expand the task (which executes backup.tmpl):
-#     $ taskopen 1
+#     $ taskopen expand 1
+
+[General]
+# remove if used productively
+taskargs = "rc.data.location=/tmp"
+
+[Actions]
+
+expand.regex = ".*\\.tmpl"
+expand.command = "sh $FILE $UUID"
+
+[CLI]
+alias.expand = "normal --include=expand"
