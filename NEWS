@@ -1,8 +1,10 @@
-New features in taskopen 2.0.0 (alpha)
+New features in taskopen 2.0.0 (beta)
 
   - Moved from perl to nim.
   - New command line interface.
   - New config file syntax.
+  - Label-based actions. (#51)
+  - Colored output.
 
 Bugfixes and minor improvements in taskopen 1.1.5
 
