@@ -139,6 +139,7 @@ proc menu*(items: openArray[Actionable]): seq[int] =
     info.log(indent, "   ", "command: ", item.action.command)
 
     if item.action.inlinecommand != "":
+      info.log(indent, "   ", "inline: ", item.action.inlinecommand)
       for line in exec_inline(item.action.inlinecommand, item.env):
         stdout.writeline(indent, "   ", line)
 

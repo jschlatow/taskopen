@@ -260,6 +260,8 @@ proc run*(settings: Settings, single = true, interactive = true) =
       if exec_cmd(settings.noAnnot, env=build_env(settings, json[0])) != 0:
         error.log("Failed executing \"", settings.noAnnot, "\".")
       return
+    elif len(actionables) == 0:
+      return
 
     # generate menu
     selected = collect(newSeq):
