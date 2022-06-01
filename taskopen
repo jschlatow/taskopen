@@ -307,7 +307,7 @@ if (exists $config{"BROWSER_REGEX"}) {
     $BROWSER_REGEX = $config{"BROWSER_REGEX"};
 }
 else {
-    $BROWSER_REGEX = "www|http|^.*://.*-.*-.*-";
+    $BROWSER_REGEX = "www|http|^.*://";
 }
 
 my $FILE_REGEX;
