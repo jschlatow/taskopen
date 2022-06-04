@@ -1,11 +1,10 @@
 Taskopen was original developed as a simple wrapper script for taskwarrior that enables interaction with annotations (e.g. open, edit, execute files).
 The current version is a pretty powerful customisable tool that supports a variety of use cases.
-This README serves as a basic getting-started guide including install instructions.
-If your are interested in more details, please have a look at the [wiki] or the man page.
-
-**Note, the man pages have not been updated to taskopen 2.0 yet.**
+This README serves as a basic getting-started guide including install instructions and examples.
+If your are interested in more details, please have a look at the [wiki] or the [man page].
 
 [wiki]: https://github.com/jschlatow/taskopen/wiki/2.0
+[man page]: doc/man/taskopen.1.md
 
 # Dependencies
 
@@ -21,10 +20,9 @@ It allows you to link almost any file, webpage or command to a taskwarrior task 
 
 Arbitrary actions can be configured with taskopen to filter and act on the annotations or other task attributes.
 
-Run `taskopen -h`, `man taskopen` or the [wiki CLI page] for further details.
+Run `taskopen -h` or `man taskopen` for further details.
 The following sections show some (very) basic usage examples.
 
-[wiki CLI page]: https://github.com/jschlatow/taskopen/wiki/CLI
 
 ## Basic usage
 
@@ -68,6 +66,7 @@ Automatically annotating tasks with 'Notes' can be achieved with 'NO_ANNOTATION_
 the manpage taskopenrc(5).
 
 ## Multiple annotations
+
 You can also add weblinks to a task and even mix all kinds of annotations:
 
 	$ task 1 annotate www.taskwarrior.org
@@ -112,6 +111,7 @@ t.b.d.
 
 
 ## Migration from taskopen < 2.0 to taskopen >= 2.0
+
 Due to changes in the command line interface and the configuration file, manual intervention is required.
 Please have a look at [CLI migration] and [Config migration].
 
@@ -129,12 +129,12 @@ Taskopen tries to find a configuration file at the following locations:
 * `~/.config/taskopen/taskopenrc`
 * `~/.taskopenrc`.
 
-The config file syntax and the available options are documented in the [wiki configuration page].
-Please also take a look at the manpage taskopenrc(5) for further details.
+Please also take a look at the manpage [taskopenrc(5)] for the config file syntax.
 
-[wiki configuration page]: https://github.com/jschlatow/taskopen/wiki/Configuration
+[taskopenrc(5)]: doc/man/taskopenrc.5.md
 
 # Feature highlights
+
   * Selecting multiple actions from a list
   * Arbitrary task filters
   * Customised annotation filtering
@@ -144,6 +144,7 @@ Please also take a look at the manpage taskopenrc(5) for further details.
   * Scripts
 
 ## Selecting multiple actions from a list
+
 When presented with a menu of actionable annotations, you can select multiple entries (separated by space) or even ranges, e.g.
 
 
@@ -156,6 +157,7 @@ When presented with a menu of actionable annotations, you can select multiple en
     Type number(s): 1 3-5
 
 ## Arbitrary filters
+
 Instead of providing taskopen with an ID you can also pass arbitrary filters in taskwarrior
 notation, like:
 
@@ -166,6 +168,7 @@ or
     $ taskopen +bug pro:taskwarrior
 
 ## Customised annotation filtering
+
 Taskopen determines the applicability of an action by matching the annotation against the action's regex.
 For instance, multiple file extensions for default notes may be supported by the following action:
 
@@ -179,6 +182,7 @@ Note, that taskopen fills the environment variable `$LAST_MATCH` with the part t
 
 
 ## Label-based filtering
+
 You can label your annotations by using the following syntax:
 
     $ task 1 annotate view: /path/to/file.html
@@ -190,6 +194,7 @@ A configuration example is found in [examples/label_regex].
 [examples/label_regex]: ./examples/label_regex
 
 ##Filter command hook
+
 You can specify a filter command that will be executed after the regex matching to determine whether the action really applies to the annotion.
 A simple example is to check for file existence:
 
@@ -203,6 +208,7 @@ files.filtercommand = "test -e $FILE"
 An override for all actions can also be provided at the command line.
 
 ##Inline commands
+
 Similar to the filter command, the inline command can be used for adding information to the menu.
 For instance, to peek show the first five lines of each file with each menu entry, you can add the following to your config file:
 
@@ -213,6 +219,7 @@ files.inlinecommand = "head -n5 $FILE"
 An override for all actions can also be provided at the command line.
 
 ## Scripts
+
 Taskopen comes with a bunch of [scripts] that serve as examples to perform more advanced actions, inline commands or filter commands.
 Most notably are [addnote] and [editnote].
 The former is used by default as the NO_ANNOTATION_HOOK and annotates the task with the given ID with 'Notes'.
