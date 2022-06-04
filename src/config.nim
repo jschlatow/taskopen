@@ -1,3 +1,10 @@
+#
+# Copyright (C) 2021-2022 Johannes Schlatow
+#
+# This file is part of taskopen, which is distributed under the terms of the
+# GNU General Public License version 2.
+#
+
 import tables
 import os
 import parsecfg
