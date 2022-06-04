@@ -34,16 +34,15 @@ $(MANFILES_GZ): %.gz: % Makefile
 	gzip -c $* > $@
 
 install: $(MANFILES_GZ) taskopen
-	mkdir -p $(DESTDIR)/$(PREFIX)/bin
-	install -m 0755 taskopen $(DESTDIR)/$(PREFIX)/bin/taskopen
-	mkdir -p $(DESTDIR)/$(PREFIX)/share/man/man1
-	mkdir -p $(DESTDIR)/$(PREFIX)/share/man/man5
-	install -m 0644 doc/man/taskopen.1.gz $(DESTDIR)/$(PREFIX)/share/man/man1/
-	install -m 0644 doc/man/taskopenrc.5.gz $(DESTDIR)/$(PREFIX)/share/man/man5/
-	mkdir -p $(DESTDIR)/$(PREFIX)/share/taskopen/scripts
-	install -m 755 scripts/* $(DESTDIR)/$(PREFIX)/share/taskopen/scripts/
+	install -Dm 0755 taskopen $(DESTDIR)/$(PREFIX)/bin/taskopen
+	install -Dm 0644 doc/man/taskopen.1.gz $(DESTDIR)/$(PREFIX)/share/man/man1/taskopen.1.gz
+	install -Dm 0644 doc/man/taskopenrc.5.gz $(DESTDIR)/$(PREFIX)/share/man/man5/taskopenrc.5.gz
+	mkdir -p $(DESTDIR)/$(PREFIX)/share/taskopen/scripts/
+	cp -r scripts/* $(DESTDIR)/$(PREFIX)/share/taskopen/scripts/
+	chmod -R 755 $(DESTDIR)/$(PREFIX)/share/taskopen/scripts
 	mkdir -p $(DESTDIR)/$(PREFIX)/share/taskopen/examples
-	install -m 755 examples/* $(DESTDIR)/$(PREFIX)/share/taskopen/examples/
+	cp -r examples/* $(DESTDIR)/$(PREFIX)/share/taskopen/examples
+	chmod -R 755 $(DESTDIR)/$(PREFIX)/share/taskopen/examples
 
 clean:
 	rm -f $(MANFILES_GZ)
