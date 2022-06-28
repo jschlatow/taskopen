@@ -111,18 +111,18 @@ proc writeHelp() =
   columns.columnise(indent, "-v, --verbose", "Print additional info messages.")
   columns.columnise(indent, "--debug",       "Print debug messages (includes -v).")
 
-  columns.columnise(indent, "-s, --sort 'key1+,key2-'",  "Defines the sort order of actionable items.")
-  columns.columnise(indent, "-c, --config \"filepath\"",   "Use a different config file.")
-  columns.columnise(indent, "-a, --active-tasks 'filter'", "Changes the filter to determine active tasks.")
+  columns.columnise(indent, "-s=, --sort='key1+,key2-'",  "Defines the sort order of actionable items.")
+  columns.columnise(indent, "-c=, --config=\"filepath\"",   "Use a different config file.")
+  columns.columnise(indent, "-a=, --active-tasks='filter'", "Changes the filter to determine active tasks.")
   columns.columnise(indent, "-A, --All",                   "Query all tasks (ignores taskwarrior context and active task filter).")
 
-  columns.columnise(indent, "-x, --execute 'cmd'", "Overrides the command executed for every action.")
-  columns.columnise(indent, "-f, --filter-command 'cmd'", "Overrides filter command for every action.")
-  columns.columnise(indent, "-i, --inline-command 'cmd'", "Overrides inline command for every action.")
-  columns.columnise(indent, "--args 'arguments'", "Defines arguments that will be available as $ARGS in any command.")
+  columns.columnise(indent, "-x=, --execute='cmd'", "Overrides the command executed for every action.")
+  columns.columnise(indent, "-f=, --filter-command='cmd'", "Overrides filter command for every action.")
+  columns.columnise(indent, "-i=, --inline-command='cmd'", "Overrides inline command for every action.")
+  columns.columnise(indent, "--args='arguments'", "Defines arguments that will be available as $ARGS in any command.")
 
-  columns.columnise(indent, "--include action1,action2", "Only consider the listed actions. Also determines their priority.")
-  columns.columnise(indent, "--exclude action1,action2", "Consider all but the listed actions.")
+  columns.columnise(indent, "--include=action1,action2", "Only consider the listed actions. Also determines their priority.")
+  columns.columnise(indent, "--exclude=action1,action2", "Consider all but the listed actions.")
 
 
   columns[0].width -= 12

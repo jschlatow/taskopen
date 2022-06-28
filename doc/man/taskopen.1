@@ -175,6 +175,11 @@ exist.
 Taskopen will ask the user whether the config file shall be created.
 When creating the config file, taskopen uses all options passed before
 the \f[V]--config\f[R] option as defaults.
+.PP
+For some options, there exists a short variant (\f[V]-\f[R]) and a long
+variant (\f[V]--\f[R]).
+Provided values must be separated by a \f[V]:\f[R] or \f[V]=\f[R] when
+using the short variant.
 .SS Output control
 .TP
 \f[V]-v/--verbose\f[R]
@@ -188,34 +193,34 @@ Prints debug messages (includes \f[V]-v\f[R]).
 Prints help message.
 .SS Config overrides
 .TP
-\f[V]-s/--sort key1+,key2-\f[R]
+\f[V]-s=/--sort=key1+,key2-\f[R]
 Changes the default sort order of annotations.
 .TP
-\f[V]-c/--config filepath\f[R]
+\f[V]-c=/--config=filepath\f[R]
 Use a different config file.
 .TP
-\f[V]-a/--active-tasks filter\f[R]
+\f[V]-a=/--active-tasks=filter\f[R]
 Changes the filter used by taskopen to determine active tasks.
 .TP
-\f[V]-x/--execute cmd\f[R]
+\f[V]-x=/--execute=cmd\f[R]
 Overrides the command executed by taskopen for every action.
 .TP
-\f[V]-f/--filter-command cmd\f[R]
+\f[V]-f=/--filter-command=cmd\f[R]
 Overrides filter command for every action.
 .TP
-\f[V]-i/--inline-command cmd\f[R]
+\f[V]-i=/--inline-command=cmd\f[R]
 Overrides inline command for every action.
 .TP
-\f[V]--args arguments\f[R]
+\f[V]--args=arguments\f[R]
 Allows definition of arguments that will be available as \f[V]$ARGS\f[R]
 in taskopen actions.
 .SS Includes/excludes
 .TP
-\f[V]--include action1,action2\f[R]
+\f[V]--include=action1,action2\f[R]
 Only consider the listed actions.
 Also determines their priority.
 .TP
-\f[V]--exclude action1,action2\f[R]
+\f[V]--exclude=action1,action2\f[R]
 Consider all but the listed actions.
 .SS Filter control
 .TP
@@ -243,6 +248,10 @@ Prints diagnostics (e.g.\ configured actions, aliases, etc.)
 .PP
 The following table compares command line arguments of taskopen 1.x with
 taskopen 2.0.
+Note that the \f[V]--include/--exclude\f[R] options require the
+definition of the appropriate actions in your config file.
+Moreover, you are able to define aliases for convenience (see
+\f[B]taskopenrc\f[R](5)).
 .PP
 .TS
 tab(@);
@@ -306,7 +315,7 @@ T}
 T{
 \f[V]-B\f[R]
 T}@T{
-\f[V]-f \[aq]test ! -e $FILE\f[R]
+\f[V]-f=\[aq]test ! -e $FILE\f[R]
 T}
 T{
 \f[V]-t\f[R]
@@ -331,12 +340,12 @@ T}
 T{
 \f[V]-D\f[R]
 T}@T{
-\f[V]--include=delete\f[R] or \f[V]delete\f[R]
+\f[V]--include=delete\f[R]
 T}
 T{
 \f[V]-r\f[R]
 T}@T{
-\f[V]--include=raw\f[R] or \f[V]raw\f[R]
+\f[V]--include=raw\f[R]
 T}
 T{
 \f[V]-m \[aq]regex\[aq]\f[R]
@@ -346,32 +355,32 @@ T}
 T{
 \f[V]--type \[aq]regex\[aq]\f[R]
 T}@T{
-\f[V]-f \[dq]file $FILE \[rs]| perl -ne \[aq]if($_ !\[ti] m/regex/){exit 1}\[aq]\[dq]\f[R]
+\f[V]-f=\[dq]file $FILE \[rs]| perl -ne \[aq]if($_ !\[ti] m/regex/){exit 1}\[aq]\[dq]\f[R]
 T}
 T{
 \f[V]-s key1+,key2-\f[R]
 T}@T{
-\f[V]-s key1+,key2-\f[R]
+\f[V]-s=key1+,key2-\f[R]
 T}
 T{
 \f[V]-e\f[R]
 T}@T{
-\f[V]-x \[aq]vim $FILE\[aq]\f[R]
+\f[V]-x=\[aq]vim $FILE\[aq]\f[R]
 T}
 T{
 \f[V]-x \[aq]cmd\[aq]\f[R]
 T}@T{
-\f[V]-x \[aq]cmd\[aq]\f[R]
+\f[V]-x=\[aq]cmd\[aq]\f[R]
 T}
 T{
 \f[V]-i \[aq]cmd\[aq]\f[R]
 T}@T{
-\f[V]-i \[aq]cmd\[aq]\f[R]
+\f[V]-i=\[aq]cmd\[aq]\f[R]
 T}
 T{
 \f[V]-c filepath\f[R]
 T}@T{
-\f[V]-c filepath\f[R]
+\f[V]-c=filepath\f[R]
 T}
 T{
 \f[V]-p cmd\f[R]

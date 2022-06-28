@@ -27,7 +27,7 @@ all: taskopen
 taskopen: $(SRCFILES) Makefile
 	nim c -d:versionGit -d:release -d:pathext:${PREFIX}/share/taskopen/scripts -d:editor:${EDITOR} -d:open:${OPEN} --outdir:./ src/taskopen.nim
 
-$(MANFILES): Makefile
+$(MANFILES): %: %.md Makefile
 	pandoc --standalone --to man $@.md -o $@
 
 $(MANFILES_GZ): %.gz: % Makefile

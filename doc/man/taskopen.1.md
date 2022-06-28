@@ -144,6 +144,9 @@ will ask the user whether the config file shall be created. When creating the
 config file, taskopen uses all options passed before the `--config` option as
 defaults.
 
+For some options, there exists a short variant (`-`) and a long variant (`--`).
+Provided values must be separated by a `:` or `=` when using the short variant.
+
 ## Output control
 
 `-v/--verbose`
@@ -157,33 +160,33 @@ defaults.
 
 ## Config overrides
 
-`-s/--sort key1+,key2-`
+`-s=/--sort=key1+,key2-`
 : Changes the default sort order of annotations.
 
-`-c/--config filepath`
+`-c=/--config=filepath`
 : Use a different config file.
 
-`-a/--active-tasks filter`
+`-a=/--active-tasks=filter`
 : Changes the filter used by taskopen to determine active tasks.
 
-`-x/--execute cmd`
+`-x=/--execute=cmd`
 : Overrides the command executed by taskopen for every action.
 
-`-f/--filter-command cmd`
+`-f=/--filter-command=cmd`
 : Overrides filter command for every action.
 
-`-i/--inline-command cmd`
+`-i=/--inline-command=cmd`
 : Overrides inline command for every action.
 
-`--args arguments`
+`--args=arguments`
 : Allows definition of arguments that will be available as `$ARGS` in taskopen actions.
 
 ## Includes/excludes
 
-`--include action1,action2`
+`--include=action1,action2`
 : Only consider the listed actions. Also determines their priority.
 
-`--exclude action1,action2`
+`--exclude=action1,action2`
 : Consider all but the listed actions.
 
 ## Filter control
@@ -214,6 +217,10 @@ can be defined in order to provide a short hand for common command line options.
 # MIGRATION FROM TASKOPEN 1.x
 
 The following table compares command line arguments of taskopen 1.x with taskopen 2.0.
+Note that the `--include/--exclude` options require the definition of the appropriate actions
+in your config file. Moreover, you are able to define aliases for convenience
+(see **taskopenrc**(5)).
+
 
 |         Taskopen 1.x         |         Taskopen 2.0         |
 | :--------------------------- | :--------------------------- |
@@ -227,20 +234,20 @@ The following table compares command line arguments of taskopen 1.x with taskope
 | `-N`                         | `--exclude=notes`            |
 | `-f`                         | `--include=files`            |
 | `-F`                         | `--exclude=files`            |
-| `-B`                         | `-f 'test ! -e $FILE`        |
+| `-B`                         | `-f='test ! -e $FILE`        |
 | `-t`                         | `--include=text`             |
 | `-T`                         | `--exclude=text`             |
 | `-a`                         | `-a`                         |
 | `-A`                         | `-A`                         |
-| `-D`                         | `--include=delete` or `delete` |
-| `-r`                         | `--include=raw` or `raw`     |
+| `-D`                         | `--include=delete`           |
+| `-r`                         | `--include=raw`              |
 | `-m 'regex'`                 | `/regex/`                    |
-| `--type 'regex'`             | `-f "file $FILE \| perl -ne 'if($_ !~ m/regex/){exit 1}'"` |
-| `-s key1+,key2-`             | `-s key1+,key2-`             |
-| `-e`                         | `-x 'vim $FILE'`             |
-| `-x 'cmd'`                   | `-x 'cmd'`                   |
-| `-i 'cmd'`                   | `-i 'cmd'`                   |
-| `-c filepath`                | `-c filepath`                |
+| `--type 'regex'`             | `-f="file $FILE \| perl -ne 'if($_ !~ m/regex/){exit 1}'"` |
+| `-s key1+,key2-`             | `-s=key1+,key2-`             |
+| `-e`                         | `-x='vim $FILE'`             |
+| `-x 'cmd'`                   | `-x='cmd'`                   |
+| `-i 'cmd'`                   | `-i='cmd'`                   |
+| `-c filepath`                | `-c=filepath`                |
 | `-p cmd`                     | automatic detection          |
 
 
