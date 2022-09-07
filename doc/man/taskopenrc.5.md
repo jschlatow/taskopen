@@ -50,7 +50,7 @@ EDITOR = vim
 path_ext = /usr/share/taskopen/scripts
 taskbin = task
 no_annotation_hook = addnote
-task_attributes = priority,project,tags,description
+task_attributes = "priority,project,tags,description"
 ```
 
 Note that the config file can be used to specify defaults for any command line
@@ -78,7 +78,7 @@ the action, e.g. `name.attribute = value`. The default values are listed below.
 <name>.regex = ".*"
 <name>.labelregex = ".*"
 <name>.command = ""
-<name>.modes = normal,any,batch
+<name>.modes = "normal,any,batch"
 <name>.filtercommand = ""
 <name>.inlinecommand = ""
 ```
@@ -124,9 +124,9 @@ edit and delete actions via `taskopen edit [filter]` and `taskopen delete
 
 ```
 [CLI]
-alias.edit = normal --include=edit
-alias.delete = normal --include=delete
-alias.cleanup = any --include=edit,delete
+alias.edit = "normal --include=edit"
+alias.delete = "normal --include=delete"
+alias.cleanup = "any --include=edit,delete"
 ```
 
 Regarding grouping, we can, e.g., define a group _cleanup_ to combine the edit
