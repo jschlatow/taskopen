@@ -195,15 +195,8 @@ proc parseOpts(opts: seq[string], settings: var Settings, ignoreconfig: bool): s
         settings.sort = p.val
 
       of "c", "config":
-        if not ignoreconfig and os.fileExists(p.val):
-          warn.log("Using alternate config file ", p.val)
+        if not ignoreconfig:
           return p.val
-        elif not ignoreconfig:
-          # ask user whether to create the config file
-          stdout.write("Config file '", p.val, "' does not exist, create it? [y/N]: ")
-          let answer = readLine(stdin)
-          if answer == "y" or answer == "Y":
-            createConfig(p.val, settings)
 
       of "a", "active-tasks":
         settings.basefilter = p.val
@@ -264,16 +257,19 @@ proc parseOpts(opts: seq[string], settings: var Settings, ignoreconfig: bool): s
 proc setup(): Settings =
   output.level = warn
 
+  let configfile = findConfig()
+
   # first, read the config to get aliases and default options
-  result = parseConfig(findConfig())
+  result = parseConfig(configfile)
 
   # second, parse command line options
-  let configfile = parseOpts(result.unparsedOptions & commandLineParams(),
-                             result,
-                             false)
-  if configfile != "":
+  let configfile_override = parseOpts(result.unparsedOptions & commandLineParams(),
+                                      result,
+                                      false)
+
+  if configfile_override != "" and configfile_override != configfile:
     # if --config options was found, redo everything
-    result = parseConfig(configfile)
+    result = parseConfig(configfile_override)
     discard parseOpts(result.unparsedOptions & commandLineParams(),
                       result,
                       true)

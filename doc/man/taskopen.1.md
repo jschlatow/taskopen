@@ -140,9 +140,7 @@ Options of taskopen are subdivided into four categories: output control, config
 overrides, includes/excludes, and filter control.
 
 A special case for `--config` is when the config file does not exist. Taskopen
-will ask the user whether the config file shall be created. When creating the
-config file, taskopen uses all options passed before the `--config` option as
-defaults.
+will ask the user whether the config file with default values shall be created.
 
 For some options, there exists a short variant (`-`) and a long variant (`--`).
 Provided values must be separated by a `:` or `=` when using the short variant.

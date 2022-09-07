@@ -147,39 +147,6 @@ proc parseFile(filepath: string, settings: var Settings) =
     error.log("cannot open: ", filepath)
 
 
-proc parseConfig*(filepath: string): Settings =
-  # set hardcoded defaults
-  result.sort = "urgency-,annot"
-  result.validSubcommands["batch"] = ""
-  result.validSubcommands["any"] = ""
-  result.validSubcommands["normal"] = ""
-  result.validSubcommands["version"] = ""
-  result.validSubcommands["diagnostics"] = ""
-  result.defaultSubcommand = "normal"
-  result.basefilter = "+PENDING"
-  result.taskAttributes = "priority,project,tags,description"
-  result.noAnnot = "addnote $ID"
-  result.configfile = filepath
-  result.validActions["files"] = Action(
-    name: "files",
-    target: "annotations",
-    labelregex: ".*",
-    regex: "^[\\.\\/~]+.*\\.(.*)",
-    modes: @["batch", "any", "normal"],
-    command: OPEN & " $FILE")
-
-  result.editor = EDITOR
-  result.pathExt = PATH_EXT
-  result.taskbin = "task"
-  result.taskargs = @[]
-
-  # read config from file
-  if filepath != "" and fileExists(filepath):
-    parseFile(filepath, result)
-
-  for a in result.validActions.keys():
-    result.actions.add(a)
-
 proc createConfig*(filepath: string, defaults = Settings()) =
   var dict=newConfig()
 
@@ -191,7 +158,7 @@ proc createConfig*(filepath: string, defaults = Settings()) =
   dict.setSectionKey("General", "--active-tasks",     defaults.basefilter)
 
   if defaults.editor != "":
-    dict.setSectionKey("General", "editor",   defaults.editor)
+    dict.setSectionKey("General", "EDITOR",   defaults.editor)
 
   if defaults.pathExt != "":
     dict.setSectionKey("General", "path_ext", defaults.pathExt)
@@ -214,4 +181,66 @@ proc createConfig*(filepath: string, defaults = Settings()) =
   if defaults.debug:
     dict.setSectionKey("General", "--debug", "on")
 
+  for a in defaults.validActions.keys():
+    dict.setSectionKey("Actions", a & ".target",     defaults.validActions[a].target)
+    dict.setSectionKey("Actions", a & ".labelregex", defaults.validActions[a].labelregex)
+    dict.setSectionKey("Actions", a & ".regex",      defaults.validActions[a].regex)
+    dict.setSectionKey("Actions", a & ".command",    defaults.validActions[a].command)
+    dict.setSectionKey("Actions", a & ".modes",      defaults.validActions[a].modes.join(","))
+
   dict.writeConfig(filepath)
+
+
+proc parseConfig*(filepath: string): Settings =
+  # set hardcoded defaults
+  result.sort = "urgency-,annot"
+  result.validSubcommands["batch"] = ""
+  result.validSubcommands["any"] = ""
+  result.validSubcommands["normal"] = ""
+  result.validSubcommands["version"] = ""
+  result.validSubcommands["diagnostics"] = ""
+  result.defaultSubcommand = "normal"
+  result.basefilter = "+PENDING"
+  result.taskAttributes = "priority,project,tags,description"
+  result.noAnnot = "addnote $ID"
+  result.configfile = filepath
+  result.validActions["files"] = Action(
+    name: "files",
+    target: "annotations",
+    labelregex: ".*",
+    regex: "^[\\.\\/~]+.*\\.(.*)",
+    modes: @["batch", "any", "normal"],
+    command: OPEN & " $FILE")
+  result.validActions["notes"] = Action(
+    name: "notes",
+    target: "annotations",
+    labelregex: ".*",
+    regex: "^Notes\\.(.*)",
+    modes: @["batch", "any", "normal"],
+    command: "editnote ~/Notes/tasknotes/$UUID.$LAST_MATCH \"$TASK_DESCRIPTION\" $UUID")
+  result.validActions["url"] = Action(
+    name: "url",
+    target: "annotations",
+    labelregex: ".*",
+    regex: "((?:www|http).*)",
+    modes: @["batch", "any", "normal"],
+    command: OPEN & " $LAST_MATCH")
+
+  result.editor = EDITOR
+  result.pathExt = PATH_EXT
+  result.taskbin = "task"
+  result.taskargs = @[]
+
+  # read config from file
+  if filepath != "":
+    if fileExists(filepath):
+      parseFile(filepath, result)
+    else:
+      stdout.write("Config file '", filepath, "' does not exist, create it? [y/N]: ")
+      let answer = readLine(stdin)
+      if answer == "y" or answer == "Y":
+        createConfig(filepath, result)
+
+  for a in result.validActions.keys():
+    result.actions.add(a)
+

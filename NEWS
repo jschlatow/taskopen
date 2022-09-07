@@ -1,3 +1,11 @@
+Bugfixes and minor improvements in taskopen 2.0.1
+
+  - Fix Makefile on MacOS. (#151)
+  - Improve documentation.
+  - Add notes and url action in default config.
+  - Remove pandoc dependency from install target.
+  - Simplify config override and creation of default config.
+
 New features in taskopen 2.0.0 (beta)
 
   - Moved from perl to nim.
