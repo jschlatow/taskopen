@@ -10,7 +10,7 @@ If your are interested in more details, please have a look at the [wiki] or the 
 
 This tool is an enhancement to taskwarrior, i.e. it depends on the task binary. See http://www.taskwarrior.org
 
-Taskopen is implemented in nim and does not require any additional modules for compilation.
+Taskopen is implemented in nim (requires at least version 1.4) and does not require any additional modules for compilation.
 
 The helper scripts are usually run by bash. Some of the scripts also depend on (g)awk.
 
