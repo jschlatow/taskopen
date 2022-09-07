@@ -29,11 +29,12 @@ all: taskopen
 taskopen: $(SRCFILES) Makefile
 	nim c -d:versionGit -d:release -d:pathext:${PREFIX}/share/taskopen/scripts -d:editor:${EDITOR} -d:open:${OPEN} --outdir:./ src/taskopen.nim
 
-$(MANFILES): %: %.md Makefile
-	pandoc --standalone --to man $@.md -o $@
-
 $(MANFILES_GZ): %.gz: % Makefile
 	gzip -c $* > $@
+
+manpages: $(MANFILES_MD)
+	pandoc --standalone --to man doc/man/taskopen.1.md -o doc/man/taskopen.1
+	pandoc --standalone --to man doc/man/taskopenrc.5.md -o doc/man/taskopenrc.5
 
 install: $(MANFILES_GZ) taskopen
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
@@ -53,4 +54,4 @@ clean:
 	rm -f $(MANFILES_GZ)
 	rm taskopen
 
-.PHONY: install clean
+.PHONY: install clean release
