@@ -88,7 +88,10 @@ In `batch` mode, it executes the first applicable action for all annotations.
 # Installation
 
 ## With Makefile
-Installation is as easy as:
+
+From the command line, run the appropriate code for your OS:
+
+### Linux
 
 ```bash
 git clone https://github.com/jschlatow/taskopen.git
@@ -97,7 +100,16 @@ make PREFIX=/usr
 sudo make PREFIX=/usr install
 ```
 
-This will install the taskopen binary at `/usr/bin/taskopen`.
+### Mac
+
+```bash
+git clone https://github.com/jschlatow/taskopen.git
+cd taskopen
+make PREFIX=/usr/local
+sudo make PREFIX=/usr/local install
+```
+
+This will install the taskopen binary into the `PREFIX/bin` directory.
 For packaging, you can add `DESTDIR=/path/to/dir/` to the install command.
 
 By default, taskopen will recognise any filenames in annotations and open them with `xdg-open` or `open` (on OS X).
