@@ -1,5 +1,6 @@
 Bugfixes and minor improvements in taskopen 2.0.1
 
+  - Fix default Notes regex (#159)
   - Fix Makefile on MacOS. (#151)
   - Improve documentation.
   - Add notes and url action in default config.

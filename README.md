@@ -58,12 +58,15 @@ As soon as you annotate a task with 'Notes':
 
 	$ taskopen 1
 
-...which, by default, opens a file like "~/tasknotes/5727f1c7-2efe-fb6b-2bac-6ce073ba95ee.txt".
+...which, by default, opens a file like "~/tasknotes/5727f1c7-2efe-fb6b-2bac-6ce073ba95ee".
 
 **Note:** You have to create the folder "~/tasknotes" before this works with the default folder.
 
 Automatically annotating tasks with 'Notes' can be achieved with 'NO_ANNOTATION_HOOK' as described in
 the manpage taskopenrc(5).
+
+Optionally, you may add any file extension to the annotation (e.g. 'Notes.txt'), which will instruct
+taskopen to add the same extension to the created file.
 
 ## Multiple annotations
 

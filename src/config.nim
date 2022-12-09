@@ -215,9 +215,9 @@ proc parseConfig*(filepath: string): Settings =
     name: "notes",
     target: "annotations",
     labelregex: ".*",
-    regex: "^Notes\\.(.*)",
+    regex: "^Notes(\\..*)?",
     modes: @["batch", "any", "normal"],
-    command: "editnote ~/Notes/tasknotes/$UUID.$LAST_MATCH \"$TASK_DESCRIPTION\" $UUID")
+    command: "editnote ~/Notes/tasknotes/$UUID$LAST_MATCH \"$TASK_DESCRIPTION\" $UUID")
   result.validActions["url"] = Action(
     name: "url",
     target: "annotations",
