@@ -19,11 +19,12 @@ import ./taskwarrior as tw
 import ./types
 import ./core
 
+const VERSION   {.strdefine.}: string = "unknown"
+
 proc version():string =
   result = "unknown"
-  when defined(versionGit):
-    const gitver = staticExec("git describe --tags HEAD")
-    result = gitver
+  when defined(version):
+    result = VERSION
   elif defined(versionNimble):
     let regex = re(".*version\\s*=\\s*\"([^\n]+)\"", {reDotAll})
     const nf = staticRead("../taskopen.nimble")

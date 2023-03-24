@@ -3,6 +3,7 @@ EDITOR ?= vim
 OPEN ?= open
 
 DESTDIR ?=
+VERSION ?= $(shell git describe --tags HEAD)
 
 SRCFILES = $(wildcard src/*.nim)
 MANFILES_MD = $(wildcard doc/man/*.1.md) $(wildcard doc/man/*.5.md)
@@ -27,7 +28,7 @@ endif
 all: taskopen
 
 taskopen: $(SRCFILES) Makefile
-	nim c -d:versionGit -d:release -d:pathext:${PREFIX}/share/taskopen/scripts -d:editor:${EDITOR} -d:open:${OPEN} --outdir:./ src/taskopen.nim
+	nim c -d:version:$(VERSION) -d:release -d:pathext:${PREFIX}/share/taskopen/scripts -d:editor:${EDITOR} -d:open:${OPEN} --outdir:./ src/taskopen.nim
 
 $(MANFILES_GZ): %.gz: % Makefile
 	gzip -c $* > $@
