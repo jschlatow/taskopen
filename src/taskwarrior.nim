@@ -11,7 +11,7 @@ import re
 import json
 import ./output
 
-const default_args = ["rc.verbose=blank,label,edit", "rc.json.array=on"]
+const default_args = ["rc.verbose=blank,label,edit", "rc.json.array=on", "rc.gc=off"]
 
 proc concat[I1, I2: static[int]; T](a: array[I1, T], b: array[I2, T]): array[I1 + I2, T] =
   result[0..a.high] = a
