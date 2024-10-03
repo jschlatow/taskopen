@@ -1,3 +1,8 @@
+Bugfixes in taskopen 2.0.2
+
+  - Disable taskwarrior's garbage collection (#165)
+  - Fix compile-time errors when EDITOR or OPEN contain spaces
+
 Bugfixes and minor improvements in taskopen 2.0.1
 
   - Fix default Notes regex (#159)
