@@ -10,17 +10,17 @@ MANFILES_MD = $(wildcard doc/man/*.1.md) $(wildcard doc/man/*.5.md)
 MANFILES    = $(MANFILES_MD:.md=)
 MANFILES_GZ = $(addsuffix .gz, $(MANFILES))
 
-EDITOR_PRESENT := $(shell which ${EDITOR} >/dev/null 2>&1 || echo "not found")
+EDITOR_PRESENT := $(shell which $(firstword ${EDITOR}) >/dev/null 2>&1 || echo "not found")
 ifneq (,${EDITOR_PRESENT})
 	EDITOR := nano
 endif
 
-OPEN_PRESENT := $(shell which ${OPEN} >/dev/null 2>&1 || echo "not found")
+OPEN_PRESENT := $(shell which $(firstword ${OPEN}) >/dev/null 2>&1 || echo "not found")
 ifneq (,${OPEN_PRESENT})
 OPEN=run-mailcap
 endif
 
-OPEN_PRESENT := $(shell which ${OPEN} >/dev/null 2>&1 || echo "not found")
+OPEN_PRESENT := $(shell which $(firstword ${OPEN}) >/dev/null 2>&1 || echo "not found")
 ifneq (,${OPEN_PRESENT})
 OPEN=xdg-open
 endif
@@ -28,7 +28,7 @@ endif
 all: taskopen
 
 taskopen: $(SRCFILES) Makefile
-	nim c -d:version:$(VERSION) -d:release -d:pathext:${PREFIX}/share/taskopen/scripts -d:editor:${EDITOR} -d:open:${OPEN} --outdir:./ src/taskopen.nim
+	nim c -d:version:$(VERSION) -d:release -d:pathext:'${PREFIX}/share/taskopen/scripts' -d:editor:'${EDITOR}' -d:open:'${OPEN}' --outdir:./ src/taskopen.nim
 
 $(MANFILES_GZ): %.gz: % Makefile
 	gzip -c $* > $@
