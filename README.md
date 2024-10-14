@@ -10,7 +10,7 @@ If your are interested in more details, please have a look at the [wiki] or the 
 
 This tool is an enhancement to taskwarrior, i.e. it depends on the task binary. See http://www.taskwarrior.org
 
-Taskopen is implemented in nim (requires at least version 1.4) and does not require any additional modules for compilation.
+Taskopen is implemented in nim (requires at least version 1.4). Taskopen also requires make, xdg-open, and when run on the Windows Subsystem for Linux, wslu.
 
 The helper scripts are usually run by bash. Some of the scripts also depend on (g)awk.
 
@@ -119,6 +119,21 @@ By default, taskopen will recognise any filenames in annotations and open them w
 Further actions must be specified in a configuration file at `~/.config/taskopen/taskopenrc` or `~/.taskopenrc`.
 
 A default configuration file can be created with `taskopen --config ~/.config/taskopen/taskopenrc`.
+
+### Windows Subsystem for Linux
+
+In a Windows command prompt, enter
+
+```
+git clone https://github.com/jschlatow/taskopen.git
+sudo apt install make
+sudo apt install nim
+sudo apt install wslu
+sudo apt install xdg-utils
+cd taskopen
+make PREFIX=/usr
+sudo make PREFIX=/usr install
+```
 
 ## With nimble
 
