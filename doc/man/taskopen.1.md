@@ -93,6 +93,9 @@ the command line exist:
 `$ID`
 : the running ID of the task
 
+`$ENTRY`
+: the entry date-time of the annotation
+
 `$LAST_MATCH`
 : the last sub-pattern of the regular expression used for filtering
 

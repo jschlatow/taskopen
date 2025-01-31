@@ -22,6 +22,7 @@ type
   Actionable* = object
     text*: string
     task*: JsonNode
+    entry*: string
     action*: Action
     env*: StringTableRef
 

@@ -179,23 +179,29 @@ proc find_actionable_items(
 
       if attr == "annotations":
         for ann in val.items():
-          let text = ann["description"].getStr()
+          let text  = ann["description"].getStr()
+          let entry = ann["entry"].getStr()
           for act, env in match_actions_label(baseenv,
                                               text,
                                               action_map[attr],
                                               single=single):
+            env["ENTRY"] = entry
             result.add(Actionable(text: text,
                                   task: task,
+                                  entry: entry,
                                   action: act,
                                   env: env))
       else:
-        let text = val.getStr()
+        let text  = val.getStr()
+        let entry = task["entry"].getStr()
         for act, env in match_actions_pure(baseenv,
                                            text,
                                            action_map[attr],
                                            single=single):
+          env["ENTRY"] = entry
           result.add(Actionable(text: text,
                                 task: task,
+                                entry: entry,
                                 action: act,
                                 env: env))
 
@@ -231,6 +237,8 @@ proc run*(settings: Settings, single = true, interactive = true) =
       var res: int
       if field.key == "annot":
         res = cmp(x.text, y.text)
+      elif field.key == "entry":
+        res = cmp(x.entry, y.entry)
       elif not xhas and not yhas:
         continue
       elif not xhas or not yhas:

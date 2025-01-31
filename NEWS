@@ -1,3 +1,8 @@
+New features in taskopen 2.0.3
+
+  - Allow sorting by entry date of annotations or tasks (#173)
+  - Add ENTRY environment variable (#173)
+
 Bugfixes in taskopen 2.0.2
 
   - Disable taskwarrior's garbage collection (#165)
