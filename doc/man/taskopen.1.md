@@ -65,7 +65,7 @@ A task in taskwarrior has various attributes (e.g. project, tags, description).
 Taskwarrior even supports user-defined attributes (UDAs), which can for
 instance be used to link to an issue id of a bug tracker. It therefore appears
 natural to use taskopen also for defining actions on UDAs. In contrast to
-annotation filtering, thre is only a single regular expression that is matched
+annotation filtering, there is only a single regular expression that is matched
 against the attribute's value.
 
 ## Actions
