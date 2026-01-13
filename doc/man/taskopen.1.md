@@ -292,7 +292,7 @@ in your config file. Moreover, you are able to define aliases for convenience
 
 # CREDITS & COPYRIGHTS
 
-Copyright (C) 2010 - 2022, J. Schlatow
+Copyright (C) 2010 - 2025, J. Schlatow
 
 Taskopen is distributed under the GNU General Public License. See
 *http://www.opensource.org/licenses/gpl-2.0.php* for more information.
@@ -306,21 +306,17 @@ Please also refer to the **AUTHORS** file for a list of contributors.
 
 For more information regarding taskopen, see the following:
 
-The official site at
+The official site and code repository
 
-:   *\<https://github.com/jschlatow/taskopen/\>*
-
-The official code repository at
-
-:   *\<git://github.com/jschlatow/taskopen.git\>*
+:   *\<https://codeberg.org/jschlatow/taskopen/\>*
 
 The wiki at
 
-:   *\<git://github.com/jschlatow/taskopen.git/wiki\>*
+:   *\<https://codeberg.org/jschlatow/taskopen/wiki\>*
 
 
 # REPORTING BUGS
 
 Bugs in taskopen may be reported to the issue-tracker at
 
-:   *\<https://github.com/jschlatow/taskopen/issues\>*
+:   *\<https://codeberg.org/jschlatow/taskopen/issues\>*

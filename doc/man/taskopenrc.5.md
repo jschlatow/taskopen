@@ -197,20 +197,16 @@ Please also refer to the **AUTHORS** file for a list of contributors.
 
 For more information regarding taskopen, see the following:
 
-The official site at
+The official site and code repository at
 
-:   *\<https://github.com/jschlatow/taskopen/\>*
-
-The official code repository at
-
-:   *\<git://github.com/jschlatow/taskopen.git\>*
+:   *\<https://codeberg.org/jschlatow/taskopen/\>*
 
 The wiki at
 
-:   *\<git://github.com/jschlatow/taskopen.git/wiki\>*
+:   *\<https://codeberg.org/jschlatow/taskopen/wiki\>*
 
 # REPORTING BUGS
 
 Bugs in taskopen may be reported to the issue-tracker at
 
-:   *\<https://github.com/jschlatow/taskopen/issues\>*
+:   *\<https://codeberg.org/jschlatow/taskopen/issues\>*

@@ -3,7 +3,7 @@ The current version is a pretty powerful customisable tool that supports a varie
 This README serves as a basic getting-started guide including install instructions and examples.
 If your are interested in more details, please have a look at the [wiki] or the [man page].
 
-[wiki]: https://github.com/jschlatow/taskopen/wiki/2.0
+[wiki]: https://codeberg.org/jschlatow/taskopen/wiki/2.0
 [man page]: doc/man/taskopen.1.md
 
 # Dependencies
@@ -97,7 +97,7 @@ From the command line, run the appropriate code for your OS:
 ### Linux
 
 ```bash
-git clone https://github.com/jschlatow/taskopen.git
+git clone https://codeberg.org/jschlatow/taskopen.git
 cd taskopen
 make PREFIX=/usr
 sudo make PREFIX=/usr install
@@ -106,7 +106,7 @@ sudo make PREFIX=/usr install
 ### Mac
 
 ```bash
-git clone https://github.com/jschlatow/taskopen.git
+git clone https://codeberg.org/jschlatow/taskopen.git
 cd taskopen
 make PREFIX=/usr/local
 sudo make PREFIX=/usr/local install
@@ -125,7 +125,7 @@ A default configuration file can be created with `taskopen --config ~/.config/ta
 In a Windows command prompt, enter
 
 ```
-git clone https://github.com/jschlatow/taskopen.git
+git clone https://codeberg.org/jschlatow/taskopen.git
 sudo apt install make
 sudo apt install nim
 sudo apt install wslu
@@ -145,8 +145,8 @@ t.b.d.
 Due to changes in the command line interface and the configuration file, manual intervention is required.
 Please have a look at [CLI migration] and [Config migration].
 
-[CLI migration]: https://github.com/jschlatow/taskopen/wiki/CLI#migration
-[Config migration]: https://github.com/jschlatow/taskopen/wiki/Configuration#migration
+[CLI migration]: https://codeberg.org/jschlatow/taskopen/wiki/CLI#migration
+[Config migration]: https://codeberg.org/jschlatow/taskopen/wiki/Configuration#migration
 
 ## Configuration basics
 
