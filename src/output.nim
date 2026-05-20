@@ -8,7 +8,7 @@
 import terminal
 import tables
 import json
-import re
+import regex
 from strutils import split, parseInt, spaces, center, strip
 from unicode import runeLen, runeSubStr, alignLeft, align
 import ./types
@@ -154,9 +154,10 @@ proc menu*(items: openArray[Actionable]): seq[int] =
   let answer = readLine(stdin)
   let maxid  = len(items)
   for ids in answer.split():
-    if ids =~ re"(\d+)(?:\.\.|-)(\d+)":
-      let fromid = parseInt(matches[0])
-      let toid   = parseInt(matches[1])
+    var m = RegexMatch2()
+    if ids.match(re2"(\d+)(?:\.\.|-)(\d+)", m):
+      let fromid = parseInt(ids[m.group(0)])
+      let toid   = parseInt(ids[m.group(1)])
       if fromid < 1 or fromid > maxid:
         error.log(fromid, " is an invalid number")
         quit(1)
@@ -168,7 +169,7 @@ proc menu*(items: openArray[Actionable]): seq[int] =
         quit(1)
       for id in fromid..toid:
         result.add(id-1)
-    elif ids =~ re"\d+":
+    elif ids.match(re2"\d+"):
       let id = parseInt(ids)
       if id < 1 or id > maxid:
         error.log(id, " is an invalid number")

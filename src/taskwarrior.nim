@@ -7,7 +7,7 @@
 
 import osproc
 import strutils
-import re
+import regex
 import json
 import ./output
 
@@ -30,10 +30,11 @@ proc current_context*(taskbin: string, taskargs: openArray[string]): string =
   let args = @default_args & @taskargs & @["context", "show"]
   exec(taskbin, args, result)
   for line in splitLines(result):
-    if line =~ re".*with filter '(.*)' is currently applied.$":
-      return "\\(" & matches[0] & "\\)"
-    elif line =~ re".*read filter: '(.*)'$":
-      return "\\(" & matches[0] & "\\)"
+    var m = RegexMatch2()
+    if line.match(re2".*with filter '(.*)' is currently applied\.$", m):
+      return "\\(" & line[m.group(0)] & "\\)"
+    elif line.match(re2".*read filter: '(.*)'$", m):
+      return "\\(" & line[m.group(0)] & "\\)"
   return ""
 
 proc json*(taskbin: string, taskargs: openArray[string], filter: openArray[string]): JsonNode =

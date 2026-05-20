@@ -9,7 +9,7 @@ import tables
 import os
 import parsecfg
 import streams
-import re
+import regex
 import strutils
 import ./types
 import ./output
@@ -107,9 +107,10 @@ proc parseFile(filepath: string, settings: var Settings) =
             warn.log("Invalid config option in [General]: ", e.key, ": ", e.value)
 
         of "Actions":
-          if e.key =~ re"(.*)\.(target|regex|labelregex|command|modes|filtercommand|inlinecommand)":
-            let actname  = matches[0]
-            let actfield = matches[1]
+          var m = RegexMatch2()
+          if e.key.match(re2"(.*)\.(target|regex|labelregex|command|modes|filtercommand|inlinecommand)", m):
+            let actname  = e.key[m.group(0)]
+            let actfield = e.key[m.group(1)]
             if not settings.validActions.hasKey(actname):
               settings.validActions[actname] = Action(name: actname,
                                                       target: "annotations",
@@ -122,11 +123,12 @@ proc parseFile(filepath: string, settings: var Settings) =
             warn.log("Invalid config option in [Actions]: ", e.key, ": ", e.value)
 
         of "CLI":
+          var m = RegexMatch2()
           if e.key == "default":
             settings.defaultSubcommand = e.value
-          elif e.key =~ re"(alias|group)\.([^\.]*)":
-            let name = matches[1]
-            case matches[0]
+          elif e.key.match(re2"(alias|group)\.([^\.]*)", m):
+            let name = e.key[m.group(1)]
+            case e.key[m.group(0)]
             of "alias":
               settings.validSubcommands[name] = e.value
             of "group":

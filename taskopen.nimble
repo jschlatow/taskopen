@@ -13,6 +13,7 @@ bin         = @["taskopen"]
 # Deps
 
 requires "nim >= 1.4.0"
+requires "regex >= 0.19.0"
 
 # TODO add external dependency to taskwarrior
 
