@@ -6,7 +6,7 @@
 #
 
 import os
-import re
+import regex
 import strutils
 import tables
 import strtabs
@@ -61,13 +61,14 @@ iterator match_actions_label(
   var env = copyEnv(baseenv)
   for act in actions:
     # split in label and file part
-    let splitre = re"((\S+):\s+)?(.*)"
-    if text =~ splitre:
-      let label = matches[1]
-      let file  = matches[2]
+    let splitre = re2"((\S+):\s+)?(.*)"
+    var sm = RegexMatch2()
+    if text.match(splitre, sm):
+      let label = text[sm.group(1)]
+      let file  = text[sm.group(2)]
 
-      let labelregex = re(act.labelregex)
-      let fileregex  = re(act.regex)
+      let labelregex = re2(act.labelregex)
+      let fileregex  = re2(act.regex)
 
       # skip action if label does not match
       if not label.match(labelregex):
@@ -75,12 +76,13 @@ iterator match_actions_label(
 
       # skip action if file does not match
       env["LAST_MATCH"] = ""
-      if file =~ fileregex:
-        for m in matches:
-          if len(m) == 0:
+      var fm = RegexMatch2()
+      if file.match(fileregex, fm):
+        for i in 0..<fm.groupsCount:
+          let cap = file[fm.group(i)]
+          if cap.len == 0:
             break
-          else:
-            env["LAST_MATCH"] = m
+          env["LAST_MATCH"] = cap
       else:
         continue
 
@@ -115,14 +117,15 @@ iterator match_actions_pure(
 
   var env = copyEnv(baseenv)
   for act in actions:
-    let fileregex  = re(act.regex)
-    if text =~ fileregex:
+    let fileregex  = re2(act.regex)
+    var fm = RegexMatch2()
+    if text.match(fileregex, fm):
       env["LAST_MATCH"] = ""
-      for m in matches:
-        if len(m) == 0:
+      for i in 0..<fm.groupsCount:
+        let cap = text[fm.group(i)]
+        if cap.len == 0:
           break
-        else:
-          env["LAST_MATCH"] = m
+        env["LAST_MATCH"] = cap
     else:
       continue
 
@@ -208,9 +211,10 @@ proc find_actionable_items(
 
 proc sortkeys(sortstr: string): seq[tuple[key: string, desc: bool]] =
   for field in sortstr.split(','):
-    if field =~ re"(.*?)(\+|-)?$":
-      let key  = matches[0]
-      let desc = matches[1] == "-"
+    var sm = RegexMatch2()
+    if field.match(re2"(.*?)(\+|-)?$", sm):
+      let key  = field[sm.group(0)]
+      let desc = field[sm.group(1)] == "-"
       result.add((key: key, desc: desc))
 
 
