@@ -28,6 +28,7 @@ endif
 all: taskopen
 
 taskopen: $(SRCFILES) Makefile
+	nimble setup
 	nim c -d:version:$(VERSION) -d:release -d:pathext:'${PREFIX}/share/taskopen/scripts' -d:editor:'${EDITOR}' -d:open:'${OPEN}' --outdir:./ src/taskopen.nim
 
 $(MANFILES_GZ): %.gz: % Makefile
